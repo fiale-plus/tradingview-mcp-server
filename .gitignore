@@ -22,6 +22,7 @@ build/
 .vscode/
 .idea/
 .claude/
+.mcp.json
 *.swp
 *.swo
 *~

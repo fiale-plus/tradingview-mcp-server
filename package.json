@@ -1,0 +1,38 @@
+{
+  "name": "tradingview-mcp-server",
+  "version": "0.1.0",
+  "description": "Unofficial MCP server for TradingView stock screener API",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "tradingview-mcp-server": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "test": "tsx --test src/tests/*.test.ts",
+    "test:watch": "tsx --test --watch src/tests/*.test.ts",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "tradingview",
+    "stock-screener",
+    "model-context-protocol"
+  ],
+  "author": "Community",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
