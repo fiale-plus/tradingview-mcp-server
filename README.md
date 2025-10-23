@@ -1,15 +1,267 @@
 # TradingView MCP Server
 
-**Unofficial** Model Context Protocol (MCP) server for TradingView API integration.
+**Unofficial** Model Context Protocol (MCP) server for TradingView's stock screener API.
 
-## Status
+🚧 **Work in Progress** - This project is in early development (v0.1.0 MVP).
 
-🚧 **Work in Progress** - This project is in early development.
+## Features
 
-## About
+- 🔍 **Screen stocks, forex, and crypto** with advanced filters
+- 📊 **30+ fundamental, technical, and performance fields**
+- 🎯 **5 preset strategies** (quality, value, dividend, momentum, growth)
+- ⚡ **Configurable caching and rate limiting**
+- 🔧 **Works with Claude Desktop and Claude Code**
 
-This is an unofficial MCP server implementation that aims to provide integration with TradingView's API through the Model Context Protocol.
+## Installation
+
+### Option 1: NPM (Recommended)
+
+```bash
+npm install -g tradingview-mcp-server
+```
+
+### Option 2: Local Development
+
+```bash
+git clone https://github.com/fiale-plus/tradingview-mcp-server.git
+cd tradingview-mcp-server
+npm install
+npm run build
+```
+
+## Configuration
+
+### Claude Desktop
+
+Add to your Claude Desktop configuration file:
+
+**Mac**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+**Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "tradingview": {
+      "command": "npx",
+      "args": ["-y", "tradingview-mcp-server"],
+      "env": {
+        "CACHE_TTL_SECONDS": "300",
+        "RATE_LIMIT_RPM": "10"
+      }
+    }
+  }
+}
+```
+
+### Claude Code (Project-Level)
+
+Create `.mcp.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "tradingview": {
+      "command": "npx",
+      "args": ["-y", "tradingview-mcp-server"],
+      "env": {
+        "CACHE_TTL_SECONDS": "300",
+        "RATE_LIMIT_RPM": "10"
+      }
+    }
+  }
+}
+```
+
+Enable in `.claude/settings.local.json`:
+
+```json
+{
+  "enableAllProjectMcpServers": true
+}
+```
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `CACHE_TTL_SECONDS` | Cache time-to-live in seconds (0 to disable) | `300` (5 min) |
+| `RATE_LIMIT_RPM` | API requests per minute | `10` |
+
+## Usage Examples
+
+### 1. Screen for Quality Stocks
+
+```
+Find high-quality stocks with strong fundamentals using the quality_stocks preset
+```
+
+Claude will use the preset with filters:
+- ROE > 12%
+- Low debt (D/E < 0.7)
+- Good margins (Net Margin > 10%)
+- Low volatility
+- Golden cross (SMA50 > SMA200)
+
+### 2. Custom Screening
+
+```
+Screen for stocks with:
+- ROE greater than 15%
+- P/E ratio less than 25
+- Market cap above $1 billion
+- Limit to 10 results
+```
+
+### 3. List Available Fields
+
+```
+What fields can I use for stock screening?
+```
+
+Returns all available fields with descriptions, organized by category (fundamental, technical, performance).
+
+### 4. Get Moving Averages
+
+```
+Get SMA50 and SMA200 for AAPL
+```
+
+### 5. Compare Stocks
+
+```
+Compare fundamentals of AAPL, MSFT, and GOOGL
+```
+
+## Available Tools
+
+### `screen_stocks`
+
+Screen stocks based on filters.
+
+**Parameters:**
+- `filters` - Array of filter conditions (field, operator, value)
+- `markets` - Markets to scan (default: `["america"]`)
+- `sort_by` - Field to sort by (default: `"market_cap_basic"`)
+- `sort_order` - `"asc"` or `"desc"` (default: `"desc"`)
+- `limit` - Number of results (1-200, default: 20)
+
+**Operators:**
+- `greater`, `less`, `greater_or_equal`, `less_or_equal`
+- `equal`, `not_equal`
+- `in_range` - For value ranges like `[45, 65]`
+- `match` - For text search
+
+### `list_fields`
+
+List available fields for filtering.
+
+**Parameters:**
+- `asset_type` - `"stock"`, `"forex"`, or `"crypto"` (default: `"stock"`)
+- `category` - `"fundamental"`, `"technical"`, or `"performance"` (optional)
+
+### `get_preset`
+
+Get a pre-configured screening strategy.
+
+**Available Presets:**
+- `quality_stocks` - Conservative quality stocks (Avanza-based)
+- `value_stocks` - Undervalued stocks with low P/E and P/B
+- `dividend_stocks` - High dividend yield with consistent payout
+- `momentum_stocks` - Strong momentum and technical signals
+- `growth_stocks` - High-growth companies
+
+### `list_presets`
+
+List all available preset strategies.
+
+## Common Fields
+
+### Fundamental
+- `return_on_equity` - ROE (%)
+- `price_earnings_ttm` - P/E Ratio
+- `price_book_fq` - P/B Ratio
+- `debt_to_equity` - Debt/Equity Ratio
+- `net_margin_ttm` - Net Margin (%)
+- `market_cap_basic` - Market Capitalization
+- `dividend_yield_recent` - Dividend Yield (%)
+
+### Technical
+- `RSI` - Relative Strength Index (14)
+- `SMA50` - 50-day Simple Moving Average
+- `SMA200` - 200-day Simple Moving Average
+- `Volatility.M` - Monthly Volatility (%)
+
+### Performance
+- `close` - Current Price
+- `change` - Daily Change (%)
+- `volume` - Trading Volume
+- `Perf.W`, `Perf.1M`, `Perf.Y` - Performance metrics
+
+## Resources
+
+The server exposes preset configurations as MCP resources:
+
+- `preset://quality_stocks`
+- `preset://value_stocks`
+- `preset://dividend_stocks`
+- `preset://momentum_stocks`
+- `preset://growth_stocks`
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run in development mode
+npm run dev
+
+# Build
+npm run build
+
+# Run tests
+npm test
+
+# Watch tests
+npm test:watch
+```
+
+## Important Notes
+
+⚠️ **Unofficial API**: This server uses TradingView's unofficial scanner API. It may change without notice.
+
+- No authentication required
+- Same access level as TradingView website without login
+- No official documentation or support from TradingView
+- Use responsibly with rate limiting
+
+## Limitations
+
+- **Current snapshot only** - No historical data
+- **Rate limits** - Conservative default (10 req/min) to avoid overloading
+- **Calculated fields** - Some metrics (e.g., Revenue per Share) need post-processing
+- **Market hours** - Data freshness depends on TradingView's update schedule
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-See [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Disclaimer
+
+This is an unofficial tool and is not affiliated with, endorsed by, or connected to TradingView. Use at your own risk.
+
+## Links
+
+- [Model Context Protocol](https://spec.modelcontextprotocol.io)
+- [TradingView](https://www.tradingview.com)
+- [Claude Desktop](https://claude.ai/download)
+- [Claude Code](https://docs.claude.com/claude-code)
+
+---
+
+Built with ❤️ using the [Model Context Protocol](https://modelcontextprotocol.io)

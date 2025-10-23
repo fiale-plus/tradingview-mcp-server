@@ -1,26 +1,44 @@
 {
   "name": "tradingview-mcp-server",
-  "version": "0.1.0",
+  "version": "0.0.0-dev",
   "description": "Unofficial MCP server for TradingView stock screener API",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
     "tradingview-mcp-server": "dist/index.js"
   },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
     "test": "tsx --test src/tests/*.test.ts",
     "test:watch": "tsx --test --watch src/tests/*.test.ts",
+    "prepublishOnly": "npm run build && npm test",
     "prepare": "npm run build"
   },
   "keywords": [
     "mcp",
     "tradingview",
     "stock-screener",
-    "model-context-protocol"
+    "model-context-protocol",
+    "claude",
+    "claude-desktop",
+    "stock-analysis",
+    "financial-data"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fiale-plus/tradingview-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fiale-plus/tradingview-mcp-server/issues"
+  },
+  "homepage": "https://github.com/fiale-plus/tradingview-mcp-server#readme",
   "author": "Community",
   "license": "MIT",
   "dependencies": {
