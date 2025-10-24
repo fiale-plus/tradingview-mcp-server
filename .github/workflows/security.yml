@@ -42,7 +42,16 @@ jobs:
       - name: Check for outdated dependencies
         run: npm outdated || true
 
-  dependabot:
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: |
+            ~/.npm/_logs/*.log
+          retention-days: 30
+
+  security-updates:
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule'
 
@@ -54,8 +63,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'npm'
 
       - name: Check for security updates
         run: |
           echo "=== Security Advisory Check ==="
-          npx npm-check-updates --doctor --doctorTest "npm audit"
+          npm install -g npm-check-updates
+          npm-check-updates --doctor --doctorTest "npm audit"
