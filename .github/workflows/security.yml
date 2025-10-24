@@ -26,29 +26,38 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20.x'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run npm audit
-        run: npm audit --audit-level=moderate
+      - name: Run npm audit (all dependencies)
+        run: |
+          echo "=== Running npm audit on all dependencies ==="
+          npm audit --audit-level=moderate | tee audit-all.txt
         continue-on-error: true
 
-      - name: Run npm audit (production only)
-        run: npm audit --production --audit-level=high
+      - name: Run npm audit (production only - strict)
+        run: |
+          echo "=== Running npm audit on production dependencies ==="
+          npm audit --production --audit-level=high
 
       - name: Check for outdated dependencies
-        run: npm outdated || true
+        run: |
+          echo "=== Checking for outdated dependencies ==="
+          npm outdated > outdated.txt || true
+          cat outdated.txt
 
-      - name: Upload audit report
+      - name: Upload audit reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-audit-report
+          name: security-audit-reports
           path: |
-            ~/.npm/_logs/*.log
+            audit-all.txt
+            outdated.txt
+          if-no-files-found: ignore
           retention-days: 30
 
   security-updates:
@@ -62,11 +71,31 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20.x'
           cache: 'npm'
 
-      - name: Check for security updates
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for available updates
         run: |
-          echo "=== Security Advisory Check ==="
-          npm install -g npm-check-updates
-          npm-check-updates --doctor --doctorTest "npm audit"
+          echo "=== Checking for available updates ==="
+          npx npm-check-updates
+          echo ""
+          echo "=== Checking which updates pass tests ==="
+          npx npm-check-updates --doctor --doctorTest "npm test" || true
+
+      - name: Generate update report
+        run: |
+          echo "=== Security Update Report ===" > security-updates.txt
+          echo "Generated on: $(date)" >> security-updates.txt
+          echo "" >> security-updates.txt
+          npx npm-check-updates >> security-updates.txt || true
+
+      - name: Upload update report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-updates-report
+          path: security-updates.txt
+          if-no-files-found: ignore
+          retention-days: 30
