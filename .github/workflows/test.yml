@@ -5,6 +5,11 @@ on:
   push:
     branches: [main]
 
+# Cancel in-progress runs for the same PR/branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -26,30 +31,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linter
+      - name: Build
         run: npm run build
 
       - name: Run tests
         run: npm test
-
-      - name: Build
-        run: npm run build
-
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Type check
-        run: npm run build
