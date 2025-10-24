@@ -1,0 +1,101 @@
+name: Security Audit
+
+on:
+  schedule:
+    # Run weekly on Mondays at 9:00 AM UTC
+    - cron: '0 9 * * 1'
+  push:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit (all dependencies)
+        run: |
+          echo "=== Running npm audit on all dependencies ==="
+          npm audit --audit-level=moderate | tee audit-all.txt
+        continue-on-error: true
+
+      - name: Run npm audit (production only - strict)
+        run: |
+          echo "=== Running npm audit on production dependencies ==="
+          npm audit --production --audit-level=high
+
+      - name: Check for outdated dependencies
+        run: |
+          echo "=== Checking for outdated dependencies ==="
+          npm outdated > outdated.txt || true
+          cat outdated.txt
+
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-reports
+          path: |
+            audit-all.txt
+            outdated.txt
+          if-no-files-found: ignore
+          retention-days: 30
+
+  security-updates:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for available updates
+        run: |
+          echo "=== Checking for available updates ==="
+          npx npm-check-updates
+          echo ""
+          echo "=== Checking which updates pass tests ==="
+          npx npm-check-updates --doctor --doctorTest "npm test" || true
+
+      - name: Generate update report
+        run: |
+          echo "=== Security Update Report ===" > security-updates.txt
+          echo "Generated on: $(date)" >> security-updates.txt
+          echo "" >> security-updates.txt
+          npx npm-check-updates >> security-updates.txt || true
+
+      - name: Upload update report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-updates-report
+          path: security-updates.txt
+          if-no-files-found: ignore
+          retention-days: 30
