@@ -140,6 +140,55 @@ const STOCK_FIELDS: FieldMetadata[] = [
     type: "percent",
     description: "Year-over-year revenue growth rate",
   },
+  {
+    name: "free_cash_flow_ttm",
+    label: "Free Cash Flow (TTM)",
+    category: "fundamental",
+    type: "currency",
+    description: "Cash generated after capital expenditures (trailing 12 months)",
+  },
+  {
+    name: "free_cash_flow_fq",
+    label: "Free Cash Flow (FQ)",
+    category: "fundamental",
+    type: "currency",
+    description: "Cash generated after capital expenditures (fiscal quarter)",
+  },
+  {
+    name: "free_cash_flow_fy",
+    label: "Free Cash Flow (FY)",
+    category: "fundamental",
+    type: "currency",
+    description: "Cash generated after capital expenditures (fiscal year)",
+  },
+  {
+    name: "free_cash_flow_margin_ttm",
+    label: "FCF Margin (TTM)",
+    category: "fundamental",
+    type: "percent",
+    description: "Free cash flow as percentage of revenue (trailing 12 months)",
+  },
+  {
+    name: "free_cash_flow_margin_fy",
+    label: "FCF Margin (FY)",
+    category: "fundamental",
+    type: "percent",
+    description: "Free cash flow as percentage of revenue (fiscal year)",
+  },
+  {
+    name: "earnings_release_next_trading_date_fq",
+    label: "Next Earnings Date",
+    category: "fundamental",
+    type: "string",
+    description: "Upcoming earnings announcement date (fiscal quarter)",
+  },
+  {
+    name: "fundamental_currency_code",
+    label: "Currency Code",
+    category: "fundamental",
+    type: "string",
+    description: "Currency code for fundamental data (e.g., USD, EUR)",
+  },
 
   // Technical
   {

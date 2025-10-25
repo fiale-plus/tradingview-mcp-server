@@ -37,6 +37,10 @@ const DEFAULT_COLUMNS = [
   "price_earnings_ttm",
   "debt_to_equity",
   "exchange",
+  "free_cash_flow_ttm",
+  "free_cash_flow_margin_ttm",
+  "earnings_release_next_trading_date_fq",
+  "fundamental_currency_code",
 ];
 
 export class ScreenTool {
