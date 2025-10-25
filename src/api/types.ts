@@ -5,7 +5,7 @@
 export interface Filter {
   left: string;
   operation: FilterOperation;
-  right: number | string | [number, number];
+  right: number | string | boolean | [number, number] | string[];
 }
 
 export type FilterOperation =
@@ -58,7 +58,7 @@ export interface ScreenStocksInput {
   filters: Array<{
     field: string;
     operator: string;
-    value: number | string | [number, number];
+    value: number | string | boolean | [number, number] | string[];
   }>;
   markets?: string[];
   sort_by?: string;
