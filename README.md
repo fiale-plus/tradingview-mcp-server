@@ -1,4 +1,8 @@
-# TradingView MCP Server
+<div align="center">
+  <img src="docs/images/banner.png" alt="TradingView MCP Server Banner" width="100%">
+</div>
+
+<div align="center">
 
 [![NPM Version](https://img.shields.io/npm/v/tradingview-mcp-server?style=flat-square)](https://www.npmjs.com/package/tradingview-mcp-server)
 [![NPM Downloads](https://img.shields.io/npm/dm/tradingview-mcp-server?style=flat-square)](https://www.npmjs.com/package/tradingview-mcp-server)
@@ -8,7 +12,7 @@
 
 **Unofficial** Model Context Protocol (MCP) server for TradingView's stock screener API.
 
-🚧 **Work in Progress** - This project is in early development (v0.1.0 MVP).
+</div>
 
 ## Table of Contents
 
