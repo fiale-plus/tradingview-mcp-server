@@ -22,6 +22,7 @@
 - [Available Tools](#available-tools)
 - [Preset Strategies](#preset-strategies)
 - [Common Fields](#common-fields)
+- [Field Variants (TTM vs FQ vs FY)](#field-variants-ttm-vs-fq-vs-fy)
 - [Development](#development)
 - [Important Notes](#important-notes)
 - [Contributing](#contributing)
@@ -30,10 +31,11 @@
 ## Features
 
 - 🔍 **Screen stocks, forex, and crypto** with advanced filters
-- 📊 **30+ fundamental, technical, and performance fields**
+- 📊 **40+ fundamental, technical, and performance fields** with TTM/FQ/FY variants
 - 🎯 **5 preset strategies** (quality, value, dividend, momentum, growth)
 - ⚡ **Configurable caching and rate limiting**
 - 🔧 **Works with Claude Desktop and Claude Code**
+- 🏦 **Exchange filtering** (NASDAQ, NYSE, CBOE) and primary listing support
 
 ## Installation
 
@@ -281,7 +283,57 @@ High-growth companies with strong profitability and margins.
 - `close` - Current Price
 - `change` - Daily Change (%)
 - `volume` - Trading Volume
+- `average_volume_90d_calc` - 90-day Average Volume
 - `Perf.W`, `Perf.1M`, `Perf.Y` - Performance metrics
+- `exchange` - Stock exchange (NASDAQ, NYSE, CBOE)
+- `is_primary` - Primary listing indicator
+
+## Field Variants (TTM vs FQ vs FY)
+
+Many financial metrics have multiple time period variants. Understanding these is crucial for accurate screening:
+
+### Time Period Suffixes
+
+- **TTM** (Trailing Twelve Months): Rolling 12-month period
+  - Most recent, updates quarterly
+  - Example: `return_on_equity`, `price_earnings_ttm`, `net_margin_ttm`
+
+- **FQ** (Fiscal Quarter): Most recent completed quarter
+  - Updates quarterly
+  - More volatile than TTM
+  - Example: `return_on_equity_fq`, `price_book_fq`
+
+- **FY** (Fiscal Year): Most recent completed fiscal year
+  - Updates annually
+  - Most stable, less frequent updates
+  - Example: `debt_to_equity_fy`, `net_margin_fy`
+
+### Common Field Variants
+
+| Base Metric | TTM | FQ | FY |
+|-------------|-----|----|----|
+| Return on Equity | `return_on_equity` | `return_on_equity_fq` | - |
+| Net Margin | `net_margin_ttm` | - | `net_margin_fy` |
+| Debt/Equity | `debt_to_equity` | - | `debt_to_equity_fy` |
+| Price/Sales | `price_sales_ratio` | - | `price_sales_current` |
+
+### Usage Tips
+
+1. **For conservative screening**: Use FY variants for stability
+2. **For current analysis**: Use TTM or FQ for recent performance
+3. **Mixing periods**: You can mix different variants in the same filter
+4. **TradingView UI matching**: Use FQ/FY variants to match TradingView's web screener exactly
+
+Example using fiscal year data:
+```javascript
+{
+  filters: [
+    { field: "return_on_equity_fq", operator: "greater", value: 15 },
+    { field: "debt_to_equity_fy", operator: "less", value: 0.6 },
+    { field: "net_margin_fy", operator: "greater", value: 12 }
+  ]
+}
+```
 
 ## Resources
 

@@ -36,6 +36,7 @@ const DEFAULT_COLUMNS = [
   "return_on_equity",
   "price_earnings_ttm",
   "debt_to_equity",
+  "exchange",
 ];
 
 export class ScreenTool {
