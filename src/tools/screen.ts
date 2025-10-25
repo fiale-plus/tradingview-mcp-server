@@ -41,6 +41,12 @@ const DEFAULT_COLUMNS = [
   "free_cash_flow_margin_ttm",
   "earnings_release_next_trading_date_fq",
   "fundamental_currency_code",
+  "dividends_yield_current",
+  "dividend_payout_ratio_ttm",
+  "beta_5_year",
+  "sector",
+  "industry",
+  "earnings_per_share_diluted_yoy_growth_ttm",
 ];
 
 export class ScreenTool {

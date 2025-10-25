@@ -106,6 +106,41 @@ const STOCK_FIELDS: FieldMetadata[] = [
     description: "Annual dividend as percentage of price",
   },
   {
+    name: "dividends_yield_current",
+    label: "Dividend Yield (Current/TTM)",
+    category: "fundamental",
+    type: "percent",
+    description: "Current dividend yield (trailing twelve months)",
+  },
+  {
+    name: "dividends_yield_fq",
+    label: "Dividend Yield (FQ)",
+    category: "fundamental",
+    type: "percent",
+    description: "Dividend yield (fiscal quarter)",
+  },
+  {
+    name: "dividends_yield_fy",
+    label: "Dividend Yield (FY)",
+    category: "fundamental",
+    type: "percent",
+    description: "Dividend yield (fiscal year)",
+  },
+  {
+    name: "dividend_payout_ratio_ttm",
+    label: "Dividend Payout Ratio (TTM)",
+    category: "fundamental",
+    type: "percent",
+    description: "Percentage of earnings paid as dividends (trailing twelve months)",
+  },
+  {
+    name: "dividend_payout_ratio_fy",
+    label: "Dividend Payout Ratio (FY)",
+    category: "fundamental",
+    type: "percent",
+    description: "Percentage of earnings paid as dividends (fiscal year)",
+  },
+  {
     name: "earnings_per_share_diluted_ttm",
     label: "EPS (Diluted, TTM)",
     category: "fundamental",
@@ -189,6 +224,48 @@ const STOCK_FIELDS: FieldMetadata[] = [
     type: "string",
     description: "Currency code for fundamental data (e.g., USD, EUR)",
   },
+  {
+    name: "earnings_per_share_diluted_yoy_growth_ttm",
+    label: "EPS Diluted Growth YoY (TTM)",
+    category: "fundamental",
+    type: "percent",
+    description: "Year-over-year growth in diluted earnings per share",
+  },
+  {
+    name: "sector",
+    label: "Sector",
+    category: "fundamental",
+    type: "string",
+    description: "Business sector",
+  },
+  {
+    name: "sector.tr",
+    label: "Sector (Translated)",
+    category: "fundamental",
+    type: "string",
+    description: "Business sector (translated)",
+  },
+  {
+    name: "industry",
+    label: "Industry",
+    category: "fundamental",
+    type: "string",
+    description: "Business industry",
+  },
+  {
+    name: "industry.tr",
+    label: "Industry (Translated)",
+    category: "fundamental",
+    type: "string",
+    description: "Business industry (translated)",
+  },
+  {
+    name: "market",
+    label: "Market",
+    category: "fundamental",
+    type: "string",
+    description: "Market identifier",
+  },
 
   // Technical
   {
@@ -239,6 +316,27 @@ const STOCK_FIELDS: FieldMetadata[] = [
     category: "technical",
     type: "number",
     description: "Average Directional Index",
+  },
+  {
+    name: "beta_1_year",
+    label: "Beta (1 Year)",
+    category: "technical",
+    type: "number",
+    description: "Stock volatility relative to market (1 year period)",
+  },
+  {
+    name: "beta_3_year",
+    label: "Beta (3 Year)",
+    category: "technical",
+    type: "number",
+    description: "Stock volatility relative to market (3 year period)",
+  },
+  {
+    name: "beta_5_year",
+    label: "Beta (5 Year)",
+    category: "technical",
+    type: "number",
+    description: "Stock volatility relative to market (5 year period)",
   },
 
   // Performance
