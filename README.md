@@ -386,12 +386,15 @@ The server exposes preset configurations as MCP resources:
 
 ## Development
 
+### Local Setup
+
 ```bash
+# Clone the repository
+git clone https://github.com/fiale-plus/tradingview-mcp-server.git
+cd tradingview-mcp-server
+
 # Install dependencies
 npm install
-
-# Run in development mode
-npm run dev
 
 # Build
 npm run build
@@ -402,6 +405,67 @@ npm test
 # Watch tests
 npm test:watch
 ```
+
+### Using Local MCP Server with Claude
+
+To test your local development build with Claude Desktop or Claude Code:
+
+#### Option 1: Project-Level MCP (Recommended for Development)
+
+Create `.mcp.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "tradingview-local": {
+      "command": "node",
+      "args": ["/absolute/path/to/tradingview-mcp-server/dist/index.js"],
+      "env": {
+        "CACHE_TTL_SECONDS": "300",
+        "RATE_LIMIT_RPM": "10"
+      }
+    }
+  }
+}
+```
+
+Enable in `.claude/settings.local.json`:
+
+```json
+{
+  "enableAllProjectMcpServers": true
+}
+```
+
+**Important**: Replace `/absolute/path/to/tradingview-mcp-server` with the actual path to your local repository.
+
+#### Option 2: Claude Desktop Global Config
+
+Add to your Claude Desktop config file:
+
+**Mac**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+**Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "tradingview-local": {
+      "command": "node",
+      "args": ["/absolute/path/to/tradingview-mcp-server/dist/index.js"]
+    }
+  }
+}
+```
+
+### Development Workflow
+
+1. **Make changes** to source files in `src/`
+2. **Build**: `npm run build`
+3. **Restart Claude** (Desktop or Code) to pick up changes
+4. **Test** your changes via Claude's MCP integration
+
+**Tip**: After rebuilding, you must restart Claude to load the new build. The MCP server runs as a separate process and doesn't auto-reload.
 
 ## Important Notes
 
