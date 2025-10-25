@@ -2,6 +2,8 @@
  * Preset screening configurations
  */
 
+import { EXTENDED_COLUMNS } from "../tools/screen.js";
+
 export interface Preset {
   name: string;
   description: string;
@@ -13,6 +15,7 @@ export interface Preset {
   markets?: string[];
   sort_by?: string;
   sort_order?: "asc" | "desc";
+  columns?: string[]; // Optional: override default columns for this preset
 }
 
 export const PRESETS: Record<string, Preset> = {
@@ -129,6 +132,7 @@ export const PRESETS: Record<string, Preset> = {
     markets: ["america"],
     sort_by: "market_cap_basic",
     sort_order: "desc",
+    columns: EXTENDED_COLUMNS,
   },
 };
 

@@ -64,6 +64,7 @@ export interface ScreenStocksInput {
   sort_by?: string;
   sort_order?: "asc" | "desc";
   limit?: number;
+  columns?: string[];
 }
 
 export interface ListFieldsInput {
