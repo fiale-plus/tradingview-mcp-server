@@ -10,6 +10,23 @@
 
 🚧 **Work in Progress** - This project is in early development (v0.1.0 MVP).
 
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Configuration](#configuration)
+  - [Claude Desktop](#claude-desktop)
+  - [Claude Code](#claude-code-project-level)
+  - [Environment Variables](#environment-variables)
+- [Usage Examples](#usage-examples)
+- [Available Tools](#available-tools)
+- [Preset Strategies](#preset-strategies)
+- [Common Fields](#common-fields)
+- [Development](#development)
+- [Important Notes](#important-notes)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Features
 
 - 🔍 **Screen stocks, forex, and crypto** with advanced filters
@@ -180,6 +197,68 @@ Get a pre-configured screening strategy.
 ### `list_presets`
 
 List all available preset strategies.
+
+## Preset Strategies
+
+The server includes 5 pre-configured screening strategies optimized for different investment styles:
+
+### Quality Stocks (Conservative)
+**Preset:** `quality_stocks`
+
+High-quality, low-volatility stocks with strong fundamentals and uptrends. Based on Avanza's conservative screening strategy.
+
+**Criteria:**
+- ROE > 12%
+- Market cap > $200M
+- P/E < 40
+- P/S < 8
+- Debt/Equity < 0.7
+- Net margin > 10%
+- RSI between 45-65
+- Monthly volatility ≤ 3%
+- Golden cross (SMA50 > SMA200)
+
+### Value Stocks
+**Preset:** `value_stocks`
+
+Undervalued stocks trading below intrinsic value with solid fundamentals.
+
+**Criteria:**
+- P/E < 15
+- P/B < 1.5
+- Market cap > $1B
+- ROE > 10%
+
+### Dividend Stocks
+**Preset:** `dividend_stocks`
+
+Income-focused stocks with high dividend yields and financial stability.
+
+**Criteria:**
+- Dividend yield > 3%
+- Market cap > $5B
+- Debt/Equity < 1.0
+
+### Momentum Stocks
+**Preset:** `momentum_stocks`
+
+Stocks showing strong technical momentum and recent performance.
+
+**Criteria:**
+- RSI between 50-70
+- SMA50 > SMA200 (golden cross)
+- 1-month performance > 5%
+- Volume > 1M shares
+
+### Growth Stocks
+**Preset:** `growth_stocks`
+
+High-growth companies with strong profitability and margins.
+
+**Criteria:**
+- ROE > 20%
+- Operating margin > 15%
+- Market cap > $1B
 
 ## Common Fields
 
