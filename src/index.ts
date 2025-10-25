@@ -105,6 +105,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               minimum: 1,
               maximum: 200,
             },
+            columns: {
+              type: "array",
+              items: { type: "string" },
+              description: "Optional: specific columns to include in results. If not provided, uses minimal default columns. Presets may define extended column sets.",
+            },
           },
           required: ["filters"],
         },

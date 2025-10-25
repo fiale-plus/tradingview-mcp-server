@@ -73,4 +73,90 @@ describe("PresetsTool", () => {
     assert.ok(preset.markets, "Should have markets");
     assert.ok(preset.markets.includes("america"), "Should include america market");
   });
+
+  it("should have quality_growth_screener preset with all required filters", () => {
+    const preset = PRESETS.quality_growth_screener;
+
+    assert.ok(preset, "Should have quality_growth_screener preset");
+    assert.strictEqual(preset.name, "Quality Growth Screener");
+    assert.strictEqual(preset.filters.length, 16, "Should have 16 filters");
+
+    // Verify key fundamental filters
+    const roeFilter = preset.filters.find((f) => f.field === "return_on_equity_fq");
+    assert.ok(roeFilter, "Should have ROE (FQ) filter");
+    assert.strictEqual(roeFilter.operator, "greater");
+    assert.strictEqual(roeFilter.value, 15);
+
+    const marginFilter = preset.filters.find((f) => f.field === "net_margin_fy");
+    assert.ok(marginFilter, "Should have net margin (FY) filter");
+    assert.strictEqual(marginFilter.value, 12);
+
+    const debtFilter = preset.filters.find((f) => f.field === "debt_to_equity_fy");
+    assert.ok(debtFilter, "Should have debt/equity (FY) filter");
+    assert.strictEqual(debtFilter.operator, "less");
+    assert.strictEqual(debtFilter.value, 0.6);
+
+    // Verify growth filter
+    const revenueGrowthFilter = preset.filters.find(
+      (f) => f.field === "total_revenue_yoy_growth_ttm"
+    );
+    assert.ok(revenueGrowthFilter, "Should have revenue growth filter");
+    assert.strictEqual(revenueGrowthFilter.value, 8);
+
+    // Verify technical filters
+    const rsiFilter = preset.filters.find((f) => f.field === "RSI");
+    assert.ok(rsiFilter, "Should have RSI filter");
+    assert.strictEqual(rsiFilter.operator, "in_range");
+    assert.deepStrictEqual(rsiFilter.value, [45, 62]);
+
+    // Verify exchange filtering with string array
+    const exchangeFilter = preset.filters.find((f) => f.field === "exchange");
+    assert.ok(exchangeFilter, "Should have exchange filter");
+    assert.strictEqual(exchangeFilter.operator, "in_range");
+    assert.deepStrictEqual(
+      exchangeFilter.value,
+      ["NASDAQ", "NYSE", "CBOE"],
+      "Should filter for major US exchanges"
+    );
+
+    // Verify is_primary boolean filter
+    const isPrimaryFilter = preset.filters.find((f) => f.field === "is_primary");
+    assert.ok(isPrimaryFilter, "Should have is_primary filter");
+    assert.strictEqual(isPrimaryFilter.operator, "equal");
+    assert.strictEqual(isPrimaryFilter.value, true, "Should filter for primary listings");
+  });
+
+  it("should have quality_growth_screener with extended columns", () => {
+    const preset = PRESETS.quality_growth_screener;
+
+    assert.ok(preset.columns, "Should have columns property");
+    assert.ok(Array.isArray(preset.columns), "Columns should be an array");
+    assert.ok(
+      preset.columns.length > 7,
+      "Should have more columns than minimal default (7)"
+    );
+
+    // Verify extended columns are present
+    const extendedFields = [
+      "free_cash_flow_ttm",
+      "sector",
+      "industry",
+      "beta_5_year",
+      "dividends_yield_current",
+    ];
+
+    for (const field of extendedFields) {
+      assert.ok(
+        preset.columns.includes(field),
+        `Should include extended field: ${field}`
+      );
+    }
+  });
+
+  it("should have quality_growth_screener with correct sorting", () => {
+    const preset = PRESETS.quality_growth_screener;
+
+    assert.strictEqual(preset.sort_by, "market_cap_basic");
+    assert.strictEqual(preset.sort_order, "desc");
+  });
 });

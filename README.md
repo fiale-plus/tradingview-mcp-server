@@ -22,6 +22,7 @@
 - [Available Tools](#available-tools)
 - [Preset Strategies](#preset-strategies)
 - [Common Fields](#common-fields)
+- [Field Variants (TTM vs FQ vs FY)](#field-variants-ttm-vs-fq-vs-fy)
 - [Development](#development)
 - [Important Notes](#important-notes)
 - [Contributing](#contributing)
@@ -30,10 +31,11 @@
 ## Features
 
 - 🔍 **Screen stocks, forex, and crypto** with advanced filters
-- 📊 **30+ fundamental, technical, and performance fields**
-- 🎯 **5 preset strategies** (quality, value, dividend, momentum, growth)
+- 📊 **50+ fundamental, technical, and performance fields** with TTM/FQ/FY variants
+- 🎯 **6 preset strategies** (quality, value, dividend, momentum, growth, comprehensive)
 - ⚡ **Configurable caching and rate limiting**
 - 🔧 **Works with Claude Desktop and Claude Code**
+- 🏦 **Exchange filtering** (NASDAQ, NYSE, CBOE) and primary listing support
 
 ## Installation
 
@@ -193,6 +195,7 @@ Get a pre-configured screening strategy.
 - `dividend_stocks` - High dividend yield with consistent payout
 - `momentum_stocks` - Strong momentum and technical signals
 - `growth_stocks` - High-growth companies
+- `quality_growth_screener` - Comprehensive 16-filter quality & growth screen
 
 ### `list_presets`
 
@@ -200,7 +203,7 @@ List all available preset strategies.
 
 ## Preset Strategies
 
-The server includes 5 pre-configured screening strategies optimized for different investment styles:
+The server includes 6 pre-configured screening strategies optimized for different investment styles:
 
 ### Quality Stocks (Conservative)
 **Preset:** `quality_stocks`
@@ -260,6 +263,43 @@ High-growth companies with strong profitability and margins.
 - Operating margin > 15%
 - Market cap > $1B
 
+### Quality Growth Screener (Comprehensive)
+**Preset:** `quality_growth_screener`
+
+Comprehensive quality and growth screen combining fundamental strength, growth momentum, financial stability, and technical uptrend. Primary listings only on major US exchanges.
+
+**16-Filter Criteria:**
+
+**Price & Size:**
+- Price ≥ $10
+- Market cap ≥ $2B
+
+**Valuation:**
+- P/E (TTM) ≤ 35
+- P/S (Current) ≤ 6
+
+**Profitability (FQ/FY):**
+- ROE (FQ) > 15%
+- Net Margin (FY) > 12%
+
+**Financial Strength:**
+- Debt/Equity (FY) < 0.6
+
+**Growth:**
+- Revenue/Share (TTM) > $3
+- Revenue Growth YoY > 8%
+
+**Technical Indicators:**
+- RSI between 45-62
+- Golden cross (SMA50 ≥ SMA200)
+- Price > SMA50 (above trend)
+- Monthly volatility < 3%
+
+**Liquidity & Quality:**
+- 90-day avg volume > 200K
+- Exchange: NASDAQ, NYSE, or CBOE only
+- Primary listing only (eliminates duplicates)
+
 ## Common Fields
 
 ### Fundamental
@@ -281,7 +321,57 @@ High-growth companies with strong profitability and margins.
 - `close` - Current Price
 - `change` - Daily Change (%)
 - `volume` - Trading Volume
+- `average_volume_90d_calc` - 90-day Average Volume
 - `Perf.W`, `Perf.1M`, `Perf.Y` - Performance metrics
+- `exchange` - Stock exchange (NASDAQ, NYSE, CBOE)
+- `is_primary` - Primary listing indicator
+
+## Field Variants (TTM vs FQ vs FY)
+
+Many financial metrics have multiple time period variants. Understanding these is crucial for accurate screening:
+
+### Time Period Suffixes
+
+- **TTM** (Trailing Twelve Months): Rolling 12-month period
+  - Most recent, updates quarterly
+  - Example: `return_on_equity`, `price_earnings_ttm`, `net_margin_ttm`
+
+- **FQ** (Fiscal Quarter): Most recent completed quarter
+  - Updates quarterly
+  - More volatile than TTM
+  - Example: `return_on_equity_fq`, `price_book_fq`
+
+- **FY** (Fiscal Year): Most recent completed fiscal year
+  - Updates annually
+  - Most stable, less frequent updates
+  - Example: `debt_to_equity_fy`, `net_margin_fy`
+
+### Common Field Variants
+
+| Base Metric | TTM | FQ | FY |
+|-------------|-----|----|----|
+| Return on Equity | `return_on_equity` | `return_on_equity_fq` | - |
+| Net Margin | `net_margin_ttm` | - | `net_margin_fy` |
+| Debt/Equity | `debt_to_equity` | - | `debt_to_equity_fy` |
+| Price/Sales | `price_sales_ratio` | - | `price_sales_current` |
+
+### Usage Tips
+
+1. **For conservative screening**: Use FY variants for stability
+2. **For current analysis**: Use TTM or FQ for recent performance
+3. **Mixing periods**: You can mix different variants in the same filter
+4. **TradingView UI matching**: Use FQ/FY variants to match TradingView's web screener exactly
+
+Example using fiscal year data:
+```javascript
+{
+  filters: [
+    { field: "return_on_equity_fq", operator: "greater", value: 15 },
+    { field: "debt_to_equity_fy", operator: "less", value: 0.6 },
+    { field: "net_margin_fy", operator: "greater", value: 12 }
+  ]
+}
+```
 
 ## Resources
 
@@ -292,15 +382,19 @@ The server exposes preset configurations as MCP resources:
 - `preset://dividend_stocks`
 - `preset://momentum_stocks`
 - `preset://growth_stocks`
+- `preset://quality_growth_screener`
 
 ## Development
 
+### Local Setup
+
 ```bash
+# Clone the repository
+git clone https://github.com/fiale-plus/tradingview-mcp-server.git
+cd tradingview-mcp-server
+
 # Install dependencies
 npm install
-
-# Run in development mode
-npm run dev
 
 # Build
 npm run build
@@ -311,6 +405,67 @@ npm test
 # Watch tests
 npm test:watch
 ```
+
+### Using Local MCP Server with Claude
+
+To test your local development build with Claude Desktop or Claude Code:
+
+#### Option 1: Project-Level MCP (Recommended for Development)
+
+Create `.mcp.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "tradingview-local": {
+      "command": "node",
+      "args": ["/absolute/path/to/tradingview-mcp-server/dist/index.js"],
+      "env": {
+        "CACHE_TTL_SECONDS": "300",
+        "RATE_LIMIT_RPM": "10"
+      }
+    }
+  }
+}
+```
+
+Enable in `.claude/settings.local.json`:
+
+```json
+{
+  "enableAllProjectMcpServers": true
+}
+```
+
+**Important**: Replace `/absolute/path/to/tradingview-mcp-server` with the actual path to your local repository.
+
+#### Option 2: Claude Desktop Global Config
+
+Add to your Claude Desktop config file:
+
+**Mac**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+**Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "tradingview-local": {
+      "command": "node",
+      "args": ["/absolute/path/to/tradingview-mcp-server/dist/index.js"]
+    }
+  }
+}
+```
+
+### Development Workflow
+
+1. **Make changes** to source files in `src/`
+2. **Build**: `npm run build`
+3. **Restart Claude** (Desktop or Code) to pick up changes
+4. **Test** your changes via Claude's MCP integration
+
+**Tip**: After rebuilding, you must restart Claude to load the new build. The MCP server runs as a separate process and doesn't auto-reload.
 
 ## Important Notes
 

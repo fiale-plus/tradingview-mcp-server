@@ -28,7 +28,7 @@ const OPERATOR_MAP: Record<string, FilterOperation> = {
   match: "match",
 };
 
-// Common fields to include in response
+// Minimal default columns for lean responses
 const DEFAULT_COLUMNS = [
   "name",
   "close",
@@ -36,6 +36,22 @@ const DEFAULT_COLUMNS = [
   "return_on_equity",
   "price_earnings_ttm",
   "debt_to_equity",
+  "exchange",
+];
+
+// Extended columns for comprehensive analysis
+export const EXTENDED_COLUMNS = [
+  ...DEFAULT_COLUMNS,
+  "free_cash_flow_ttm",
+  "free_cash_flow_margin_ttm",
+  "earnings_release_next_trading_date_fq",
+  "fundamental_currency_code",
+  "dividends_yield_current",
+  "dividend_payout_ratio_ttm",
+  "beta_5_year",
+  "sector",
+  "industry",
+  "earnings_per_share_diluted_yoy_growth_ttm",
 ];
 
 export class ScreenTool {
@@ -52,6 +68,7 @@ export class ScreenTool {
       sort_by = "market_cap_basic",
       sort_order = "desc",
       limit = 20,
+      columns: inputColumns,
     } = input;
 
     // Validate limit
@@ -60,7 +77,7 @@ export class ScreenTool {
     }
 
     // Build cache key
-    const cacheKey = JSON.stringify({ filters, markets, sort_by, sort_order, limit });
+    const cacheKey = JSON.stringify({ filters, markets, sort_by, sort_order, limit, columns: inputColumns });
 
     // Check cache
     const cached = this.cache.get(cacheKey);
@@ -84,7 +101,8 @@ export class ScreenTool {
 
     // Extract unique fields from filters for columns
     const filterFields = filters.map((f) => f.field);
-    const columns = [...new Set([...DEFAULT_COLUMNS, ...filterFields])];
+    const baseColumns = inputColumns || DEFAULT_COLUMNS;
+    const columns = [...new Set([...baseColumns, ...filterFields])];
 
     // Build request
     const request: ScreenerRequest = {
@@ -142,11 +160,18 @@ export class ScreenTool {
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
-    const tvFilters: Filter[] = filters.map((f) => ({
-      left: f.field,
-      operation: OPERATOR_MAP[f.operator] || "greater",
-      right: f.value,
-    }));
+    const tvFilters: Filter[] = filters.map((f) => {
+      const operation = OPERATOR_MAP[f.operator];
+      if (!operation) {
+        throw new Error(`Unknown operator: ${f.operator}`);
+      }
+
+      return {
+        left: f.field,
+        operation,
+        right: f.value,
+      };
+    });
 
     const filterFields = filters.map((f) => f.field);
     const columns = [...new Set(["name", "close", "change", ...filterFields])];
@@ -189,11 +214,18 @@ export class ScreenTool {
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
-    const tvFilters: Filter[] = filters.map((f) => ({
-      left: f.field,
-      operation: OPERATOR_MAP[f.operator] || "greater",
-      right: f.value,
-    }));
+    const tvFilters: Filter[] = filters.map((f) => {
+      const operation = OPERATOR_MAP[f.operator];
+      if (!operation) {
+        throw new Error(`Unknown operator: ${f.operator}`);
+      }
+
+      return {
+        left: f.field,
+        operation,
+        right: f.value,
+      };
+    });
 
     const filterFields = filters.map((f) => f.field);
     const columns = [...new Set(["name", "close", "market_cap_basic", "change", ...filterFields])];

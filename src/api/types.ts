@@ -5,7 +5,7 @@
 export interface Filter {
   left: string;
   operation: FilterOperation;
-  right: number | string | [number, number];
+  right: number | string | boolean | [number, number] | string[];
 }
 
 export type FilterOperation =
@@ -58,12 +58,13 @@ export interface ScreenStocksInput {
   filters: Array<{
     field: string;
     operator: string;
-    value: number | string | [number, number];
+    value: number | string | boolean | [number, number] | string[];
   }>;
   markets?: string[];
   sort_by?: string;
   sort_order?: "asc" | "desc";
   limit?: number;
+  columns?: string[];
 }
 
 export interface ListFieldsInput {
@@ -84,6 +85,6 @@ export interface FieldMetadata {
   name: string;
   label: string;
   category: "fundamental" | "technical" | "performance";
-  type: "number" | "percent" | "currency" | "string";
+  type: "number" | "percent" | "currency" | "string" | "boolean";
   description?: string;
 }
