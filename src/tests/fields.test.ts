@@ -171,7 +171,7 @@ describe("FieldsTool", () => {
     );
 
     assert.ok(isPrimaryField, "is_primary field should exist");
-    assert.strictEqual(isPrimaryField.type, "string", "is_primary should be string type");
+    assert.strictEqual(isPrimaryField.type, "boolean", "is_primary should be boolean type");
     assert.ok(
       isPrimaryField.description.includes("primary"),
       "Description should mention primary"

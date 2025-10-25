@@ -160,11 +160,18 @@ export class ScreenTool {
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
-    const tvFilters: Filter[] = filters.map((f) => ({
-      left: f.field,
-      operation: OPERATOR_MAP[f.operator] || "greater",
-      right: f.value,
-    }));
+    const tvFilters: Filter[] = filters.map((f) => {
+      const operation = OPERATOR_MAP[f.operator];
+      if (!operation) {
+        throw new Error(`Unknown operator: ${f.operator}`);
+      }
+
+      return {
+        left: f.field,
+        operation,
+        right: f.value,
+      };
+    });
 
     const filterFields = filters.map((f) => f.field);
     const columns = [...new Set(["name", "close", "change", ...filterFields])];
@@ -207,11 +214,18 @@ export class ScreenTool {
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
-    const tvFilters: Filter[] = filters.map((f) => ({
-      left: f.field,
-      operation: OPERATOR_MAP[f.operator] || "greater",
-      right: f.value,
-    }));
+    const tvFilters: Filter[] = filters.map((f) => {
+      const operation = OPERATOR_MAP[f.operator];
+      if (!operation) {
+        throw new Error(`Unknown operator: ${f.operator}`);
+      }
+
+      return {
+        left: f.field,
+        operation,
+        right: f.value,
+      };
+    });
 
     const filterFields = filters.map((f) => f.field);
     const columns = [...new Set(["name", "close", "market_cap_basic", "change", ...filterFields])];

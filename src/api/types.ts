@@ -85,6 +85,6 @@ export interface FieldMetadata {
   name: string;
   label: string;
   category: "fundamental" | "technical" | "performance";
-  type: "number" | "percent" | "currency" | "string";
+  type: "number" | "percent" | "currency" | "string" | "boolean";
   description?: string;
 }

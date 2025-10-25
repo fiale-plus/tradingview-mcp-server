@@ -416,8 +416,8 @@ const STOCK_FIELDS: FieldMetadata[] = [
     name: "is_primary",
     label: "Is Primary Listing",
     category: "performance",
-    type: "string",
-    description: "Whether this is the primary listing (true/false)",
+    type: "boolean",
+    description: "Whether this is the primary listing for the security",
   },
 ];
 
