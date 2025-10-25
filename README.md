@@ -31,8 +31,8 @@
 ## Features
 
 - 🔍 **Screen stocks, forex, and crypto** with advanced filters
-- 📊 **40+ fundamental, technical, and performance fields** with TTM/FQ/FY variants
-- 🎯 **5 preset strategies** (quality, value, dividend, momentum, growth)
+- 📊 **50+ fundamental, technical, and performance fields** with TTM/FQ/FY variants
+- 🎯 **6 preset strategies** (quality, value, dividend, momentum, growth, comprehensive)
 - ⚡ **Configurable caching and rate limiting**
 - 🔧 **Works with Claude Desktop and Claude Code**
 - 🏦 **Exchange filtering** (NASDAQ, NYSE, CBOE) and primary listing support
@@ -195,6 +195,7 @@ Get a pre-configured screening strategy.
 - `dividend_stocks` - High dividend yield with consistent payout
 - `momentum_stocks` - Strong momentum and technical signals
 - `growth_stocks` - High-growth companies
+- `quality_growth_screener` - Comprehensive 16-filter quality & growth screen
 
 ### `list_presets`
 
@@ -202,7 +203,7 @@ List all available preset strategies.
 
 ## Preset Strategies
 
-The server includes 5 pre-configured screening strategies optimized for different investment styles:
+The server includes 6 pre-configured screening strategies optimized for different investment styles:
 
 ### Quality Stocks (Conservative)
 **Preset:** `quality_stocks`
@@ -261,6 +262,43 @@ High-growth companies with strong profitability and margins.
 - ROE > 20%
 - Operating margin > 15%
 - Market cap > $1B
+
+### Quality Growth Screener (Comprehensive)
+**Preset:** `quality_growth_screener`
+
+Comprehensive quality and growth screen combining fundamental strength, growth momentum, financial stability, and technical uptrend. Primary listings only on major US exchanges.
+
+**16-Filter Criteria:**
+
+**Price & Size:**
+- Price ≥ $10
+- Market cap ≥ $2B
+
+**Valuation:**
+- P/E (TTM) ≤ 35
+- P/S (Current) ≤ 6
+
+**Profitability (FQ/FY):**
+- ROE (FQ) > 15%
+- Net Margin (FY) > 12%
+
+**Financial Strength:**
+- Debt/Equity (FY) < 0.6
+
+**Growth:**
+- Revenue/Share (TTM) > $3
+- Revenue Growth YoY > 8%
+
+**Technical Indicators:**
+- RSI between 45-62
+- Golden cross (SMA50 ≥ SMA200)
+- Price > SMA50 (above trend)
+- Monthly volatility < 3%
+
+**Liquidity & Quality:**
+- 90-day avg volume > 200K
+- Exchange: NASDAQ, NYSE, or CBOE only
+- Primary listing only (eliminates duplicates)
 
 ## Common Fields
 
@@ -344,6 +382,7 @@ The server exposes preset configurations as MCP resources:
 - `preset://dividend_stocks`
 - `preset://momentum_stocks`
 - `preset://growth_stocks`
+- `preset://quality_growth_screener`
 
 ## Development
 
