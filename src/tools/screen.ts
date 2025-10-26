@@ -112,10 +112,19 @@ export class ScreenTool {
     }
 
     // Convert filters to TradingView format
-    const tvFilters: Filter[] = filters.map((f) => {
+    const tvFilters: Filter[] = filters.map((f, index) => {
+      // Validate filter structure
+      if (!f || typeof f !== 'object' || Array.isArray(f)) {
+        throw new Error(`Invalid filter at index ${index}: expected object with {field, operator, value}, got ${typeof f}`);
+      }
+
+      if (!f.field || !f.operator || f.value === undefined) {
+        throw new Error(`Invalid filter at index ${index}: missing required properties (field: ${f.field}, operator: ${f.operator}, value: ${f.value})`);
+      }
+
       const operation = OPERATOR_MAP[f.operator];
       if (!operation) {
-        throw new Error(`Unknown operator: ${f.operator}`);
+        throw new Error(`Unknown operator: ${f.operator}. Valid operators: ${Object.keys(OPERATOR_MAP).join(', ')}`);
       }
 
       return {
@@ -186,10 +195,19 @@ export class ScreenTool {
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
-    const tvFilters: Filter[] = filters.map((f) => {
+    const tvFilters: Filter[] = filters.map((f, index) => {
+      // Validate filter structure
+      if (!f || typeof f !== 'object' || Array.isArray(f)) {
+        throw new Error(`Invalid filter at index ${index}: expected object with {field, operator, value}, got ${typeof f}`);
+      }
+
+      if (!f.field || !f.operator || f.value === undefined) {
+        throw new Error(`Invalid filter at index ${index}: missing required properties (field: ${f.field}, operator: ${f.operator}, value: ${f.value})`);
+      }
+
       const operation = OPERATOR_MAP[f.operator];
       if (!operation) {
-        throw new Error(`Unknown operator: ${f.operator}`);
+        throw new Error(`Unknown operator: ${f.operator}. Valid operators: ${Object.keys(OPERATOR_MAP).join(', ')}`);
       }
 
       return {
@@ -240,10 +258,19 @@ export class ScreenTool {
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
-    const tvFilters: Filter[] = filters.map((f) => {
+    const tvFilters: Filter[] = filters.map((f, index) => {
+      // Validate filter structure
+      if (!f || typeof f !== 'object' || Array.isArray(f)) {
+        throw new Error(`Invalid filter at index ${index}: expected object with {field, operator, value}, got ${typeof f}`);
+      }
+
+      if (!f.field || !f.operator || f.value === undefined) {
+        throw new Error(`Invalid filter at index ${index}: missing required properties (field: ${f.field}, operator: ${f.operator}, value: ${f.value})`);
+      }
+
       const operation = OPERATOR_MAP[f.operator];
       if (!operation) {
-        throw new Error(`Unknown operator: ${f.operator}`);
+        throw new Error(`Unknown operator: ${f.operator}. Valid operators: ${Object.keys(OPERATOR_MAP).join(', ')}`);
       }
 
       return {
