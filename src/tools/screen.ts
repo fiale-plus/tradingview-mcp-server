@@ -42,16 +42,42 @@ const DEFAULT_COLUMNS = [
 // Extended columns for comprehensive analysis
 export const EXTENDED_COLUMNS = [
   ...DEFAULT_COLUMNS,
+  // Cash flow & margins
   "free_cash_flow_ttm",
   "free_cash_flow_margin_ttm",
+  "gross_margin",
+  "gross_margin_ttm",
+  "operating_margin_ttm",
+  "pre_tax_margin_ttm",
+  // Returns & efficiency
+  "return_on_assets",
+  "return_on_assets_fq",
+  "return_on_invested_capital_fq",
+  // Balance sheet
+  "total_assets",
+  "total_debt",
+  "current_ratio",
+  // Valuation
+  "enterprise_value_current",
+  "enterprise_value_to_ebit_ttm",
+  "enterprise_value_ebitda_ttm",
+  "price_earnings_growth_ttm",
+  "ebitda",
+  // Operating metrics
+  "research_and_dev_ratio_ttm",
+  "sell_gen_admin_exp_other_ratio_ttm",
+  // Earnings & growth
   "earnings_release_next_trading_date_fq",
-  "fundamental_currency_code",
+  "earnings_per_share_diluted_yoy_growth_ttm",
+  // Dividends
   "dividends_yield_current",
   "dividend_payout_ratio_ttm",
+  // Risk & classification
+  "beta_1_year",
   "beta_5_year",
   "sector",
   "industry",
-  "earnings_per_share_diluted_yoy_growth_ttm",
+  "fundamental_currency_code",
 ];
 
 export class ScreenTool {
