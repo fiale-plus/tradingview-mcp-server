@@ -35,9 +35,10 @@
 ## Features
 
 - 🔍 **Screen stocks, forex, and crypto** with advanced filters
-- 📊 **50+ fundamental, technical, and performance fields** with TTM/FQ/FY variants
+- 📊 **75+ fundamental, technical, and performance fields** with TTM/FQ/FY variants
 - 🎯 **6 preset strategies** (quality, value, dividend, momentum, growth, comprehensive)
-- ⚡ **Configurable caching and rate limiting**
+- ⚡ **Performance optimized** - minimal (7 fields) vs extended (35 fields) column sets
+- 💰 **Comprehensive valuation metrics** - EV, EV/EBIT, EV/EBITDA, PEG, margins, ROIC
 - 🔧 **Works with Claude Desktop and Claude Code**
 - 🏦 **Exchange filtering** (NASDAQ, NYSE, CBOE) and primary listing support
 
@@ -174,6 +175,7 @@ Screen stocks based on filters.
 - `sort_by` - Field to sort by (default: `"market_cap_basic"`)
 - `sort_order` - `"asc"` or `"desc"` (default: `"desc"`)
 - `limit` - Number of results (1-200, default: 20)
+- `columns` - Optional array of columns to return (default: minimal 7 fields for performance)
 
 **Operators:**
 - `greater`, `less`, `greater_or_equal`, `less_or_equal`
@@ -272,6 +274,8 @@ High-growth companies with strong profitability and margins.
 
 Comprehensive quality and growth screen combining fundamental strength, growth momentum, financial stability, and technical uptrend. Primary listings only on major US exchanges.
 
+**Returns 35 extended columns** including enterprise value metrics, margins (gross, operating, pre-tax), returns (ROA, ROIC), balance sheet data, and R&D ratios for deep fundamental analysis.
+
 **16-Filter Criteria:**
 
 **Price & Size:**
@@ -306,7 +310,7 @@ Comprehensive quality and growth screen combining fundamental strength, growth m
 
 ## Common Fields
 
-### Fundamental
+### Fundamental - Core Metrics
 - `return_on_equity` - ROE (%)
 - `price_earnings_ttm` - P/E Ratio
 - `price_book_fq` - P/B Ratio
@@ -314,6 +318,30 @@ Comprehensive quality and growth screen combining fundamental strength, growth m
 - `net_margin_ttm` - Net Margin (%)
 - `market_cap_basic` - Market Capitalization
 - `dividend_yield_recent` - Dividend Yield (%)
+
+### Fundamental - Valuation & Enterprise Value
+- `enterprise_value_current` - Enterprise Value (Market Cap + Debt - Cash)
+- `enterprise_value_to_ebit_ttm` - EV/EBIT Ratio
+- `enterprise_value_ebitda_ttm` - EV/EBITDA Ratio
+- `price_earnings_growth_ttm` - PEG Ratio (P/E to Growth)
+- `ebitda` - Earnings Before Interest, Taxes, Depreciation & Amortization
+
+### Fundamental - Margins & Profitability
+- `gross_margin_ttm` - Gross Margin (%)
+- `operating_margin_ttm` - Operating Margin (%)
+- `pre_tax_margin_ttm` - Pre-Tax Margin (%)
+- `free_cash_flow_margin_ttm` - FCF Margin (%)
+
+### Fundamental - Returns & Efficiency
+- `return_on_assets` / `return_on_assets_fq` - ROA (%)
+- `return_on_invested_capital_fq` - ROIC (%)
+- `research_and_dev_ratio_ttm` - R&D as % of Revenue
+- `sell_gen_admin_exp_other_ratio_ttm` - SG&A as % of Revenue
+
+### Fundamental - Balance Sheet
+- `total_assets` - Total Company Assets
+- `total_debt` - Total Company Debt
+- `current_ratio` - Current Assets / Current Liabilities
 
 ### Technical
 - `RSI` - Relative Strength Index (14)
