@@ -19,15 +19,9 @@
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
-  - [Claude Desktop](#claude-desktop)
-  - [Claude Code](#claude-code-project-level)
-  - [Environment Variables](#environment-variables)
-- [Usage Examples](#usage-examples)
+- [Quick Start](#quick-start)
+- [Documentation](#documentation)
 - [Available Tools](#available-tools)
-- [Preset Strategies](#preset-strategies)
-- [Common Fields](#common-fields)
-- [Field Variants (TTM vs FQ vs FY)](#field-variants-ttm-vs-fq-vs-fy)
-- [Development](#development)
 - [Important Notes](#important-notes)
 - [Contributing](#contributing)
 - [License](#license)
@@ -63,28 +57,20 @@ npm run build
 
 ### Claude Desktop
 
-Add to your Claude Desktop configuration file:
-
-**Mac**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-**Linux**: `~/.config/Claude/claude_desktop_config.json`
+Add to your Claude config file (`~/Library/Application Support/Claude/claude_desktop_config.json` on Mac):
 
 ```json
 {
   "mcpServers": {
     "tradingview": {
       "command": "npx",
-      "args": ["-y", "tradingview-mcp-server"],
-      "env": {
-        "CACHE_TTL_SECONDS": "300",
-        "RATE_LIMIT_RPM": "10"
-      }
+      "args": ["-y", "tradingview-mcp-server"]
     }
   }
 }
 ```
 
-### Claude Code (Project-Level)
+### Claude Code
 
 Create `.mcp.json` in your project root:
 
@@ -93,11 +79,7 @@ Create `.mcp.json` in your project root:
   "mcpServers": {
     "tradingview": {
       "command": "npx",
-      "args": ["-y", "tradingview-mcp-server"],
-      "env": {
-        "CACHE_TTL_SECONDS": "300",
-        "RATE_LIMIT_RPM": "10"
-      }
+      "args": ["-y", "tradingview-mcp-server"]
     }
   }
 }
@@ -111,57 +93,60 @@ Enable in `.claude/settings.local.json`:
 }
 ```
 
-## Environment Variables
+**Optional environment variables:**
+- `CACHE_TTL_SECONDS` - Cache duration (default: 300)
+- `RATE_LIMIT_RPM` - Requests per minute (default: 10)
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `CACHE_TTL_SECONDS` | Cache time-to-live in seconds (0 to disable) | `300` (5 min) |
-| `RATE_LIMIT_RPM` | API requests per minute | `10` |
+## Quick Start
 
-## Usage Examples
+### Using Presets
 
-### 1. Screen for Quality Stocks
+Ask Claude to use pre-configured screening strategies:
 
 ```
-Find high-quality stocks with strong fundamentals using the quality_stocks preset
+Find quality growth stocks using the comprehensive screener
 ```
 
-Claude will use the preset with filters:
-- ROE > 12%
-- Low debt (D/E < 0.7)
-- Good margins (Net Margin > 10%)
-- Low volatility
-- Golden cross (SMA50 > SMA200)
+```
+Show me dividend stocks with yield above 3%
+```
 
-### 2. Custom Screening
+```
+Screen for value stocks with low P/E ratios
+```
+
+### Custom Screening
 
 ```
 Screen for stocks with:
 - ROE greater than 15%
 - P/E ratio less than 25
 - Market cap above $1 billion
-- Limit to 10 results
 ```
 
-### 3. List Available Fields
+### Exploring Fields
 
 ```
 What fields can I use for stock screening?
 ```
 
-Returns all available fields with descriptions, organized by category (fundamental, technical, performance).
-
-### 4. Get Moving Averages
-
 ```
-Get SMA50 and SMA200 for AAPL
+Show me all valuation-related fields
 ```
 
-### 5. Compare Stocks
+## Documentation
 
-```
-Compare fundamentals of AAPL, MSFT, and GOOGL
-```
+### 📚 Comprehensive Guides
+
+- **[Preset Strategies](docs/presets.md)** - All 6 preset strategies with detailed criteria, use cases, and examples
+- **[Field Reference](docs/fields.md)** - Complete guide to all 75+ fields with descriptions and usage examples
+- **[Development Guide](docs/development.md)** - Local setup, testing, and extending the server
+
+### 🔧 Advanced Topics
+
+- **[Field Variants (TTM/FQ/FY)](docs/fields.md#understanding-field-variants)** - Understanding time periods
+- **[Column Optimization](docs/presets.md#performance-characteristics)** - Minimal vs extended column sets
+- **[Custom Presets](docs/development.md#creating-new-presets)** - Creating your own screening strategies
 
 ## Available Tools
 
@@ -196,308 +181,45 @@ List available fields for filtering.
 Get a pre-configured screening strategy.
 
 **Available Presets:**
-- `quality_stocks` - Conservative quality stocks (Avanza-based)
-- `value_stocks` - Undervalued stocks with low P/E and P/B
-- `dividend_stocks` - High dividend yield with consistent payout
-- `momentum_stocks` - Strong momentum and technical signals
-- `growth_stocks` - High-growth companies
-- `quality_growth_screener` - Comprehensive 16-filter quality & growth screen
+- `quality_stocks` - Conservative quality (ROE >12%, low debt, low volatility)
+- `value_stocks` - Undervalued (P/E <15, P/B <1.5)
+- `dividend_stocks` - High yield (>3%, low debt)
+- `momentum_stocks` - Technical strength (RSI 50-70, golden cross)
+- `growth_stocks` - High growth (ROE >20%, margins >15%)
+- `quality_growth_screener` - Comprehensive 16-filter screen with 35 extended columns
+
+See **[Preset Strategies Guide](docs/presets.md)** for detailed criteria and usage.
 
 ### `list_presets`
 
 List all available preset strategies.
 
-## Preset Strategies
+## Key Features at a Glance
 
-The server includes 6 pre-configured screening strategies optimized for different investment styles:
+### 75+ Available Fields
 
-### Quality Stocks (Conservative)
-**Preset:** `quality_stocks`
+The server provides comprehensive coverage across categories:
 
-High-quality, low-volatility stocks with strong fundamentals and uptrends. Based on Avanza's conservative screening strategy.
+- **Fundamental** - Core metrics (ROE, P/E, P/B), valuation (EV, EV/EBIT, PEG), margins (gross, operating, pre-tax), returns (ROA, ROIC), balance sheet (debt, assets, current ratio)
+- **Technical** - RSI, moving averages (SMA50, SMA200), volatility, beta
+- **Performance** - Price, volume, growth metrics, sector/industry
 
-**Criteria:**
-- ROE > 12%
-- Market cap > $200M
-- P/E < 40
-- P/S < 8
-- Debt/Equity < 0.7
-- Net margin > 10%
-- RSI between 45-65
-- Monthly volatility ≤ 3%
-- Golden cross (SMA50 > SMA200)
+See **[Complete Field Reference](docs/fields.md)** for all 75+ fields with descriptions and examples.
 
-### Value Stocks
-**Preset:** `value_stocks`
+### 6 Preset Strategies
 
-Undervalued stocks trading below intrinsic value with solid fundamentals.
+Pre-configured screens for common investment strategies:
 
-**Criteria:**
-- P/E < 15
-- P/B < 1.5
-- Market cap > $1B
-- ROE > 10%
+| Preset | Style | Key Criteria | Columns |
+|--------|-------|--------------|---------|
+| `quality_stocks` | Conservative | ROE >12%, low debt, low volatility | 7 default |
+| `value_stocks` | Value | P/E <15, P/B <1.5 | 7 default |
+| `dividend_stocks` | Income | Yield >3%, low debt | 7 default |
+| `momentum_stocks` | Momentum | RSI 50-70, golden cross | 7 default |
+| `growth_stocks` | Growth | ROE >20%, margins >15% | 7 default |
+| `quality_growth_screener` | Comprehensive | 16 filters, deep analysis | 35 extended |
 
-### Dividend Stocks
-**Preset:** `dividend_stocks`
-
-Income-focused stocks with high dividend yields and financial stability.
-
-**Criteria:**
-- Dividend yield > 3%
-- Market cap > $5B
-- Debt/Equity < 1.0
-
-### Momentum Stocks
-**Preset:** `momentum_stocks`
-
-Stocks showing strong technical momentum and recent performance.
-
-**Criteria:**
-- RSI between 50-70
-- SMA50 > SMA200 (golden cross)
-- 1-month performance > 5%
-- Volume > 1M shares
-
-### Growth Stocks
-**Preset:** `growth_stocks`
-
-High-growth companies with strong profitability and margins.
-
-**Criteria:**
-- ROE > 20%
-- Operating margin > 15%
-- Market cap > $1B
-
-### Quality Growth Screener (Comprehensive)
-**Preset:** `quality_growth_screener`
-
-Comprehensive quality and growth screen combining fundamental strength, growth momentum, financial stability, and technical uptrend. Primary listings only on major US exchanges.
-
-**Returns 35 extended columns** including enterprise value metrics, margins (gross, operating, pre-tax), returns (ROA, ROIC), balance sheet data, and R&D ratios for deep fundamental analysis.
-
-**16-Filter Criteria:**
-
-**Price & Size:**
-- Price ≥ $10
-- Market cap ≥ $2B
-
-**Valuation:**
-- P/E (TTM) ≤ 35
-- P/S (Current) ≤ 6
-
-**Profitability (FQ/FY):**
-- ROE (FQ) > 15%
-- Net Margin (FY) > 12%
-
-**Financial Strength:**
-- Debt/Equity (FY) < 0.6
-
-**Growth:**
-- Revenue/Share (TTM) > $3
-- Revenue Growth YoY > 8%
-
-**Technical Indicators:**
-- RSI between 45-62
-- Golden cross (SMA50 ≥ SMA200)
-- Price > SMA50 (above trend)
-- Monthly volatility < 3%
-
-**Liquidity & Quality:**
-- 90-day avg volume > 200K
-- Exchange: NASDAQ, NYSE, or CBOE only
-- Primary listing only (eliminates duplicates)
-
-## Common Fields
-
-### Fundamental - Core Metrics
-- `return_on_equity` - ROE (%)
-- `price_earnings_ttm` - P/E Ratio
-- `price_book_fq` - P/B Ratio
-- `debt_to_equity` - Debt/Equity Ratio
-- `net_margin_ttm` - Net Margin (%)
-- `market_cap_basic` - Market Capitalization
-- `dividend_yield_recent` - Dividend Yield (%)
-
-### Fundamental - Valuation & Enterprise Value
-- `enterprise_value_current` - Enterprise Value (Market Cap + Debt - Cash)
-- `enterprise_value_to_ebit_ttm` - EV/EBIT Ratio
-- `enterprise_value_ebitda_ttm` - EV/EBITDA Ratio
-- `price_earnings_growth_ttm` - PEG Ratio (P/E to Growth)
-- `ebitda` - Earnings Before Interest, Taxes, Depreciation & Amortization
-
-### Fundamental - Margins & Profitability
-- `gross_margin_ttm` - Gross Margin (%)
-- `operating_margin_ttm` - Operating Margin (%)
-- `pre_tax_margin_ttm` - Pre-Tax Margin (%)
-- `free_cash_flow_margin_ttm` - FCF Margin (%)
-
-### Fundamental - Returns & Efficiency
-- `return_on_assets` / `return_on_assets_fq` - ROA (%)
-- `return_on_invested_capital_fq` - ROIC (%)
-- `research_and_dev_ratio_ttm` - R&D as % of Revenue
-- `sell_gen_admin_exp_other_ratio_ttm` - SG&A as % of Revenue
-
-### Fundamental - Balance Sheet
-- `total_assets` - Total Company Assets
-- `total_debt` - Total Company Debt
-- `current_ratio` - Current Assets / Current Liabilities
-
-### Technical
-- `RSI` - Relative Strength Index (14)
-- `SMA50` - 50-day Simple Moving Average
-- `SMA200` - 200-day Simple Moving Average
-- `Volatility.M` - Monthly Volatility (%)
-
-### Performance
-- `close` - Current Price
-- `change` - Daily Change (%)
-- `volume` - Trading Volume
-- `average_volume_90d_calc` - 90-day Average Volume
-- `Perf.W`, `Perf.1M`, `Perf.Y` - Performance metrics
-- `exchange` - Stock exchange (NASDAQ, NYSE, CBOE)
-- `is_primary` - Primary listing indicator
-
-## Field Variants (TTM vs FQ vs FY)
-
-Many financial metrics have multiple time period variants. Understanding these is crucial for accurate screening:
-
-### Time Period Suffixes
-
-- **TTM** (Trailing Twelve Months): Rolling 12-month period
-  - Most recent, updates quarterly
-  - Example: `return_on_equity`, `price_earnings_ttm`, `net_margin_ttm`
-
-- **FQ** (Fiscal Quarter): Most recent completed quarter
-  - Updates quarterly
-  - More volatile than TTM
-  - Example: `return_on_equity_fq`, `price_book_fq`
-
-- **FY** (Fiscal Year): Most recent completed fiscal year
-  - Updates annually
-  - Most stable, less frequent updates
-  - Example: `debt_to_equity_fy`, `net_margin_fy`
-
-### Common Field Variants
-
-| Base Metric | TTM | FQ | FY |
-|-------------|-----|----|----|
-| Return on Equity | `return_on_equity` | `return_on_equity_fq` | - |
-| Net Margin | `net_margin_ttm` | - | `net_margin_fy` |
-| Debt/Equity | `debt_to_equity` | - | `debt_to_equity_fy` |
-| Price/Sales | `price_sales_ratio` | - | `price_sales_current` |
-
-### Usage Tips
-
-1. **For conservative screening**: Use FY variants for stability
-2. **For current analysis**: Use TTM or FQ for recent performance
-3. **Mixing periods**: You can mix different variants in the same filter
-4. **TradingView UI matching**: Use FQ/FY variants to match TradingView's web screener exactly
-
-Example using fiscal year data:
-```javascript
-{
-  filters: [
-    { field: "return_on_equity_fq", operator: "greater", value: 15 },
-    { field: "debt_to_equity_fy", operator: "less", value: 0.6 },
-    { field: "net_margin_fy", operator: "greater", value: 12 }
-  ]
-}
-```
-
-## Resources
-
-The server exposes preset configurations as MCP resources:
-
-- `preset://quality_stocks`
-- `preset://value_stocks`
-- `preset://dividend_stocks`
-- `preset://momentum_stocks`
-- `preset://growth_stocks`
-- `preset://quality_growth_screener`
-
-## Development
-
-### Local Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/fiale-plus/tradingview-mcp-server.git
-cd tradingview-mcp-server
-
-# Install dependencies
-npm install
-
-# Build
-npm run build
-
-# Run tests
-npm test
-
-# Watch tests
-npm test:watch
-```
-
-### Using Local MCP Server with Claude
-
-To test your local development build with Claude Desktop or Claude Code:
-
-#### Option 1: Project-Level MCP (Recommended for Development)
-
-Create `.mcp.json` in your project root:
-
-```json
-{
-  "mcpServers": {
-    "tradingview-local": {
-      "command": "node",
-      "args": ["/absolute/path/to/tradingview-mcp-server/dist/index.js"],
-      "env": {
-        "CACHE_TTL_SECONDS": "300",
-        "RATE_LIMIT_RPM": "10"
-      }
-    }
-  }
-}
-```
-
-Enable in `.claude/settings.local.json`:
-
-```json
-{
-  "enableAllProjectMcpServers": true
-}
-```
-
-**Important**: Replace `/absolute/path/to/tradingview-mcp-server` with the actual path to your local repository.
-
-#### Option 2: Claude Desktop Global Config
-
-Add to your Claude Desktop config file:
-
-**Mac**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-**Linux**: `~/.config/Claude/claude_desktop_config.json`
-
-```json
-{
-  "mcpServers": {
-    "tradingview-local": {
-      "command": "node",
-      "args": ["/absolute/path/to/tradingview-mcp-server/dist/index.js"]
-    }
-  }
-}
-```
-
-### Development Workflow
-
-1. **Make changes** to source files in `src/`
-2. **Build**: `npm run build`
-3. **Restart Claude** (Desktop or Code) to pick up changes
-4. **Test** your changes via Claude's MCP integration
-
-**Tip**: After rebuilding, you must restart Claude to load the new build. The MCP server runs as a separate process and doesn't auto-reload.
+See **[Preset Strategies Guide](docs/presets.md)** for detailed criteria, use cases, and examples.
 
 ## Important Notes
 
@@ -518,6 +240,8 @@ Add to your Claude Desktop config file:
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+For development setup and guidelines, see the **[Development Guide](docs/development.md)**.
 
 ## License
 
