@@ -1,5 +1,7 @@
 # Preset Screening Strategies
 
+> **Disclaimer:** This guide provides educational information about screening strategies. It is not investment advice. All investment decisions are your responsibility. See the [full disclaimer](../README.md#disclaimer) for details.
+
 ## Learn Time-Tested Investment Approaches
 
 These 6 pre-configured strategies represent proven investment philosophies used by successful investors for decades. Each preset is designed to help you **explore different investment styles systematically** - from conservative quality investing to growth-oriented strategies.

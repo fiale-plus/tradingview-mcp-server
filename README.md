@@ -308,7 +308,24 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Disclaimer
 
-This is an unofficial tool and is not affiliated with, endorsed by, or connected to TradingView. Use at your own risk.
+**Not Investment Advice**
+
+This tool provides stock screening capabilities for informational and educational purposes only. It is **not investment advice, financial advice, or a recommendation** to buy or sell any security.
+
+- All investment decisions are your sole responsibility
+- Past performance does not indicate future results
+- Screening results do not constitute investment recommendations
+- Always conduct your own research and due diligence
+- Consult qualified financial advisors before making investment decisions
+- You may lose money investing in securities
+
+**Software License**
+
+This software is provided "AS IS" under the [MIT License](LICENSE), without warranty of any kind, express or implied. The authors and contributors are not liable for any damages or losses arising from use of this software.
+
+**Third-Party Services**
+
+This is an unofficial tool and is not affiliated with, endorsed by, or connected to TradingView. Use at your own risk. TradingView's unofficial API may change without notice.
 
 ## Links
 

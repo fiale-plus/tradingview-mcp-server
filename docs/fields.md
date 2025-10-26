@@ -1,5 +1,7 @@
 # Field Reference
 
+> **Disclaimer:** This guide provides educational information about financial metrics and screening fields. It is not investment advice. All investment decisions are your responsibility. See the [full disclaimer](../README.md#disclaimer) for details.
+
 ## Understanding Investment Metrics
 
 This reference helps you **learn what financial metrics mean** and how to use them for systematic stock research. Unlike trading platforms that assume you already know these metrics, this guide explains each field's purpose, interpretation, and typical values.
