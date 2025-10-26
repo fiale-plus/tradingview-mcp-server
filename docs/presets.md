@@ -1,6 +1,25 @@
 # Preset Screening Strategies
 
-The TradingView MCP Server includes 6 pre-configured screening strategies optimized for different investment styles. Each preset defines specific filters, sorting preferences, and column sets to help you quickly find stocks matching common investment criteria.
+> **Disclaimer:** This guide provides educational information about screening strategies. It is not investment advice. All investment decisions are your responsibility. See the [full disclaimer](../README.md#disclaimer) for details.
+
+## Learn Time-Tested Investment Approaches
+
+These 6 pre-configured strategies represent proven investment philosophies used by successful investors for decades. Each preset is designed to help you **explore different investment styles systematically** - from conservative quality investing to growth-oriented strategies.
+
+### Why Presets Matter for Learning Investors
+
+Instead of reinventing the wheel or relying on tips, these presets give you:
+
+1. **Structured frameworks** - Learn what metrics matter for each investment style
+2. **Systematic research** - Understand how professional investors screen opportunities
+3. **Risk-appropriate approaches** - Match strategies to your risk tolerance and timeline
+4. **Educational foundation** - Build investment knowledge through practical application
+
+Each preset codifies the criteria that define an investment approach - quality, value, growth, income, or momentum. By exploring results from different presets, you learn to recognize patterns and develop your investment thesis.
+
+**These are starting points for research, not buy signals.** Use them to build watchlists, understand company characteristics, and develop conviction before investing.
+
+---
 
 ## Table of Contents
 
@@ -29,7 +48,7 @@ Each preset is designed for a specific investment strategy and returns different
 
 **Preset ID:** `quality_stocks`
 
-High-quality, low-volatility stocks with strong fundamentals and uptrends. Based on Avanza's conservative screening strategy. Ideal for risk-averse investors seeking stable, well-managed companies.
+High-quality, low-volatility stocks with strong fundamentals and uptrends. Conservative screening strategy ideal for risk-averse investors seeking stable, well-managed companies.
 
 ### Criteria
 
@@ -62,10 +81,10 @@ Default minimal columns (7 fields) for fast screening with lean payload.
 
 ### Best For
 
-- Conservative long-term investing
-- Low-risk portfolios
-- Dividend reinvestment plans
-- Retirement accounts
+- **Learning quality investing** - Understand what makes a "quality" company (strong ROE, low debt, stable margins)
+- **Conservative portfolios** - Lower volatility suits risk-averse or long-term investors
+- **Building conviction** - Research fundamentally sound companies before investing
+- **First portfolio holdings** - Stable companies suitable for new investors learning the ropes
 
 ---
 
@@ -101,10 +120,10 @@ Default minimal columns (7 fields).
 
 ### Best For
 
-- Value investing strategies
-- Contrarian investors
-- Mean reversion plays
-- Deep value hunting
+- **Learning value investing** - Explore Warren Buffett's approach of finding undervalued companies
+- **Patient investors** - Value stocks often take time to be recognized by the market
+- **Contrarian research** - Find companies temporarily out of favor but fundamentally sound
+- **Understanding valuation** - Learn why P/E and P/B matter for finding bargains
 
 ---
 
@@ -139,10 +158,10 @@ Default minimal columns (7 fields).
 
 ### Best For
 
-- Income generation
-- Dividend growth portfolios
-- DRIP strategies
-- Retirement income
+- **Learning income investing** - Understand how dividends provide cash flow and stability
+- **Building passive income** - Research companies with sustainable dividend payments
+- **Compound wealth** - Explore dividend reinvestment (DRIP) strategies
+- **Retirement planning** - Identify stable income sources for long-term portfolios
 
 ---
 
@@ -178,10 +197,10 @@ Default minimal columns (7 fields).
 
 ### Best For
 
-- Trend following
-- Swing trading
-- Breakout strategies
-- Short to medium-term holds
+- **Understanding momentum** - Learn how technical indicators identify trending stocks
+- **Medium-term positions** - Hold winners for weeks to months (not intraday trading)
+- **Combining technical + fundamental** - See how price action confirms fundamental strength
+- **Risk management practice** - Study how to ride trends and manage position exits
 
 ---
 
@@ -216,10 +235,10 @@ Default minimal columns (7 fields).
 
 ### Best For
 
-- Growth investing
-- High-conviction plays
-- Tech/innovation focus
-- Long-term capital appreciation
+- **Learning growth investing** - Understand Peter Lynch's approach of finding great businesses
+- **High-conviction research** - Deep dive into companies with exceptional returns and margins
+- **Long-term compounding** - Identify businesses that can grow for years or decades
+- **Developing conviction** - Build understanding before making concentrated bets
 
 ---
 
@@ -323,11 +342,11 @@ The most comprehensive preset combining fundamental strength, growth momentum, f
 
 ### Best For
 
-- Comprehensive fundamental analysis
-- Portfolio construction
-- Multi-factor screening
-- Quality-at-reasonable-price (QARP) strategies
-- Long-term compounders
+- **Deep fundamental research** - Access 35 metrics to thoroughly understand a business
+- **Learning advanced analysis** - Study enterprise value, ROIC, margins, and cash flow metrics
+- **Portfolio construction** - Build high-conviction positions with comprehensive data
+- **QARP strategies** - Master quality-at-reasonable-price investing (Buffett + Lynch combined)
+- **Long-term investing education** - Understand what metrics predict sustainable competitive advantages
 
 ### Typical Results
 
@@ -410,3 +429,7 @@ Screen for value stocks with P/E under 15
 - [Field Reference](fields.md) - Complete list of all 75+ available fields
 - [Development Guide](development.md) - How to create custom presets
 - [Quick Start Guide](../README.md#quick-start) - Custom screening examples
+
+---
+
+**Smarter screens, not faster trades.**

@@ -1,6 +1,25 @@
 # Field Reference
 
-Complete reference for all 75+ available fields in the TradingView MCP Server. Fields are organized by category and include descriptions, types, and usage examples.
+> **Disclaimer:** This guide provides educational information about financial metrics and screening fields. It is not investment advice. All investment decisions are your responsibility. See the [full disclaimer](../README.md#disclaimer) for details.
+
+## Understanding Investment Metrics
+
+This reference helps you **learn what financial metrics mean** and how to use them for systematic stock research. Unlike trading platforms that assume you already know these metrics, this guide explains each field's purpose, interpretation, and typical values.
+
+### Why These Fields Matter
+
+Successful long-term investing requires understanding what separates great businesses from mediocre ones. These 75+ fields give you the same fundamental and technical data that professional analysts use - organized for learning and practical application.
+
+**You'll learn:**
+- **Valuation** - Is the stock price reasonable? (P/E, EV/EBITDA, PEG)
+- **Profitability** - How efficiently does the business generate returns? (ROE, ROA, ROIC, margins)
+- **Financial health** - Can the company weather storms? (debt ratios, current ratio, free cash flow)
+- **Growth** - Is the business expanding? (revenue growth, EPS growth)
+- **Technical confirmation** - Does price action support fundamentals? (RSI, moving averages, volatility)
+
+Each field includes typical value ranges (excellent/good/average/poor) to help you interpret results and build screening criteria. Start with a few key metrics, then expand your analysis as you learn.
+
+---
 
 ## Table of Contents
 
@@ -776,3 +795,7 @@ Many financial metrics have multiple time period variants. Understanding these i
 - [Preset Strategies](presets.md) - Pre-configured screening strategies
 - [Development Guide](development.md) - How to add new fields
 - [Main README](../README.md) - Getting started guide
+
+---
+
+**Smarter screens, not faster trades.**
