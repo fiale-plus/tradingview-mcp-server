@@ -46,7 +46,7 @@ Each preset is designed for a specific investment strategy and returns different
 
 **Preset ID:** `quality_stocks`
 
-High-quality, low-volatility stocks with strong fundamentals and uptrends. Based on Avanza's conservative screening strategy. Ideal for risk-averse investors seeking stable, well-managed companies.
+High-quality, low-volatility stocks with strong fundamentals and uptrends. Conservative screening strategy ideal for risk-averse investors seeking stable, well-managed companies.
 
 ### Criteria
 

@@ -22,7 +22,7 @@ export const PRESETS: Record<string, Preset> = {
   quality_stocks: {
     name: "Quality Stocks (Conservative)",
     description:
-      "High-quality, low-volatility stocks with strong fundamentals and uptrends. Based on Avanza conservative screening strategy.",
+      "High-quality, low-volatility stocks with strong fundamentals and uptrends. Conservative screening strategy ideal for risk-averse investors.",
     filters: [
       { field: "return_on_equity", operator: "greater", value: 12 },
       { field: "market_cap_basic", operator: "greater", value: 200000000 },
