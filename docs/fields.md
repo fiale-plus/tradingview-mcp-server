@@ -793,3 +793,7 @@ Many financial metrics have multiple time period variants. Understanding these i
 - [Preset Strategies](presets.md) - Pre-configured screening strategies
 - [Development Guide](development.md) - How to add new fields
 - [Main README](../README.md) - Getting started guide
+
+---
+
+**Smarter screens, not faster trades.**

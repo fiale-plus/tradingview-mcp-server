@@ -12,6 +12,8 @@
 
 **Unofficial** Model Context Protocol (MCP) server for TradingView's stock screener API.
 
+### AI-powered investment research for patient, systematic investors.
+
 </div>
 
 ---
@@ -316,5 +318,7 @@ This is an unofficial tool and is not affiliated with, endorsed by, or connected
 - [Claude Code](https://docs.claude.com/claude-code)
 
 ---
+
+**Smarter screens, not faster trades.**
 
 Built with ❤️ using the [Model Context Protocol](https://modelcontextprotocol.io)

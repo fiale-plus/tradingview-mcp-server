@@ -427,3 +427,7 @@ Screen for value stocks with P/E under 15
 - [Field Reference](fields.md) - Complete list of all 75+ available fields
 - [Development Guide](development.md) - How to create custom presets
 - [Quick Start Guide](../README.md#quick-start) - Custom screening examples
+
+---
+
+**Smarter screens, not faster trades.**
