@@ -89,8 +89,8 @@ describe("ScreenTool - Filter Validation", () => {
         async () => {
           await screenTool.screenStocks({
             filters: [
+              // @ts-expect-error Testing invalid input
               {
-                // @ts-expect-error Testing invalid input
                 operator: "greater",
                 value: 10,
               },
@@ -108,9 +108,9 @@ describe("ScreenTool - Filter Validation", () => {
         async () => {
           await screenTool.screenStocks({
             filters: [
+              // @ts-expect-error Testing invalid input
               {
                 field: "market_cap_basic",
-                // @ts-expect-error Testing invalid input
                 value: 10,
               },
             ],
@@ -127,10 +127,10 @@ describe("ScreenTool - Filter Validation", () => {
         async () => {
           await screenTool.screenStocks({
             filters: [
+              // @ts-expect-error Testing invalid input
               {
                 field: "market_cap_basic",
                 operator: "greater",
-                // @ts-expect-error Testing invalid input
               },
             ],
           });
@@ -184,7 +184,6 @@ describe("ScreenTool - Filter Validation", () => {
             filters: [
               {
                 field: "market_cap_basic",
-                // @ts-expect-error Testing invalid input
                 operator: "invalid_operator",
                 value: 10,
               },
@@ -203,7 +202,6 @@ describe("ScreenTool - Filter Validation", () => {
           filters: [
             {
               field: "market_cap_basic",
-              // @ts-expect-error Testing invalid input
               operator: "bad_op",
               value: 10,
             },
@@ -280,7 +278,6 @@ describe("ScreenTool - Filter Validation", () => {
               {
                 // Invalid filter at index 2
                 field: "price_earnings_ttm",
-                // @ts-expect-error Testing invalid input
                 operator: "invalid",
                 value: 25,
               },
@@ -302,7 +299,6 @@ describe("ScreenTool - Filter Validation", () => {
             filters: [
               {
                 field: "volume",
-                // @ts-expect-error Testing invalid input
                 operator: "bad_operator",
                 value: 1000,
               },
@@ -320,10 +316,10 @@ describe("ScreenTool - Filter Validation", () => {
         async () => {
           await screenTool.screenCrypto({
             filters: [
+              // @ts-expect-error Testing invalid input - missing value
               {
                 field: "market_cap_basic",
                 operator: "greater",
-                // @ts-expect-error Testing invalid input - missing value
               },
             ],
           });
