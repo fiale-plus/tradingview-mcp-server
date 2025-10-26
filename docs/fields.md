@@ -338,6 +338,27 @@ Many financial metrics have multiple time period variants. Understanding these i
 
 ---
 
+#### After-Tax Margin
+
+**Fields:**
+- `after_tax_margin` - After-tax margin percentage
+
+**Type:** Percent
+**Description:** Net income after taxes as percentage of revenue. Similar to net margin, measures bottom-line profitability after all expenses including taxes.
+
+**Typical Values:**
+- Excellent: > 20%
+- Good: 10-20%
+- Average: 5-10%
+- Poor: < 5%
+
+**Example:**
+```javascript
+{ field: "after_tax_margin", operator: "greater", value: 10 }
+```
+
+---
+
 #### Free Cash Flow Margin
 
 **Fields:**

@@ -40,7 +40,7 @@ High-quality, low-volatility stocks with strong fundamentals and uptrends. Based
 | **Valuation** | P/E (TTM) | < 40 |
 | **Valuation** | P/S | < 8 |
 | **Financial Health** | Debt/Equity | < 0.7 |
-| **Margins** | Net Margin | > 10% |
+| **Margins** | After-Tax Margin | > 10% |
 | **Technical** | RSI | 45-65 (neutral zone) |
 | **Risk** | Monthly Volatility | ≤ 3% |
 | **Trend** | SMA50 vs SMA200 | Golden Cross (50 > 200) |
@@ -409,4 +409,4 @@ Screen for value stocks with P/E under 15
 
 - [Field Reference](fields.md) - Complete list of all 75+ available fields
 - [Development Guide](development.md) - How to create custom presets
-- [Advanced Usage](../README.md#usage-examples) - Custom screening examples
+- [Quick Start Guide](../README.md#quick-start) - Custom screening examples

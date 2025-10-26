@@ -593,8 +593,6 @@ Solution: Restart the MCP server or set `CACHE_TTL_SECONDS=0` to disable caching
 
 ## See Also
 
-- [Architecture Design](local/MCP_SERVER_DESIGN.md) - Detailed architecture
-- [Screener Filters Guide](local/SCREENER_FILTERS_GUIDE.md) - Filter implementation
 - [Preset Strategies](presets.md) - Creating effective presets
 - [Field Reference](fields.md) - All available fields
 - [Main README](../README.md) - Getting started
