@@ -69,7 +69,7 @@ Unlike hedge funds competing on speed and information access, you can compete on
 
 - 🔍 **Multi-asset screening** - Dedicated tools for stocks, forex, crypto, and ETFs with advanced filters
 - 📊 **75+ investment metrics** - Fundamental (valuation, margins, returns), technical (RSI, moving averages), and performance fields with TTM/FQ/FY variants
-- 🎯 **6 proven investment strategies** - Pre-configured screens for quality, value, dividend, momentum, and growth investing
+- 🎯 **7 proven strategies & presets** - Pre-configured screens for quality, value, dividend, momentum, growth investing, plus global market indexes
 - 💡 **AI-powered exploration** - Natural language queries through Claude ("Find undervalued companies with strong balance sheets")
 - 💰 **Deep financial analysis** - EV, EV/EBIT, EV/EBITDA, PEG, gross/operating margins, ROIC, ROA, ROE
 - ⚡ **Research-optimized** - Minimal (7 fields) for quick scans vs extended (35 fields) for comprehensive analysis
@@ -190,7 +190,7 @@ What's the difference between gross margin and operating margin?
 
 ### 📚 Comprehensive Guides
 
-- **[Preset Strategies](docs/presets.md)** - All 6 preset strategies with detailed criteria, use cases, and examples
+- **[Preset Strategies](docs/presets.md)** - All 7 preset strategies with detailed criteria, use cases, and examples
 - **[Field Reference](docs/fields.md)** - Complete guide to all 75+ fields with descriptions and usage examples
 - **[Development Guide](docs/development.md)** - Local setup, testing, and extending the server
 
@@ -284,6 +284,30 @@ Screen ETFs (Exchange-Traded Funds) based on performance and technical criteria.
 
 **Example fields:** `close`, `volume`, `change`, `Perf.1M`, `Perf.Y`, `RSI`, `beta_1_year`
 
+### `lookup_symbols`
+
+Look up specific symbols (stocks, indexes, ETFs) by ticker. **Use this for market indexes** like TVC:SPX, TVC:DJI, OMXSTO:OMXS30 that cannot be found via screening.
+
+**Parameters:**
+- `symbols` - Array of ticker symbols (e.g., `["TVC:SPX", "NASDAQ:AAPL", "OMXSTO:OMXS30"]`). Maximum 100 symbols.
+- `columns` - Optional array of columns to include
+
+**Default columns:** `name`, `close`, `change`, `volume`, `market_cap_basic`, `all_time_high`, `all_time_low`, `price_52_week_high`, `price_52_week_low`
+
+**Use Cases:**
+- **Market regime analysis** - Check if indexes are at all-time highs
+- **Direct symbol lookup** - Faster than screening for known tickers
+- **Portfolio comparison** - Compare your holdings side-by-side
+- **Benchmark analysis** - Compare against market indexes
+
+**Example:** Get S&P 500, Nasdaq, and OMX Stockholm 30 with market regime data
+```javascript
+lookup_symbols({
+  symbols: ["TVC:SPX", "TVC:IXIC", "OMXSTO:OMXS30"],
+  columns: ["close", "all_time_high", "price_52_week_high", "Perf.Y", "RSI"]
+})
+```
+
 ## Key Features at a Glance
 
 ### 75+ Available Fields
@@ -296,7 +320,7 @@ The server provides comprehensive coverage across categories:
 
 See **[Complete Field Reference](docs/fields.md)** for all 75+ fields with descriptions and examples.
 
-### 6 Preset Strategies
+### 7 Preset Strategies
 
 Pre-configured screens for common investment strategies:
 
@@ -308,6 +332,7 @@ Pre-configured screens for common investment strategies:
 | `momentum_stocks` | Momentum | RSI 50-70, golden cross | 7 default |
 | `growth_stocks` | Growth | ROE >20%, margins >15% | 7 default |
 | `quality_growth_screener` | Comprehensive | 16 filters, deep analysis | 35 extended |
+| `market_indexes` | Market Regime | 13 global indexes (US, EU, Asia) | 16 extended |
 
 See **[Preset Strategies Guide](docs/presets.md)** for detailed criteria, use cases, and examples.
 

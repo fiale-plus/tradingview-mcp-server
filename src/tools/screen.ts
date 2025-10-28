@@ -362,4 +362,85 @@ export class ScreenTool {
 
     return result;
   }
+
+  async lookupSymbols(input: { symbols: string[]; columns?: string[] }): Promise<any> {
+    const {
+      symbols,
+      columns: inputColumns,
+    } = input;
+
+    // Validate symbols
+    if (!symbols || symbols.length === 0) {
+      throw new Error("At least one symbol is required");
+    }
+
+    if (symbols.length > 100) {
+      throw new Error("Maximum 100 symbols allowed");
+    }
+
+    // Build cache key
+    const cacheKey = JSON.stringify({ type: "lookup", symbols, columns: inputColumns });
+
+    // Check cache
+    const cached = this.cache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    // Default columns for symbol lookup
+    const defaultColumns = [
+      "name",
+      "close",
+      "change",
+      "volume",
+      "market_cap_basic",
+      "all_time_high",
+      "all_time_low",
+      "price_52_week_high",
+      "price_52_week_low",
+    ];
+
+    const columns = inputColumns || defaultColumns;
+
+    // Build request using symbols.tickers pattern
+    const request: ScreenerRequest = {
+      filter: [],
+      columns,
+      sort: {
+        sortBy: "name",
+        sortOrder: "asc",
+      },
+      range: [0, symbols.length],
+      options: { lang: "en" },
+      symbols: {
+        query: { types: [] },
+        tickers: symbols,
+      },
+    };
+
+    // Rate limit
+    await this.rateLimiter.acquire();
+
+    // Make request
+    const response = await this.client.scanStocks(request);
+
+    // Format response
+    const result = {
+      total_count: response.totalCount,
+      symbols: response.data.map((item) => {
+        const symbol: Record<string, any> = { symbol: item.s };
+
+        columns.forEach((col, idx) => {
+          symbol[col] = item.d[idx];
+        });
+
+        return symbol;
+      }),
+    };
+
+    // Cache result
+    this.cache.set(cacheKey, result);
+
+    return result;
+  }
 }
