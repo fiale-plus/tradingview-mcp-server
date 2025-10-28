@@ -56,6 +56,7 @@ Unlike hedge funds competing on speed and information access, you can compete on
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [Try It Out: Included Commands](#try-it-out-included-commands)
 - [Quick Start](#quick-start)
 - [Documentation](#documentation)
 - [Available Tools](#available-tools)
@@ -136,6 +137,53 @@ Enable in `.claude/settings.local.json`:
 **Optional environment variables:**
 - `CACHE_TTL_SECONDS` - Cache duration (default: 300)
 - `RATE_LIMIT_RPM` - Requests per minute (default: 10)
+
+## Try It Out: Included Commands
+
+The repository includes two ready-to-use Claude Code commands that demonstrate practical workflows:
+
+### `/market-regime` - Check Market Health
+
+Quickly assess overall market conditions by analyzing major indexes relative to their all-time highs.
+
+```bash
+# In Claude Code, run:
+/market-regime
+```
+
+**What you get:**
+- Color-coded status table (🟢/🟡/🔴) for Nasdaq, OMX Stockholm 30, and Nikkei 225
+- Drawdown calculations from all-time highs
+- Market regime summary (bull/correction/bear)
+- Use before making new allocations or for weekly portfolio reviews
+
+### `/run-screener` - Interactive Stock Screening
+
+Run pre-configured screening strategies and save results to CSV for further analysis.
+
+```bash
+# In Claude Code, run:
+/run-screener
+```
+
+**What you get:**
+- Interactive preset selection (quality, value, dividend, momentum, growth)
+- Summary table of top results with key metrics
+- Complete results saved to `docs/local/screening-runs/{preset}_{timestamp}.csv`
+- Perfect for building watchlists and learning different investment styles
+
+**First-time setup:**
+```bash
+# Copy example configuration files
+cp .mcp.json.example .mcp.json
+cp .claude/settings.json.example .claude/settings.local.json
+
+# Restart Claude Code to load MCP server and commands
+```
+
+See [`.claude/commands/README.md`](.claude/commands/README.md) for detailed command documentation.
+
+---
 
 ## Quick Start
 

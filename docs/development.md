@@ -61,6 +61,36 @@ dist/
 └── utils/             # Cache, rate limiting
 ```
 
+### Quick Development Setup (This Repository)
+
+For rapid development in this repository, use the included example configuration files:
+
+```bash
+# 1. Copy example MCP config for development (uses local source with tsx)
+cp .mcp.json.example .mcp.json
+
+# For development, modify .mcp.json to use local source:
+# Change: "args": ["-y", "tradingview-mcp-server"]
+# To:     "args": ["tsx", "src/index.ts"]
+
+# 2. Copy example Claude settings
+cp .claude/settings.json.example .claude/settings.local.json
+
+# 3. Restart Claude Code to load the MCP server
+```
+
+**Important distinctions:**
+
+- **Cloned repo config** (`.mcp.json.example`): Uses `npx -y tradingview-mcp-server` → pulls published npm package
+- **Development config** (`.mcp.json` with tsx): Uses `npx tsx src/index.ts` → runs local source code directly
+- Both `.mcp.json` and `.claude/settings.local.json` are gitignored to avoid committing your local setup
+
+**Development advantages with tsx:**
+- ✅ No build step required - edit and restart
+- ✅ Faster iteration cycle
+- ✅ TypeScript runs directly from `src/`
+- ✅ Easier debugging with source maps
+
 ---
 
 ## Using Local MCP Server with Claude
