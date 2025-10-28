@@ -85,13 +85,18 @@ Unlike hedge funds competing on speed and information access, you can compete on
 npm install -g tradingview-mcp-server
 ```
 
-### Option 2: Local Development
+### Option 2: Clone Repository (with demo commands)
 
 ```bash
 git clone https://github.com/fiale-plus/tradingview-mcp-server.git
 cd tradingview-mcp-server
 npm install
-npm run build
+
+# Quick setup - creates project-level MCP config
+./local-setup.sh          # Linux/Mac
+local-setup.bat           # Windows
+
+# Restart Claude Code and try: /market-regime or /run-screener
 ```
 
 ## Configuration
@@ -174,7 +179,11 @@ Run pre-configured screening strategies and save results to CSV for further anal
 
 **First-time setup:**
 ```bash
-# Copy example configuration files
+# Quick setup script (recommended)
+./local-setup.sh          # Linux/Mac
+local-setup.bat           # Windows
+
+# Or manually copy files:
 cp .mcp.json.example .mcp.json
 cp .claude/settings.json.example .claude/settings.local.json
 

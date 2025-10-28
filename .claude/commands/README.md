@@ -79,15 +79,15 @@ Regime: Strong bull market with slightly elevated RSI (caution on new entries)
 After cloning the repository:
 
 ```bash
-# 1. Copy example configs
+# Quick setup script (recommended)
+./local-setup.sh          # Linux/Mac
+local-setup.bat           # Windows
+
+# Or manually:
 cp .mcp.json.example .mcp.json
 cp .claude/settings.json.example .claude/settings.local.json
 
-# 2. Enable project MCP servers
-# In .claude/settings.local.json, ensure:
-# "enableAllProjectMcpServers": true
-
-# 3. Restart Claude Code
+# Restart Claude Code
 ```
 
 ### Development mode

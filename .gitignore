@@ -23,6 +23,7 @@ build/
 .claude/
 !.claude/commands/
 .mcp.json
+.mcp.json.backup-*
 *.swp
 *.swo
 *~
