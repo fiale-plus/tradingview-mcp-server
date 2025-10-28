@@ -31,6 +31,7 @@ Interactive stock screening using pre-configured investment strategies. Results 
    - Include total count of results
 
 6. **Save results to CSV**:
+   - First, ensure output directory exists: Run `mkdir -p docs/local/screening-runs` using Bash tool
    - Path: `docs/local/screening-runs/`
    - Filename format: `{preset_name}_{timestamp}.csv`
    - Timestamp format: `YYYY-MM-DD_HH-MM-SS`
@@ -53,4 +54,4 @@ Interactive stock screening using pre-configured investment strategies. Results 
 - Handle both filter-based screening (stocks) and symbol-based lookup (indexes)
 - For market_indexes preset, explain this is market regime analysis, not stock screening
 - If screener returns 0 results, explain possible reasons (filters too strict, market conditions)
-- Ensure docs/local/screening-runs/ directory exists before writing
+- Always create output directory before writing CSV (see step 6)
