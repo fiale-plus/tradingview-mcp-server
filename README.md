@@ -67,13 +67,14 @@ Unlike hedge funds competing on speed and information access, you can compete on
 
 **Built for research-driven investment discovery:**
 
-- 🔍 **Systematic screening** - Find opportunities across stocks, forex, and crypto with advanced filters
+- 🔍 **Multi-asset screening** - Dedicated tools for stocks, forex, crypto, and ETFs with advanced filters
 - 📊 **75+ investment metrics** - Fundamental (valuation, margins, returns), technical (RSI, moving averages), and performance fields with TTM/FQ/FY variants
 - 🎯 **6 proven investment strategies** - Pre-configured screens for quality, value, dividend, momentum, and growth investing
 - 💡 **AI-powered exploration** - Natural language queries through Claude ("Find undervalued companies with strong balance sheets")
 - 💰 **Deep financial analysis** - EV, EV/EBIT, EV/EBITDA, PEG, gross/operating margins, ROIC, ROA, ROE
 - ⚡ **Research-optimized** - Minimal (7 fields) for quick scans vs extended (35 fields) for comprehensive analysis
 - 🏦 **Exchange filtering** - Focus on NASDAQ, NYSE, CBOE, or primary listings only
+- 🌍 **Global coverage** - Screen stocks across multiple markets (America, Europe, Asia) and 9,000+ cryptocurrencies
 
 ## Installation
 
@@ -244,6 +245,44 @@ See **[Preset Strategies Guide](docs/presets.md)** for detailed criteria and usa
 ### `list_presets`
 
 List all available preset strategies.
+
+### `screen_forex`
+
+Screen forex pairs based on technical criteria.
+
+**Parameters:**
+- `filters` - Array of filter conditions (field, operator, value)
+- `sort_by` - Field to sort by (default: `"volume"`)
+- `sort_order` - `"asc"` or `"desc"` (default: `"desc"`)
+- `limit` - Number of results (1-200, default: 20)
+
+**Example fields:** `close`, `volume`, `change`, `RSI`, `SMA50`, `SMA200`, `Volatility.M`
+
+### `screen_crypto`
+
+Screen cryptocurrencies based on technical and market criteria.
+
+**Parameters:**
+- `filters` - Array of filter conditions (field, operator, value)
+- `sort_by` - Field to sort by (default: `"market_cap_basic"`)
+- `sort_order` - `"asc"` or `"desc"` (default: `"desc"`)
+- `limit` - Number of results (1-200, default: 20)
+
+**Example fields:** `close`, `market_cap_basic`, `volume`, `change`, `Perf.1M`, `Perf.3M`, `Perf.Y`
+
+### `screen_etf`
+
+Screen ETFs (Exchange-Traded Funds) based on performance and technical criteria.
+
+**Parameters:**
+- `filters` - Array of filter conditions (field, operator, value)
+- `markets` - Markets to scan (default: `["america"]`)
+- `sort_by` - Field to sort by (default: `"market_cap_basic"`)
+- `sort_order` - `"asc"` or `"desc"` (default: `"desc"`)
+- `limit` - Number of results (1-200, default: 20)
+- `columns` - Optional array of columns to return
+
+**Example fields:** `close`, `volume`, `change`, `Perf.1M`, `Perf.Y`, `RSI`, `beta_1_year`
 
 ## Key Features at a Glance
 

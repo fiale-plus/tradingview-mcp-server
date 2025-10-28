@@ -158,6 +158,166 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {},
         },
       },
+      {
+        name: "screen_forex",
+        description:
+          "Screen forex pairs based on technical criteria. Returns forex pairs matching the specified filters.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            filters: {
+              type: "array",
+              description: "Array of filter conditions to apply",
+              items: {
+                type: "object",
+                properties: {
+                  field: {
+                    type: "string",
+                    description:
+                      "Field name to filter (e.g., 'close', 'volume', 'RSI', 'change')",
+                  },
+                  operator: {
+                    type: "string",
+                    description:
+                      "Comparison operator: greater, less, greater_or_equal, less_or_equal, equal, in_range, etc.",
+                  },
+                  value: {
+                    description:
+                      "Value to compare against (number, string for field comparison, or array [min, max] for in_range)",
+                  },
+                },
+                required: ["field", "operator", "value"],
+              },
+            },
+            sort_by: {
+              type: "string",
+              description: "Field to sort results by. Default: 'volume'",
+            },
+            sort_order: {
+              type: "string",
+              enum: ["asc", "desc"],
+              description: "Sort order. Default: 'desc'",
+            },
+            limit: {
+              type: "number",
+              description: "Number of results to return (1-200). Default: 20",
+              minimum: 1,
+              maximum: 200,
+            },
+          },
+          required: ["filters"],
+        },
+      },
+      {
+        name: "screen_crypto",
+        description:
+          "Screen cryptocurrencies based on technical and market criteria. Returns cryptocurrencies matching the specified filters.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            filters: {
+              type: "array",
+              description: "Array of filter conditions to apply",
+              items: {
+                type: "object",
+                properties: {
+                  field: {
+                    type: "string",
+                    description:
+                      "Field name to filter (e.g., 'close', 'market_cap_basic', 'volume', 'change')",
+                  },
+                  operator: {
+                    type: "string",
+                    description:
+                      "Comparison operator: greater, less, greater_or_equal, less_or_equal, equal, in_range, etc.",
+                  },
+                  value: {
+                    description:
+                      "Value to compare against (number, string for field comparison, or array [min, max] for in_range)",
+                  },
+                },
+                required: ["field", "operator", "value"],
+              },
+            },
+            sort_by: {
+              type: "string",
+              description: "Field to sort results by. Default: 'market_cap_basic'",
+            },
+            sort_order: {
+              type: "string",
+              enum: ["asc", "desc"],
+              description: "Sort order. Default: 'desc'",
+            },
+            limit: {
+              type: "number",
+              description: "Number of results to return (1-200). Default: 20",
+              minimum: 1,
+              maximum: 200,
+            },
+          },
+          required: ["filters"],
+        },
+      },
+      {
+        name: "screen_etf",
+        description:
+          "Screen ETFs (Exchange-Traded Funds) based on performance and technical criteria. Returns ETFs matching the specified filters.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            filters: {
+              type: "array",
+              description: "Array of filter conditions to apply",
+              items: {
+                type: "object",
+                properties: {
+                  field: {
+                    type: "string",
+                    description:
+                      "Field name to filter (e.g., 'close', 'volume', 'change', 'Perf.1M')",
+                  },
+                  operator: {
+                    type: "string",
+                    description:
+                      "Comparison operator: greater, less, greater_or_equal, less_or_equal, equal, in_range, etc.",
+                  },
+                  value: {
+                    description:
+                      "Value to compare against (number, string for field comparison, or array [min, max] for in_range)",
+                  },
+                },
+                required: ["field", "operator", "value"],
+              },
+            },
+            markets: {
+              type: "array",
+              items: { type: "string" },
+              description: "Markets to scan (e.g., ['america']). Default: ['america']",
+            },
+            sort_by: {
+              type: "string",
+              description: "Field to sort results by. Default: 'market_cap_basic'",
+            },
+            sort_order: {
+              type: "string",
+              enum: ["asc", "desc"],
+              description: "Sort order. Default: 'desc'",
+            },
+            limit: {
+              type: "number",
+              description: "Number of results to return (1-200). Default: 20",
+              minimum: 1,
+              maximum: 200,
+            },
+            columns: {
+              type: "array",
+              items: { type: "string" },
+              description: "Optional: specific columns to include in results. If not provided, uses minimal default columns.",
+            },
+          },
+          required: ["filters"],
+        },
+      },
     ],
   };
 });
@@ -222,6 +382,42 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: "text",
               text: JSON.stringify(presets, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "screen_forex": {
+        const result = await screenTool.screenForex(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "screen_crypto": {
+        const result = await screenTool.screenCrypto(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "screen_etf": {
+        const result = await screenTool.screenETF(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
             },
           ],
         };
