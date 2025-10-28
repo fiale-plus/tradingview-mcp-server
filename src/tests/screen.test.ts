@@ -329,6 +329,53 @@ describe("ScreenTool - Filter Validation", () => {
         }
       );
     });
+
+    it("should validate filters in screenETF", async () => {
+      await assert.rejects(
+        async () => {
+          await screenTool.screenETF({
+            filters: [
+              {
+                field: "volume",
+                operator: "invalid_operator",
+                value: 1000000,
+              },
+            ],
+          });
+        },
+        {
+          message: /Unknown operator: invalid_operator/,
+        }
+      );
+    });
+
+    it("should accept valid filters in screenETF", async () => {
+      // Mock successful response
+      (mockClient.scanStocks as any).mock.mockImplementation(async (request: any) => {
+        // Verify ETF-specific type filter is added
+        const typeFilter = request.filter.find((f: any) => f.left === "type");
+        assert.ok(typeFilter, "Should have type filter");
+        assert.strictEqual(typeFilter.operation, "equal");
+        assert.strictEqual(typeFilter.right, "fund");
+
+        return {
+          totalCount: 0,
+          data: [],
+        };
+      });
+
+      await assert.doesNotReject(async () => {
+        await screenTool.screenETF({
+          filters: [
+            {
+              field: "volume",
+              operator: "greater",
+              value: 1000000,
+            },
+          ],
+        });
+      });
+    });
   });
 
   describe("Valid filter conversion", () => {

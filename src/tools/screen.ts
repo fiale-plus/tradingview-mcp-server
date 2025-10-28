@@ -283,4 +283,83 @@ export class ScreenTool {
     this.cache.set(cacheKey, result);
     return result;
   }
+
+  async screenETF(input: ScreenStocksInput): Promise<any> {
+    // ETFs/Funds screening - similar to stocks but with type filter
+    const {
+      filters,
+      markets = ["america"],
+      sort_by = "market_cap_basic",
+      sort_order = "desc",
+      limit = 20,
+      columns: inputColumns,
+    } = input;
+
+    // Validate limit
+    if (limit < 1 || limit > 200) {
+      throw new Error("Limit must be between 1 and 200");
+    }
+
+    // Build cache key
+    const cacheKey = JSON.stringify({ type: "etf", filters, markets, sort_by, sort_order, limit, columns: inputColumns });
+
+    // Check cache
+    const cached = this.cache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    // Convert filters to TradingView format
+    const tvFilters = this.validateAndConvertFilters(filters);
+
+    // Extract unique fields from filters for columns
+    const filterFields = filters.map((f) => f.field);
+    const baseColumns = inputColumns || ["name", "close", "volume", "change", "change_from_open"];
+    const columns = [...new Set([...baseColumns, ...filterFields])];
+
+    // Build request with fund type filter
+    const request: ScreenerRequest = {
+      filter: [
+        ...tvFilters,
+        { left: "type", operation: "equal", right: "fund" }, // Filter for ETFs/Funds
+      ],
+      columns,
+      sort: {
+        sortBy: sort_by,
+        sortOrder: sort_order,
+      },
+      range: [0, limit],
+      options: { lang: "en" },
+      symbols: {
+        query: { types: [] },
+        tickers: [],
+      },
+      markets,
+    };
+
+    // Rate limit
+    await this.rateLimiter.acquire();
+
+    // Make request
+    const response = await this.client.scanStocks(request);
+
+    // Format response
+    const result = {
+      total_count: response.totalCount,
+      etfs: response.data.map((item) => {
+        const etf: Record<string, any> = { symbol: item.s };
+
+        columns.forEach((col, idx) => {
+          etf[col] = item.d[idx];
+        });
+
+        return etf;
+      }),
+    };
+
+    // Cache result
+    this.cache.set(cacheKey, result);
+
+    return result;
+  }
 }
