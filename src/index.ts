@@ -318,6 +318,27 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["filters"],
         },
       },
+      {
+        name: "lookup_symbols",
+        description:
+          "Look up specific symbols (stocks, indexes, ETFs) by ticker. Use this for direct symbol lookup including market indexes like TVC:SPX, TVC:DJI, OMXSTO:OMXS30 that cannot be found via screening. Returns comprehensive data including ATH, 52-week highs/lows.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            symbols: {
+              type: "array",
+              items: { type: "string" },
+              description: "Array of ticker symbols (e.g., ['TVC:SPX', 'NASDAQ:AAPL', 'OMXSTO:OMXS30']). Maximum 100 symbols.",
+            },
+            columns: {
+              type: "array",
+              items: { type: "string" },
+              description: "Optional: specific columns to include. Default: name, close, change, volume, market_cap_basic, all_time_high, all_time_low, price_52_week_high, price_52_week_low.",
+            },
+          },
+          required: ["symbols"],
+        },
+      },
     ],
   };
 });
@@ -413,6 +434,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "screen_etf": {
         const result = await screenTool.screenETF(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "lookup_symbols": {
+        const result = await screenTool.lookupSymbols(args as any);
         return {
           content: [
             {

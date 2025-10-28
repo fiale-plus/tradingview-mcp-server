@@ -7,11 +7,13 @@ import { EXTENDED_COLUMNS } from "../tools/screen.js";
 export interface Preset {
   name: string;
   description: string;
-  filters: Array<{
+  // Either filters-based (screening) or symbols-based (lookup)
+  filters?: Array<{
     field: string;
     operator: string;
     value: number | string | boolean | [number, number] | string[];
   }>;
+  symbols?: string[]; // For direct symbol lookup (e.g., indexes)
   markets?: string[];
   sort_by?: string;
   sort_order?: "asc" | "desc";
@@ -133,6 +135,51 @@ export const PRESETS: Record<string, Preset> = {
     sort_by: "market_cap_basic",
     sort_order: "desc",
     columns: EXTENDED_COLUMNS,
+  },
+
+  market_indexes: {
+    name: "Global Market Indexes",
+    description: "Major global stock market indexes for market regime analysis. Includes US (S&P 500, Dow, Nasdaq, Russell 2000), European (FTSE, DAX, CAC, IBEX), Asian (Nikkei, Hang Seng, Shanghai, Sensex), and Nordic (OMX Stockholm 30) indexes with ATH, 52-week highs/lows, and performance data.",
+    symbols: [
+      // US Indexes
+      "TVC:SPX",      // S&P 500
+      "TVC:DJI",      // Dow Jones Industrial Average
+      "TVC:IXIC",     // Nasdaq Composite
+      "TVC:RUT",      // Russell 2000
+
+      // European Indexes
+      "TVC:UKX",      // FTSE 100 (UK)
+      "TVC:DAX",      // DAX (Germany)
+      "TVC:CAC",      // CAC 40 (France)
+      "TVC:IBEX35",   // IBEX 35 (Spain)
+
+      // Asian Indexes
+      "TVC:NI225",    // Nikkei 225 (Japan)
+      "TVC:HSI",      // Hang Seng (Hong Kong)
+      "TVC:SHCOMP",   // Shanghai Composite (China)
+      "BSE:SENSEX",   // Sensex (India)
+
+      // Nordic
+      "OMXSTO:OMXS30", // OMX Stockholm 30 (Sweden)
+    ],
+    columns: [
+      "name",
+      "close",
+      "change",
+      "all_time_high",
+      "all_time_low",
+      "price_52_week_high",
+      "price_52_week_low",
+      "Perf.W",
+      "Perf.1M",
+      "Perf.3M",
+      "Perf.Y",
+      "Perf.YTD",
+      "RSI",
+      "Volatility.M",
+      "SMA50",
+      "SMA200",
+    ],
   },
 };
 
