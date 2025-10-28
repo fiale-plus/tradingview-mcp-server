@@ -4,7 +4,7 @@
 
 ## Learn Time-Tested Investment Approaches
 
-These 6 pre-configured strategies represent proven investment philosophies used by successful investors for decades. Each preset is designed to help you **explore different investment styles systematically** - from conservative quality investing to growth-oriented strategies.
+These 7 pre-configured strategies represent proven investment philosophies used by successful investors for decades. Each preset is designed to help you **explore different investment styles systematically** - from conservative quality investing to growth-oriented strategies, plus market regime analysis.
 
 ### Why Presets Matter for Learning Investors
 
@@ -30,6 +30,7 @@ Each preset codifies the criteria that define an investment approach - quality, 
 - [Momentum Stocks](#momentum-stocks)
 - [Growth Stocks](#growth-stocks)
 - [Quality Growth Screener (Comprehensive)](#quality-growth-screener-comprehensive)
+- [Market Indexes (Market Regime Analysis)](#market-indexes-market-regime-analysis)
 - [Usage](#usage)
 - [Performance Characteristics](#performance-characteristics)
 
@@ -356,6 +357,114 @@ Typically finds **6-11 stocks globally** (6 in US markets with exchange filters)
 - Healthy balance sheets (low debt)
 - Growth momentum (revenue growing >8%)
 - Technical strength (uptrend, low volatility)
+
+---
+
+## Market Indexes (Market Regime Analysis)
+
+**Preset ID:** `market_indexes`
+
+Direct symbol lookup for 13 major global market indexes to analyze overall market regime. Unlike screening presets that filter stocks, this preset fetches specific index symbols with comprehensive market positioning data.
+
+**Returns 16 extended columns** including all-time high, all-time low, 52-week highs/lows, multi-timeframe performance (weekly, monthly, quarterly, yearly, YTD), RSI, volatility, and moving averages for complete market regime analysis.
+
+### Included Indexes
+
+#### United States (4)
+- **S&P 500** (TVC:SPX) - Large-cap US stocks
+- **Dow Jones Industrial Average** (TVC:DJI) - 30 blue-chip US companies
+- **Nasdaq Composite** (TVC:IXIC) - Technology-heavy US market
+- **Russell 2000** (TVC:RUT) - Small-cap US stocks
+
+#### Europe (4)
+- **FTSE 100** (TVC:UKX) - UK large-cap
+- **DAX** (TVC:DAX) - German large-cap
+- **CAC 40** (TVC:CAC) - French large-cap
+- **IBEX 35** (TVC:IBEX35) - Spanish large-cap
+
+#### Asia-Pacific (4)
+- **Nikkei 225** (TVC:NI225) - Japanese large-cap
+- **Hang Seng** (TVC:HSI) - Hong Kong large-cap
+- **Shanghai Composite** (TVC:SHCOMP) - Chinese mainland stocks
+- **Sensex** (BSE:SENSEX) - Indian large-cap
+
+#### Nordic (1)
+- **OMX Stockholm 30** (OMXSTO:OMXS30) - Swedish large-cap
+
+### Configuration
+
+```javascript
+{
+  symbols: [
+    // 13 global market indexes
+    "TVC:SPX", "TVC:DJI", "TVC:IXIC", "TVC:RUT",
+    "TVC:UKX", "TVC:DAX", "TVC:CAC", "TVC:IBEX35",
+    "TVC:NI225", "TVC:HSI", "TVC:SHCOMP", "BSE:SENSEX",
+    "OMXSTO:OMXS30"
+  ],
+  columns: [
+    // Price & basics (3)
+    "name", "close", "change",
+
+    // Market positioning (4)
+    "all_time_high", "all_time_low",
+    "price_52_week_high", "price_52_week_low",
+
+    // Multi-timeframe performance (5)
+    "Perf.W", "Perf.1M", "Perf.3M", "Perf.Y", "Perf.YTD",
+
+    // Technical indicators (4)
+    "RSI", "Volatility.M", "SMA50", "SMA200"
+  ]
+}
+```
+
+### Market Regime Analysis Use Cases
+
+**Calculate Drawdowns from All-Time Highs**
+```javascript
+drawdown_from_ath = ((close - all_time_high) / all_time_high) * 100
+// Negative values indicate distance from peak
+```
+
+**Identify Bull vs Bear Markets**
+- **Strong bull**: Multiple indexes at/near ATH (within 2-5%)
+- **Correction**: Indexes 5-10% off ATH
+- **Bear market**: Indexes >20% off ATH
+
+**Assess Risk Appetite**
+- **Risk-on**: Small-caps (RUT) outperforming large-caps (SPX)
+- **Risk-off**: Safe-haven markets (treasuries) rallying, equity indexes declining
+- **Sector rotation**: Compare US, Europe, Asia performance
+
+**Technical Confirmation**
+- **Golden cross**: SMA50 > SMA200 (bullish trend)
+- **Death cross**: SMA50 < SMA200 (bearish trend)
+- **Overbought/oversold**: RSI >70 suggests caution, RSI <30 suggests opportunity
+
+### Best For
+
+- **Market timing context** - Understand if markets are at extremes before making allocations
+- **Risk management** - Reduce exposure when multiple indexes show overextension (high RSI, near ATH)
+- **Global diversification** - Identify which regions are outperforming or underperforming
+- **Portfolio rebalancing** - Use drawdown data to shift allocations toward undervalued markets
+- **Learning market cycles** - Study how indexes move together (correlation) or diverge
+- **Entry point identification** - Wait for pullbacks (5-10% from ATH) rather than buying at peaks
+
+### Typical Results
+
+Retrieves **9-13 indexes** depending on TradingView data availability. As of October 2025:
+- **Bull market signals**: 6 of 9 accessible indexes at/above all-time highs
+- **Strong US markets**: S&P 500, Nasdaq, Dow near ATH with RSI 65-70 (slightly overbought)
+- **Strong Japan**: Nikkei 225 at ATH (+33% Y performance)
+- **Moderate Nordic**: OMX Stockholm 30 near ATH (+7% Y performance)
+
+### Important Notes
+
+- **Not for screening**: Uses `lookup_symbols` tool (direct fetch), not `screen_stocks` (filtering)
+- **Index symbols**: Market indexes use TVC: prefix (e.g., TVC:SPX, TVC:IXIC)
+- **Data lag**: ATH/ATL fields may lag real-time by 1-2 days during active markets
+- **Availability**: Some indexes may not return data depending on TradingView's coverage
 
 ---
 
