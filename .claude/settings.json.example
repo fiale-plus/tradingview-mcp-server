@@ -1,3 +1,12 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__tradingview__lookup_symbols",
+      "mcp__tradingview__list_presets",
+      "mcp__tradingview__get_preset",
+      "mcp__tradingview__screen_stocks",
+      "Bash(mkdir:*)"
+    ]
+  },
   "enableAllProjectMcpServers": true
 }

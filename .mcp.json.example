@@ -2,7 +2,7 @@
   "mcpServers": {
     "tradingview": {
       "command": "npx",
-      "args": ["-y", "tradingview-mcp-server"],
+      "args": ["-y", "tradingview-mcp-server@0.2.1"],
       "env": {
         "CACHE_TTL_SECONDS": "300",
         "RATE_LIMIT_RPM": "10"
