@@ -22,6 +22,7 @@ build/
 .idea/
 .claude/
 !.claude/commands/
+!.claude/skills/
 .mcp.json
 .mcp.json.backup-*
 *.swp
