@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/images/banner.png" alt="TradingView MCP Server Banner" width="100%">
+  <img src="docs/images/demo.webp" alt="TradingView MCP Server Demo" width="100%">
 </div>
 
 <div align="center">
@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/github/license/fiale-plus/tradingview-mcp-server?style=flat-square)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue?style=flat-square)](https://modelcontextprotocol.io)
 
-**Unofficial** Model Context Protocol (MCP) server for TradingView's stock screener API.
+**Unofficial** Model Context Protocol (MCP) server for TradingView's market screener API - stocks, forex, crypto & ETFs.
 
 ### AI-powered investment research for patient, systematic investors.
 
