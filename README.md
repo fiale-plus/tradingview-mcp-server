@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/images/banner.png" alt="TradingView MCP Server Banner" width="100%">
+  <img src="docs/images/demo.webp" alt="TradingView MCP Server Demo" width="100%">
 </div>
 
 <div align="center">
