@@ -20,6 +20,10 @@ import { FieldsTool } from "./tools/fields.js";
 import { PresetsTool, PRESETS } from "./resources/presets.js";
 import { Cache } from "./utils/cache.js";
 import { RateLimiter } from "./utils/rateLimit.js";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
+const pkg = require("../package.json");
 
 // Configuration from environment
 const CACHE_TTL = parseInt(process.env.CACHE_TTL_SECONDS || "300");
@@ -40,7 +44,7 @@ cache.startCleanup();
 const server = new Server(
   {
     name: "tradingview-mcp-server",
-    version: "0.1.0",
+    version: pkg.version,
   },
   {
     capabilities: {
