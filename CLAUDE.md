@@ -46,7 +46,7 @@ For local development, use `npm run dev` which runs TypeScript directly via tsx 
 - `fields.ts` - Field metadata and listing (75+ fields across fundamental/technical/performance categories)
 
 **Resources** (`src/resources/`)
-- `presets.ts` - Pre-configured screening strategies (quality, value, dividend, momentum, growth, market_indexes). Presets can be filter-based or symbol-based (for direct lookup)
+- `presets.ts` - Pre-configured screening strategies (quality_stocks, value_stocks, dividend_stocks, momentum_stocks, growth_stocks, quality_growth_screener, market_indexes). Presets can be filter-based or symbol-based (for direct lookup)
 
 **Utilities** (`src/utils/`)
 - `cache.ts` - In-memory cache with TTL
