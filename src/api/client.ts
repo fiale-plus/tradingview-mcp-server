@@ -3,7 +3,11 @@
  */
 
 import fetch from "node-fetch";
+import { createRequire } from "module";
 import type { ScreenerRequest, ScreenerResponse } from "./types.js";
+
+const require = createRequire(import.meta.url);
+const pkg = require("../../package.json");
 
 const API_BASE = "https://scanner.tradingview.com";
 const API_TIMEOUT = 10000; // 10 seconds
@@ -21,7 +25,7 @@ export class TradingViewClient {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "User-Agent": "tradingview-mcp-server/0.1.0",
+          "User-Agent": `tradingview-mcp-server/${pkg.version}`,
         },
         body: JSON.stringify(payload),
         signal: controller.signal,
