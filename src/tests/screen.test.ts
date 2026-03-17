@@ -1,4 +1,4 @@
-import { describe, it, mock } from "node:test";
+import { describe, it, beforeEach, mock } from "node:test";
 import assert from "node:assert";
 import { ScreenTool } from "../tools/screen.js";
 import type { TradingViewClient } from "../api/client.js";
@@ -127,7 +127,7 @@ describe("ScreenTool - Filter Validation", () => {
         async () => {
           await screenTool.screenStocks({
             filters: [
-              // @ts-expect-error Testing invalid input
+              // value omitted to test runtime validation (non-empty/not_empty operators require value)
               {
                 field: "market_cap_basic",
                 operator: "greater",
@@ -238,6 +238,10 @@ describe("ScreenTool - Filter Validation", () => {
         "crosses_above",
         "crosses_below",
         "match",
+        "above_percent",
+        "below_percent",
+        "has",
+        "has_none_of",
       ];
 
       for (const operator of validOperators) {
@@ -248,7 +252,10 @@ describe("ScreenTool - Filter Validation", () => {
                 {
                   field: "market_cap_basic",
                   operator,
-                  value: operator === "in_range" ? [10, 100] : 10,
+                  value: operator === "in_range" || operator === "not_in_range" ? [10, 100]
+                    : operator === "above_percent" || operator === "below_percent" ? ["SMA200", 10]
+                    : operator === "has" || operator === "has_none_of" ? ["common"]
+                    : 10,
                 },
               ],
             });
@@ -256,6 +263,157 @@ describe("ScreenTool - Filter Validation", () => {
           `Operator "${operator}" should be valid`
         );
       }
+
+      // empty/not_empty are valid without a value
+      for (const operator of ["empty", "not_empty"]) {
+        await assert.doesNotReject(
+          async () => {
+            await screenTool.screenStocks({
+              // value intentionally omitted for no-value operators
+              filters: [
+                {
+                  field: "dividends_yield_current",
+                  operator,
+                },
+              ],
+            });
+          },
+          `Operator "${operator}" should be valid without value`
+        );
+      }
+    });
+  });
+
+  describe("New operators (empty, not_empty, above_percent, below_percent, has, has_none_of)", () => {
+    beforeEach(() => {
+      (mockClient.scanStocks as any).mock.mockImplementation(async () => ({
+        totalCount: 0,
+        data: [],
+      }));
+    });
+
+    it("should allow empty operator without value", async () => {
+      await assert.doesNotReject(async () => {
+        await screenTool.screenStocks({
+          // value intentionally omitted for no-value operators
+          filters: [{ field: "dividends_yield_current", operator: "empty" }],
+        });
+      });
+    });
+
+    it("should allow not_empty operator without value", async () => {
+      await assert.doesNotReject(async () => {
+        await screenTool.screenStocks({
+          // value intentionally omitted for no-value operators
+          filters: [{ field: "dividends_yield_current", operator: "not_empty" }],
+        });
+      });
+    });
+
+    it("should convert empty to 'empty' TradingView operation without right property", async () => {
+      (mockClient.scanStocks as any).mock.mockImplementation(async (request: any) => {
+        const f = request.filter[0];
+        assert.strictEqual(f.left, "dividends_yield_current");
+        assert.strictEqual(f.operation, "empty");
+        // right should be undefined (dropped by JSON.stringify)
+        assert.strictEqual(f.right, undefined);
+        return { totalCount: 0, data: [] };
+      });
+
+      await screenTool.screenStocks({
+        // value intentionally omitted for no-value operators
+        filters: [{ field: "dividends_yield_current", operator: "empty" }],
+      });
+    });
+
+    it("should convert not_empty to 'nempty' TradingView operation", async () => {
+      (mockClient.scanStocks as any).mock.mockImplementation(async (request: any) => {
+        const f = request.filter[0];
+        assert.strictEqual(f.operation, "nempty");
+        assert.strictEqual(f.right, undefined);
+        return { totalCount: 0, data: [] };
+      });
+
+      await screenTool.screenStocks({
+        // value intentionally omitted for no-value operators
+        filters: [{ field: "dividends_yield_current", operator: "not_empty" }],
+      });
+    });
+
+    it("should convert above_percent to 'above%' TradingView operation", async () => {
+      (mockClient.scanStocks as any).mock.mockImplementation(async (request: any) => {
+        const f = request.filter[0];
+        assert.strictEqual(f.operation, "above%");
+        assert.deepStrictEqual(f.right, ["SMA200", 10]);
+        return { totalCount: 0, data: [] };
+      });
+
+      await screenTool.screenStocks({
+        filters: [{ field: "close", operator: "above_percent", value: ["SMA200", 10] }],
+      });
+    });
+
+    it("should convert below_percent to 'below%' TradingView operation", async () => {
+      (mockClient.scanStocks as any).mock.mockImplementation(async (request: any) => {
+        const f = request.filter[0];
+        assert.strictEqual(f.operation, "below%");
+        assert.deepStrictEqual(f.right, ["SMA50", 5]);
+        return { totalCount: 0, data: [] };
+      });
+
+      await screenTool.screenStocks({
+        filters: [{ field: "close", operator: "below_percent", value: ["SMA50", 5] }],
+      });
+    });
+
+    it("should convert has to 'has' TradingView operation", async () => {
+      (mockClient.scanStocks as any).mock.mockImplementation(async (request: any) => {
+        const f = request.filter[0];
+        assert.strictEqual(f.operation, "has");
+        assert.deepStrictEqual(f.right, ["common"]);
+        return { totalCount: 0, data: [] };
+      });
+
+      await screenTool.screenStocks({
+        filters: [{ field: "typespecs", operator: "has", value: ["common"] }],
+      });
+    });
+
+    it("should convert has_none_of to 'has_none_of' TradingView operation", async () => {
+      (mockClient.scanStocks as any).mock.mockImplementation(async (request: any) => {
+        const f = request.filter[0];
+        assert.strictEqual(f.operation, "has_none_of");
+        assert.deepStrictEqual(f.right, ["preferred"]);
+        return { totalCount: 0, data: [] };
+      });
+
+      await screenTool.screenStocks({
+        filters: [{ field: "typespecs", operator: "has_none_of", value: ["preferred"] }],
+      });
+    });
+
+    it("should require value for above_percent operator", async () => {
+      await assert.rejects(
+        async () => {
+          await screenTool.screenStocks({
+            // value omitted to test runtime validation
+            filters: [{ field: "close", operator: "above_percent" }],
+          });
+        },
+        { message: /missing required properties/ }
+      );
+    });
+
+    it("should require value for has operator", async () => {
+      await assert.rejects(
+        async () => {
+          await screenTool.screenStocks({
+            // value omitted to test runtime validation
+            filters: [{ field: "typespecs", operator: "has" }],
+          });
+        },
+        { message: /missing required properties/ }
+      );
     });
   });
 
@@ -316,7 +474,7 @@ describe("ScreenTool - Filter Validation", () => {
         async () => {
           await screenTool.screenCrypto({
             filters: [
-              // @ts-expect-error Testing invalid input - missing value
+              // value omitted to test runtime validation
               {
                 field: "market_cap_basic",
                 operator: "greater",

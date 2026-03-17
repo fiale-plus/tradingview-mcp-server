@@ -64,7 +64,11 @@ export interface ScreenStocksInput {
   filters: Array<{
     field: string;
     operator: string;
-    value: number | string | boolean | [number, number] | string[];
+    /** Value to filter on. Optional for 'empty'/'not_empty' operators.
+     *  For above_percent/below_percent use [field_name, percent_number] e.g. ["SMA200", 10].
+     *  For has/has_none_of use string[].
+     */
+    value?: number | string | boolean | [number, number] | [string, number] | string[];
   }>;
   markets?: string[];
   sort_by?: string;
