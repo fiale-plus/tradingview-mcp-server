@@ -26,6 +26,12 @@ const OPERATOR_MAP: Record<string, FilterOperation> = {
   crosses_above: "crosses_above",
   crosses_below: "crosses_below",
   match: "match",
+  above_percent: "above%",
+  below_percent: "below%",
+  has: "has",
+  has_none_of: "has_none_of",
+  empty: "empty",
+  not_empty: "nempty",
 };
 
 // Minimal default columns for lean responses

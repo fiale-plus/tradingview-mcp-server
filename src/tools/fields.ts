@@ -538,6 +538,223 @@ const STOCK_FIELDS: FieldMetadata[] = [
     type: "boolean",
     description: "Whether this is the primary listing for the security",
   },
+
+  // Composite Scores (unique differentiators)
+  {
+    name: "piotroski_f_score_ttm",
+    label: "Piotroski F-Score",
+    category: "fundamental",
+    type: "number",
+    description: "Piotroski F-Score (0-9): financial strength composite. Score ≥7 = strong, ≤2 = weak. Tests profitability, leverage, operating efficiency.",
+  },
+  {
+    name: "altman_z_score_ttm",
+    label: "Altman Z-Score",
+    category: "fundamental",
+    type: "number",
+    description: "Altman Z-Score: bankruptcy risk predictor. Z>2.99 = safe zone, 1.81-2.99 = grey zone, <1.81 = distress zone.",
+  },
+  {
+    name: "graham_numbers_ttm",
+    label: "Graham Number",
+    category: "fundamental",
+    type: "currency",
+    description: "Graham Number: intrinsic value estimate = sqrt(22.5 × EPS × BVPS). Price below Graham Number suggests undervaluation.",
+  },
+
+  // Analyst Data
+  {
+    name: "Recommend.All",
+    label: "Analyst Recommendation (Composite)",
+    category: "fundamental",
+    type: "number",
+    description: "Composite analyst recommendation from 26 indicators: -1=Strong Sell, -0.5=Sell, 0=Neutral, 0.5=Buy, 1=Strong Buy.",
+  },
+  {
+    name: "Recommend.MA",
+    label: "Moving Average Recommendation",
+    category: "technical",
+    type: "number",
+    description: "Moving average composite signal: -1=Strong Sell to 1=Strong Buy.",
+  },
+  {
+    name: "Recommend.Other",
+    label: "Oscillator Recommendation",
+    category: "technical",
+    type: "number",
+    description: "Oscillator composite signal: -1=Strong Sell to 1=Strong Buy.",
+  },
+  {
+    name: "analyst_recommendations_buy",
+    label: "Analyst Buy Ratings",
+    category: "fundamental",
+    type: "number",
+    description: "Number of analyst Buy/Strong Buy recommendations.",
+  },
+  {
+    name: "analyst_recommendations_sell",
+    label: "Analyst Sell Ratings",
+    category: "fundamental",
+    type: "number",
+    description: "Number of analyst Sell/Strong Sell recommendations.",
+  },
+  {
+    name: "analyst_recommendations_neutral",
+    label: "Analyst Hold Ratings",
+    category: "fundamental",
+    type: "number",
+    description: "Number of analyst Hold/Neutral recommendations.",
+  },
+  {
+    name: "price_target_average",
+    label: "Analyst Price Target (Average)",
+    category: "fundamental",
+    type: "currency",
+    description: "Average analyst 12-month price target.",
+  },
+  {
+    name: "price_target_high",
+    label: "Analyst Price Target (High)",
+    category: "fundamental",
+    type: "currency",
+    description: "Highest analyst 12-month price target.",
+  },
+  {
+    name: "price_target_low",
+    label: "Analyst Price Target (Low)",
+    category: "fundamental",
+    type: "currency",
+    description: "Lowest analyst 12-month price target.",
+  },
+
+  // Extended Performance
+  {
+    name: "Perf.5D",
+    label: "5-Day Performance",
+    category: "performance",
+    type: "percent",
+    description: "5-day price change percentage.",
+  },
+  {
+    name: "Perf.6M",
+    label: "6-Month Performance",
+    category: "performance",
+    type: "percent",
+    description: "6-month price change percentage.",
+  },
+  {
+    name: "Perf.3Y",
+    label: "3-Year Performance",
+    category: "performance",
+    type: "percent",
+    description: "3-year price change percentage.",
+  },
+  {
+    name: "Perf.5Y",
+    label: "5-Year Performance",
+    category: "performance",
+    type: "percent",
+    description: "5-year price change percentage.",
+  },
+  {
+    name: "Perf.10Y",
+    label: "10-Year Performance",
+    category: "performance",
+    type: "percent",
+    description: "10-year price change percentage.",
+  },
+  {
+    name: "Perf.All",
+    label: "All-Time Performance",
+    category: "performance",
+    type: "percent",
+    description: "All-time price change from IPO.",
+  },
+
+  // Volume & Liquidity
+  {
+    name: "relative_volume_10d_calc",
+    label: "Relative Volume (10D)",
+    category: "performance",
+    type: "number",
+    description: "Today's volume relative to 10-day average. >1.5 = elevated activity.",
+  },
+  {
+    name: "average_volume_30d_calc",
+    label: "Average Volume (30D)",
+    category: "performance",
+    type: "number",
+    description: "30-day average trading volume.",
+  },
+  {
+    name: "VWAP",
+    label: "VWAP",
+    category: "technical",
+    type: "currency",
+    description: "Volume Weighted Average Price — average price weighted by volume.",
+  },
+
+  // 52-Week & ATH
+  {
+    name: "price_52_week_high",
+    label: "52-Week High",
+    category: "performance",
+    type: "currency",
+    description: "Highest price in past 52 weeks.",
+  },
+  {
+    name: "price_52_week_low",
+    label: "52-Week Low",
+    category: "performance",
+    type: "currency",
+    description: "Lowest price in past 52 weeks.",
+  },
+  {
+    name: "all_time_high",
+    label: "All-Time High",
+    category: "performance",
+    type: "currency",
+    description: "All-time highest price.",
+  },
+  {
+    name: "all_time_low",
+    label: "All-Time Low",
+    category: "performance",
+    type: "currency",
+    description: "All-time lowest price.",
+  },
+  {
+    name: "High.All",
+    label: "% From All-Time High",
+    category: "performance",
+    type: "percent",
+    description: "Percentage below all-time high (negative = below ATH).",
+  },
+
+  // Dividend Growth
+  {
+    name: "continuous_dividend_payout_years",
+    label: "Consecutive Dividend Years",
+    category: "fundamental",
+    type: "number",
+    description: "Number of consecutive years paying dividends. Dividend Aristocrats have ≥25 years.",
+  },
+  {
+    name: "dps_yoy_growth_ttm",
+    label: "Dividend Growth YoY (TTM)",
+    category: "fundamental",
+    type: "percent",
+    description: "Year-over-year growth in dividends per share.",
+  },
+
+  // Index Membership
+  {
+    name: "indexes",
+    label: "Index Membership",
+    category: "fundamental",
+    type: "string",
+    description: "Indexes this security belongs to (e.g., S&P 500, Nasdaq 100). Use 'has' operator to filter by index membership.",
+  },
 ];
 
 // ETF-specific fields (verified against TradingView API)

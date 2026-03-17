@@ -20,7 +20,13 @@ export type FilterOperation =
   | "crosses"
   | "crosses_above"
   | "crosses_below"
-  | "match";
+  | "match"
+  | "above%"
+  | "below%"
+  | "has"
+  | "has_none_of"
+  | "empty"
+  | "nempty";
 
 export interface ScreenerRequest {
   filter: Filter[];
