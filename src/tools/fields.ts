@@ -585,21 +585,21 @@ const STOCK_FIELDS: FieldMetadata[] = [
     description: "Oscillator composite signal: -1=Strong Sell to 1=Strong Buy.",
   },
   {
-    name: "analyst_recommendations_buy",
+    name: "recommendation_buy",
     label: "Analyst Buy Ratings",
     category: "fundamental",
     type: "number",
     description: "Number of analyst Buy/Strong Buy recommendations.",
   },
   {
-    name: "analyst_recommendations_sell",
+    name: "recommendation_sell",
     label: "Analyst Sell Ratings",
     category: "fundamental",
     type: "number",
     description: "Number of analyst Sell/Strong Sell recommendations.",
   },
   {
-    name: "analyst_recommendations_neutral",
+    name: "recommendation_hold",
     label: "Analyst Hold Ratings",
     category: "fundamental",
     type: "number",
@@ -733,18 +733,18 @@ const STOCK_FIELDS: FieldMetadata[] = [
 
   // Dividend Growth
   {
-    name: "continuous_dividend_payout_years",
+    name: "continuous_dividend_payout",
     label: "Consecutive Dividend Years",
     category: "fundamental",
     type: "number",
     description: "Number of consecutive years paying dividends. Dividend Aristocrats have ≥25 years.",
   },
   {
-    name: "dps_yoy_growth_ttm",
-    label: "Dividend Growth YoY (TTM)",
+    name: "dps_common_stock_prim_issue_yoy_growth_fy",
+    label: "Dividend Growth YoY (FY)",
     category: "fundamental",
     type: "percent",
-    description: "Year-over-year growth in dividends per share.",
+    description: "Year-over-year growth in dividends per share (fiscal year).",
   },
 
   // Index Membership
