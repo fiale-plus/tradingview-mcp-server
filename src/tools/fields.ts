@@ -753,7 +753,7 @@ const STOCK_FIELDS: FieldMetadata[] = [
     label: "Index Membership",
     category: "fundamental",
     type: "string",
-    description: "Indexes this security belongs to (e.g., S&P 500, Nasdaq 100). Use 'has' operator to filter by index membership.",
+    description: "Indexes this security belongs to (e.g., S&P 500, Nasdaq 100). Useful as a display column; note that filtering by index membership is not supported on the global scanner endpoint.",
   },
 ];
 

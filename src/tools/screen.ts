@@ -108,7 +108,8 @@ export class ScreenTool {
         );
       }
 
-      if (!f.field || !f.operator || f.value === undefined) {
+      const noValueOperators = ["empty", "not_empty"];
+      if (!f.field || !f.operator || (f.value === undefined && !noValueOperators.includes(f.operator))) {
         throw new Error(
           `Invalid filter at index ${index}: missing required properties (field: ${f.field}, operator: ${f.operator}, value: ${f.value})`
         );

@@ -5,7 +5,7 @@
 export interface Filter {
   left: string;
   operation: FilterOperation;
-  right: number | string | boolean | [number, number] | string[];
+  right?: any;  // optional — not needed for empty/nempty operators
 }
 
 export type FilterOperation =
