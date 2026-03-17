@@ -137,6 +137,139 @@ export const PRESETS: Record<string, Preset> = {
     columns: EXTENDED_COLUMNS,
   },
 
+  quality_compounder: {
+    name: "Quality Compounders (Munger/Buffett)",
+    description:
+      "Durable competitive advantage compounders: gross margin >40%, ROIC >15%, FCF margin >15%, growing revenue, low debt. Ideal for long-term buy-and-hold investors.",
+    filters: [
+      { field: "gross_margin_ttm", operator: "greater", value: 40 },
+      { field: "return_on_invested_capital_fq", operator: "greater", value: 15 },
+      { field: "free_cash_flow_margin_ttm", operator: "greater", value: 15 },
+      { field: "total_revenue_yoy_growth_ttm", operator: "greater", value: 5 },
+      { field: "debt_to_equity", operator: "less", value: 0.8 },
+      { field: "market_cap_basic", operator: "greater", value: 2000000000 },
+      { field: "price_earnings_ttm", operator: "less", value: 50 },
+      { field: "is_primary", operator: "equal", value: true },
+    ],
+    markets: ["america"],
+    sort_by: "return_on_invested_capital_fq",
+    sort_order: "desc",
+  },
+
+  garp: {
+    name: "GARP (Growth at Reasonable Price)",
+    description:
+      "PEG-based screen combining growth and value: PEG <2, ROE >15%, revenue growth >10%, reasonable debt. Targets quality growth stocks not yet overvalued.",
+    filters: [
+      { field: "price_earnings_growth_ttm", operator: "in_range", value: [0.1, 2.0] },
+      { field: "return_on_equity", operator: "greater", value: 15 },
+      { field: "total_revenue_yoy_growth_ttm", operator: "greater", value: 10 },
+      { field: "market_cap_basic", operator: "greater", value: 1000000000 },
+      { field: "debt_to_equity", operator: "less", value: 1.5 },
+      { field: "price_earnings_ttm", operator: "in_range", value: [5, 40] },
+      { field: "is_primary", operator: "equal", value: true },
+    ],
+    markets: ["america"],
+    sort_by: "price_earnings_growth_ttm",
+    sort_order: "asc",
+  },
+
+  deep_value: {
+    name: "Deep Value (Contrarian)",
+    description:
+      "Classic deep value contrarian screen: P/E <10, P/B <1.5, positive earnings and FCF. For patient investors comfortable with out-of-favor companies.",
+    filters: [
+      { field: "price_earnings_ttm", operator: "in_range", value: [1, 10] },
+      { field: "price_book_fq", operator: "less", value: 1.5 },
+      { field: "market_cap_basic", operator: "greater", value: 500000000 },
+      { field: "return_on_equity", operator: "greater", value: 5 },
+      { field: "free_cash_flow_ttm", operator: "greater", value: 0 },
+      { field: "is_primary", operator: "equal", value: true },
+    ],
+    markets: ["america"],
+    sort_by: "price_book_fq",
+    sort_order: "asc",
+  },
+
+  breakout_scanner: {
+    name: "Breakout Scanner",
+    description:
+      "Technical breakout screen: stocks near 52-week highs, above SMA200 (golden cross), RSI momentum zone, above-average volume. Targets high-momentum setups.",
+    filters: [
+      { field: "SMA50", operator: "greater", value: "SMA200" },
+      { field: "RSI", operator: "in_range", value: [50, 75] },
+      { field: "close", operator: "greater", value: "SMA50" },
+      { field: "volume", operator: "greater", value: 500000 },
+      { field: "market_cap_basic", operator: "greater", value: 500000000 },
+      { field: "average_volume_90d_calc", operator: "greater", value: 200000 },
+      { field: "is_primary", operator: "equal", value: true },
+      { field: "exchange", operator: "in_range", value: ["NASDAQ", "NYSE"] },
+    ],
+    markets: ["america"],
+    sort_by: "Perf.1M",
+    sort_order: "desc",
+  },
+
+  earnings_momentum: {
+    name: "Earnings Momentum",
+    description:
+      "Strong earnings momentum: high EPS growth YoY, positive RSI momentum, above SMA50, large cap. Targets stocks with improving fundamentals backed by price momentum.",
+    filters: [
+      { field: "earnings_per_share_diluted_yoy_growth_ttm", operator: "greater", value: 20 },
+      { field: "total_revenue_yoy_growth_ttm", operator: "greater", value: 10 },
+      { field: "RSI", operator: "in_range", value: [45, 70] },
+      { field: "close", operator: "greater", value: "SMA50" },
+      { field: "market_cap_basic", operator: "greater", value: 1000000000 },
+      { field: "is_primary", operator: "equal", value: true },
+    ],
+    markets: ["america"],
+    sort_by: "earnings_per_share_diluted_yoy_growth_ttm",
+    sort_order: "desc",
+  },
+
+  dividend_growth: {
+    name: "Dividend Growth (Compounding Income)",
+    description:
+      "Dividend growth investing: consistent payers with growing dividends, strong FCF to sustain payouts, moderate yield. Suitable for income-focused long-term investors.",
+    filters: [
+      { field: "dividend_yield_recent", operator: "in_range", value: [1, 6] },
+      { field: "dividend_payout_ratio_ttm", operator: "less", value: 70 },
+      { field: "free_cash_flow_ttm", operator: "greater", value: 0 },
+      { field: "return_on_equity", operator: "greater", value: 10 },
+      { field: "debt_to_equity", operator: "less", value: 1.5 },
+      { field: "market_cap_basic", operator: "greater", value: 2000000000 },
+      { field: "is_primary", operator: "equal", value: true },
+    ],
+    markets: ["america"],
+    sort_by: "dividend_yield_recent",
+    sort_order: "desc",
+  },
+
+  macro_assets: {
+    name: "Macro Asset Monitor",
+    description:
+      "Key macro assets for market regime analysis: US equity indexes, VIX fear gauge, US Dollar Index, 10-year Treasury yield, Gold, Oil, and Bitcoin.",
+    symbols: [
+      "TVC:VIX",       // CBOE Volatility Index
+      "TVC:DXY",       // US Dollar Index
+      "TVC:TNX",       // 10-Year Treasury Yield
+      "TVC:GOLD",      // Gold
+      "TVC:USOIL",     // WTI Crude Oil
+      "CRYPTOCAP:BTC", // Bitcoin Market Cap
+      "TVC:SPX",       // S&P 500 (reference)
+    ],
+    columns: [
+      "name",
+      "close",
+      "change",
+      "Perf.W",
+      "Perf.1M",
+      "Perf.3M",
+      "Perf.Y",
+      "RSI",
+    ],
+  },
+
   market_indexes: {
     name: "Global Market Indexes",
     description: "Major global stock market indexes for market regime analysis. Includes US (S&P 500, Dow, Nasdaq, Russell 2000), European (FTSE, DAX, CAC, IBEX), Asian (Nikkei, Hang Seng, Shanghai, Sensex), and Nordic (OMX Stockholm 30) indexes with ATH, 52-week highs/lows, and performance data.",
