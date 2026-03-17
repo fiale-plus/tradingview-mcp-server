@@ -79,11 +79,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   operator: {
                     type: "string",
                     description: "Comparison operator",
-                    enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match"],
+                    enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match", "above_percent", "below_percent", "has", "has_none_of", "empty", "not_empty"],
                   },
                   value: {
                     description:
-                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or array [min, max] for in_range.",
+                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or [min, max] array for in_range. For above_percent/below_percent, use [field_name, percent_number] e.g. ['SMA200', 10] means 10% above/below SMA200. For has/has_none_of, use an array of strings for set-type fields like typespecs.",
                   },
                 },
                 required: ["field", "operator"],
@@ -92,7 +92,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   {"field": "RSI", "operator": "in_range", "value": [40, 60]},
                   {"field": "SMA50", "operator": "crosses_above", "value": "SMA200"},
                   {"field": "sector", "operator": "equal", "value": "Technology"},
-                  {"field": "exchange", "operator": "in_range", "value": ["NASDAQ", "NYSE"]}
+                  {"field": "exchange", "operator": "in_range", "value": ["NASDAQ", "NYSE"]},
+                  {"field": "close", "operator": "above_percent", "value": ["SMA200", 10]},
+                  {"field": "typespecs", "operator": "has", "value": ["common"]},
+                  {"field": "dividends_yield_current", "operator": "empty"}
                 ],
               },
             },
@@ -206,11 +209,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   operator: {
                     type: "string",
                     description: "Comparison operator",
-                    enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match"],
+                    enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match", "above_percent", "below_percent", "has", "has_none_of", "empty", "not_empty"],
                   },
                   value: {
                     description:
-                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or array [min, max] for in_range.",
+                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or [min, max] array for in_range. For above_percent/below_percent, use [field_name, percent_number] e.g. ['SMA200', 10].",
                   },
                 },
                 required: ["field", "operator"],
@@ -219,7 +222,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   {"field": "change", "operator": "greater", "value": 0.5},
                   {"field": "ATR", "operator": "greater", "value": 0.001},
                   {"field": "SMA50", "operator": "crosses_above", "value": "SMA200"},
-                  {"field": "volume", "operator": "greater", "value": 1000}
+                  {"field": "volume", "operator": "greater", "value": 1000},
+                  {"field": "close", "operator": "above_percent", "value": ["SMA200", 5]}
                 ],
               },
             },
@@ -272,11 +276,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   operator: {
                     type: "string",
                     description: "Comparison operator",
-                    enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match"],
+                    enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match", "above_percent", "below_percent", "has", "has_none_of", "empty", "not_empty"],
                   },
                   value: {
                     description:
-                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or array [min, max] for in_range.",
+                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or [min, max] array for in_range. For above_percent/below_percent, use [field_name, percent_number] e.g. ['SMA200', 10].",
                   },
                 },
                 required: ["field", "operator"],
@@ -285,7 +289,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   {"field": "market_cap_basic", "operator": "greater", "value": 1000000000},
                   {"field": "change", "operator": "greater", "value": 2},
                   {"field": "volume", "operator": "greater", "value": 10000000},
-                  {"field": "Perf.1M", "operator": "greater", "value": 10}
+                  {"field": "Perf.1M", "operator": "greater", "value": 10},
+                  {"field": "close", "operator": "above_percent", "value": ["SMA200", 10]}
                 ],
               },
             },
@@ -338,11 +343,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   operator: {
                     type: "string",
                     description: "Comparison operator",
-                    enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match"],
+                    enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match", "above_percent", "below_percent", "has", "has_none_of", "empty", "not_empty"],
                   },
                   value: {
                     description:
-                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or array [min, max] for in_range.",
+                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or [min, max] array for in_range. For above_percent/below_percent, use [field_name, percent_number] e.g. ['SMA200', 10].",
                   },
                 },
                 required: ["field", "operator"],
@@ -351,7 +356,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   {"field": "RSI", "operator": "in_range", "value": [40, 60]},
                   {"field": "SMA50", "operator": "crosses_above", "value": "SMA200"},
                   {"field": "sector", "operator": "equal", "value": "Technology"},
-                  {"field": "exchange", "operator": "in_range", "value": ["NASDAQ", "NYSE"]}
+                  {"field": "exchange", "operator": "in_range", "value": ["NASDAQ", "NYSE"]},
+                  {"field": "close", "operator": "above_percent", "value": ["SMA200", 5]}
                 ],
               },
             },
