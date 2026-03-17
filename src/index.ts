@@ -74,12 +74,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   field: {
                     type: "string",
                     description:
-                      "Field name to filter (e.g., 'return_on_equity', 'price_earnings_ttm')",
+                      "Field name to filter on. String fields (sector, exchange, industry, market) support 'equal' and 'in_range' operators. Cross-field comparison: use another field name as value (e.g., SMA50 crosses_above SMA200 for golden cross).",
                   },
                   operator: {
                     type: "string",
-                    description:
-                      "Comparison operator: greater, less, greater_or_equal, less_or_equal, equal, in_range, etc.",
+                    description: "Comparison operator",
+                    enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match"],
                   },
                   value: {
                     description:
@@ -87,12 +87,19 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   },
                 },
                 required: ["field", "operator", "value"],
+                examples: [
+                  {"field": "return_on_equity", "operator": "greater", "value": 15},
+                  {"field": "RSI", "operator": "in_range", "value": [40, 60]},
+                  {"field": "SMA50", "operator": "crosses_above", "value": "SMA200"},
+                  {"field": "sector", "operator": "equal", "value": "Technology"},
+                  {"field": "exchange", "operator": "in_range", "value": ["NASDAQ", "NYSE"]}
+                ],
               },
             },
             markets: {
               type: "array",
               items: { type: "string" },
-              description: "Markets to scan (e.g., ['america', 'japan']). Default: ['america']",
+              description: "Markets to scan. Valid values: america, uk, germany, france, italy, spain, sweden, norway, denmark, finland, brazil, india, japan, hongkong, china, australia, canada, turkey, uae, and 30+ more. Default: ['america']",
             },
             sort_by: {
               type: "string",
@@ -115,7 +122,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Optional: specific columns to include in results. If not provided, uses minimal default columns. Presets may define extended column sets.",
             },
           },
-          required: ["filters"],
+          required: [],
+        },
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
         },
       },
       {
@@ -137,29 +148,41 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
           },
         },
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
+        },
       },
       {
         name: "get_preset",
         description:
-          "Get a pre-configured screening strategy. Returns filter configuration for common screening strategies like quality stocks, value stocks, etc.",
+          "Get a pre-configured screening strategy. Returns filter configuration for the strategy.\n\nAvailable presets:\n- quality_stocks: High-quality low-volatility stocks (conservative)\n- value_stocks: Undervalued stocks with low P/E and P/B\n- dividend_stocks: High dividend yield with consistent payout\n- momentum_stocks: Strong recent performance and technical momentum\n- growth_stocks: High-growth companies with expanding revenue/earnings\n- quality_growth_screener: Comprehensive quality+growth screen with technical filters\n- market_indexes: Global market indexes for regime analysis (use lookup_symbols)",
         inputSchema: {
           type: "object",
           properties: {
             preset_name: {
               type: "string",
               description:
-                "Name of preset: quality_stocks, value_stocks, dividend_stocks, momentum_stocks, growth_stocks",
+                "Key of preset to retrieve. See tool description for available keys.",
             },
           },
           required: ["preset_name"],
         },
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
+        },
       },
       {
         name: "list_presets",
-        description: "List all available preset screening strategies",
+        description: "List all available preset screening strategies. Returns key, name, and description for each preset. Use the key with get_preset.",
         inputSchema: {
           type: "object",
           properties: {},
+        },
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
         },
       },
       {
@@ -178,12 +201,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   field: {
                     type: "string",
                     description:
-                      "Field name to filter (e.g., 'close', 'volume', 'RSI', 'change')",
+                      "Field name to filter on. Common fields: RSI, ATR, ADX, close, change, volume, SMA50, SMA200, Perf.W, Perf.1M, Perf.3M. Cross-field comparison: use another field name as value (e.g., SMA50 crosses_above SMA200).",
                   },
                   operator: {
                     type: "string",
-                    description:
-                      "Comparison operator: greater, less, greater_or_equal, less_or_equal, equal, in_range, etc.",
+                    description: "Comparison operator",
+                    enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match"],
                   },
                   value: {
                     description:
@@ -191,6 +214,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   },
                 },
                 required: ["field", "operator", "value"],
+                examples: [
+                  {"field": "RSI", "operator": "in_range", "value": [40, 60]},
+                  {"field": "change", "operator": "greater", "value": 0.5},
+                  {"field": "ATR", "operator": "greater", "value": 0.001},
+                  {"field": "SMA50", "operator": "crosses_above", "value": "SMA200"},
+                  {"field": "volume", "operator": "greater", "value": 1000}
+                ],
               },
             },
             sort_by: {
@@ -208,8 +238,17 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               minimum: 1,
               maximum: 200,
             },
+            columns: {
+              type: "array",
+              items: { type: "string" },
+              description: "Optional: specific columns to include in results. If not provided, uses default columns.",
+            },
           },
-          required: ["filters"],
+          required: [],
+        },
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
         },
       },
       {
@@ -228,12 +267,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   field: {
                     type: "string",
                     description:
-                      "Field name to filter (e.g., 'close', 'market_cap_basic', 'volume', 'change')",
+                      "Field name to filter on. Common fields: market_cap_basic, RSI, close, change, volume, Perf.1M, Perf.3M, Volatility.M. Cross-field comparison: use another field name as value.",
                   },
                   operator: {
                     type: "string",
-                    description:
-                      "Comparison operator: greater, less, greater_or_equal, less_or_equal, equal, in_range, etc.",
+                    description: "Comparison operator",
+                    enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match"],
                   },
                   value: {
                     description:
@@ -241,6 +280,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   },
                 },
                 required: ["field", "operator", "value"],
+                examples: [
+                  {"field": "RSI", "operator": "in_range", "value": [40, 70]},
+                  {"field": "market_cap_basic", "operator": "greater", "value": 1000000000},
+                  {"field": "change", "operator": "greater", "value": 2},
+                  {"field": "volume", "operator": "greater", "value": 10000000},
+                  {"field": "Perf.1M", "operator": "greater", "value": 10}
+                ],
               },
             },
             sort_by: {
@@ -258,8 +304,17 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               minimum: 1,
               maximum: 200,
             },
+            columns: {
+              type: "array",
+              items: { type: "string" },
+              description: "Optional: specific columns to include in results. If not provided, uses default columns.",
+            },
           },
-          required: ["filters"],
+          required: [],
+        },
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
         },
       },
       {
@@ -278,12 +333,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   field: {
                     type: "string",
                     description:
-                      "Field name to filter (e.g., 'close', 'volume', 'change', 'Perf.1M')",
+                      "Field name to filter on. String fields (sector, exchange, industry, market) support 'equal' and 'in_range' operators. Cross-field comparison: use another field name as value (e.g., SMA50 crosses_above SMA200 for golden cross).",
                   },
                   operator: {
                     type: "string",
-                    description:
-                      "Comparison operator: greater, less, greater_or_equal, less_or_equal, equal, in_range, etc.",
+                    description: "Comparison operator",
+                    enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match"],
                   },
                   value: {
                     description:
@@ -291,12 +346,19 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   },
                 },
                 required: ["field", "operator", "value"],
+                examples: [
+                  {"field": "return_on_equity", "operator": "greater", "value": 15},
+                  {"field": "RSI", "operator": "in_range", "value": [40, 60]},
+                  {"field": "SMA50", "operator": "crosses_above", "value": "SMA200"},
+                  {"field": "sector", "operator": "equal", "value": "Technology"},
+                  {"field": "exchange", "operator": "in_range", "value": ["NASDAQ", "NYSE"]}
+                ],
               },
             },
             markets: {
               type: "array",
               items: { type: "string" },
-              description: "Markets to scan (e.g., ['america']). Default: ['america']",
+              description: "Markets to scan. Valid values: america, uk, germany, france, italy, spain, sweden, norway, denmark, finland, brazil, india, japan, hongkong, china, australia, canada, turkey, uae, and 30+ more. Default: ['america']",
             },
             sort_by: {
               type: "string",
@@ -319,7 +381,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Optional: specific columns to include in results. If not provided, uses minimal default columns.",
             },
           },
-          required: ["filters"],
+          required: [],
+        },
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
         },
       },
       {
@@ -341,6 +407,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
           },
           required: ["symbols"],
+        },
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
         },
       },
     ],

@@ -125,7 +125,7 @@ export class ScreenTool {
 
   async screenStocks(input: ScreenStocksInput): Promise<any> {
     const {
-      filters,
+      filters = [],
       markets = ["america"],
       sort_by = "market_cap_basic",
       sort_order = "desc",
@@ -201,20 +201,26 @@ export class ScreenTool {
   async screenForex(input: Omit<ScreenStocksInput, "markets">): Promise<any> {
     // Similar to screenStocks but without markets
     const {
-      filters,
+      filters = [],
       sort_by = "volume",
       sort_order = "desc",
       limit = 20,
+      columns: inputColumns,
     } = input;
 
-    const cacheKey = JSON.stringify({ type: "forex", filters, sort_by, sort_order, limit });
+    if (limit < 1 || limit > 200) {
+      throw new Error("Limit must be between 1 and 200");
+    }
+
+    const cacheKey = JSON.stringify({ type: "forex", filters, sort_by, sort_order, limit, columns: inputColumns });
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
     const tvFilters = this.validateAndConvertFilters(filters);
 
     const filterFields = filters.map((f) => f.field);
-    const columns = [...new Set(["name", "close", "change", ...filterFields])];
+    const baseColumns = inputColumns || ["name", "close", "change"];
+    const columns = [...new Set([...baseColumns, ...filterFields])];
 
     const request: ScreenerRequest = {
       filter: tvFilters,
@@ -244,20 +250,26 @@ export class ScreenTool {
   async screenCrypto(input: Omit<ScreenStocksInput, "markets">): Promise<any> {
     // Similar to forex
     const {
-      filters,
+      filters = [],
       sort_by = "market_cap_basic",
       sort_order = "desc",
       limit = 20,
+      columns: inputColumns,
     } = input;
 
-    const cacheKey = JSON.stringify({ type: "crypto", filters, sort_by, sort_order, limit });
+    if (limit < 1 || limit > 200) {
+      throw new Error("Limit must be between 1 and 200");
+    }
+
+    const cacheKey = JSON.stringify({ type: "crypto", filters, sort_by, sort_order, limit, columns: inputColumns });
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
     const tvFilters = this.validateAndConvertFilters(filters);
 
     const filterFields = filters.map((f) => f.field);
-    const columns = [...new Set(["name", "close", "market_cap_basic", "change", ...filterFields])];
+    const baseColumns = inputColumns || ["name", "close", "market_cap_basic", "change"];
+    const columns = [...new Set([...baseColumns, ...filterFields])];
 
     const request: ScreenerRequest = {
       filter: tvFilters,
@@ -287,7 +299,7 @@ export class ScreenTool {
   async screenETF(input: ScreenStocksInput): Promise<any> {
     // ETFs/Funds screening - similar to stocks but with type filter
     const {
-      filters,
+      filters = [],
       markets = ["america"],
       sort_by = "market_cap_basic",
       sort_order = "desc",

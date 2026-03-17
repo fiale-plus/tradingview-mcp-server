@@ -321,9 +321,10 @@ export class PresetsTool {
     return PRESETS[presetName] || null;
   }
 
-  listPresets(): Array<{ name: string; description: string }> {
+  listPresets(): Array<{ key: string; name: string; description: string }> {
     return Object.entries(PRESETS).map(([key, preset]) => ({
-      name: key,
+      key,
+      name: preset.name,
       description: preset.description,
     }));
   }
