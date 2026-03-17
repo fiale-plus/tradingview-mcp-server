@@ -252,11 +252,11 @@ export const PRESETS: Record<string, Preset> = {
     symbols: [
       "TVC:VIX",       // CBOE Volatility Index
       "TVC:DXY",       // US Dollar Index
-      "TVC:TNX",       // 10-Year Treasury Yield
+      "TVC:US10Y",     // 10-Year Treasury Yield
       "TVC:GOLD",      // Gold
-      "TVC:USOIL",     // WTI Crude Oil
+      "NYMEX:CL1!",    // WTI Crude Oil Futures
       "CRYPTOCAP:BTC", // Bitcoin Market Cap
-      "TVC:SPX",       // S&P 500 (reference)
+      "SP:SPX",        // S&P 500 (reference)
     ],
     columns: [
       "name",
@@ -275,25 +275,25 @@ export const PRESETS: Record<string, Preset> = {
     description: "Major global stock market indexes for market regime analysis. Includes US (S&P 500, Dow, Nasdaq, Russell 2000), European (FTSE, DAX, CAC, IBEX), Asian (Nikkei, Hang Seng, Shanghai, Sensex), and Nordic (OMX Stockholm 30) indexes with ATH, 52-week highs/lows, and performance data.",
     symbols: [
       // US Indexes
-      "TVC:SPX",      // S&P 500
-      "TVC:DJI",      // Dow Jones Industrial Average
-      "TVC:IXIC",     // Nasdaq Composite
-      "TVC:RUT",      // Russell 2000
+      "SP:SPX",         // S&P 500
+      "TVC:DJI",        // Dow Jones Industrial Average
+      "TVC:IXIC",       // Nasdaq Composite
+      "TVC:RUT",        // Russell 2000
 
       // European Indexes
-      "TVC:UKX",      // FTSE 100 (UK)
-      "TVC:DAX",      // DAX (Germany)
-      "TVC:CAC",      // CAC 40 (France)
-      "TVC:IBEX35",   // IBEX 35 (Spain)
+      "TVC:UKX",        // FTSE 100 (UK)
+      "XETR:DAX",       // DAX (Germany)
+      "EURONEXT:PX1",   // CAC 40 (France)
+      "TVC:IBEX35",     // IBEX 35 (Spain)
 
       // Asian Indexes
-      "TVC:NI225",    // Nikkei 225 (Japan)
-      "TVC:HSI",      // Hang Seng (Hong Kong)
-      "TVC:SHCOMP",   // Shanghai Composite (China)
-      "BSE:SENSEX",   // Sensex (India)
+      "TVC:NI225",      // Nikkei 225 (Japan)
+      "TVC:HSI",        // Hang Seng (Hong Kong)
+      "SSE:000001",     // Shanghai Composite (China)
+      "BSE:SENSEX",     // Sensex (India)
 
       // Nordic
-      "OMXSTO:OMXS30", // OMX Stockholm 30 (Sweden)
+      "OMXSTO:OMXS30",  // OMX Stockholm 30 (Sweden)
     ],
     columns: [
       "name",
