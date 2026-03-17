@@ -574,7 +574,7 @@ const ETF_FIELDS: FieldMetadata[] = [
   {
     name: "exchange",
     label: "Exchange",
-    category: "fundamental",
+    category: "performance",
     type: "string",
     description: "Listed exchange",
   },
