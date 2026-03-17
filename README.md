@@ -10,44 +10,11 @@
 [![License](https://img.shields.io/github/license/fiale-plus/tradingview-mcp-server?style=flat-square)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue?style=flat-square)](https://modelcontextprotocol.io)
 
-**Unofficial** Model Context Protocol (MCP) server for TradingView's market screener API - stocks, forex, crypto & ETFs.
+**Unofficial** Model Context Protocol (MCP) server for TradingView's market screener API — stocks, forex, crypto & ETFs.
 
 ### AI-powered investment research for patient, systematic investors.
 
 </div>
-
----
-
-## 🎯 Why Use This Tool?
-
-This tool is designed for **curious investors** who want to explore beyond passive index investing without the complexity and competition of day trading.
-
-### The Investment Sweet Spot
-
-**Not for day trading** 📉
-Individual traders can't compete with hedge funds, HFT algorithms, and institutional systems operating at millisecond speeds. Day trading is a zero-sum game dominated by professionals with superior technology and information.
-
-**Not for passive index investing** 📊
-If you're content with market returns through index funds (S&P 500, total market ETFs), that's excellent - but you don't need screening tools. Just buy and hold.
-
-**Perfect for systematic, research-driven investing** 🔍
-This tool is for investors who:
-- Want to **explore higher alpha strategies** than passive investing
-- Are **curious to learn** different investment approaches (value, growth, quality, momentum)
-- Seek **better risk-adjusted returns** through systematic stock selection
-- Prefer **multi-month to multi-year investment horizons** without intraday stress
-- Want to **test investment hypotheses** using fundamental and technical data
-- Value **systematic screening** over gut feelings and tips
-
-### Your Edge: Time, Research, and Patience
-
-Unlike hedge funds competing on speed and information access, you can compete on:
-- **Patience** - Hold positions through volatility without quarterly reporting pressure
-- **Research depth** - Screen comprehensively with 75+ fundamental and technical fields
-- **Strategy experimentation** - Test different approaches (quality, value, growth, momentum)
-- **Risk management** - Build diversified portfolios with systematic criteria
-
-**This tool helps you find opportunities, understand metrics, and make informed decisions - not chase minute-by-minute price movements.**
 
 ---
 
@@ -56,26 +23,26 @@ Unlike hedge funds competing on speed and information access, you can compete on
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
-- [Try It Out: Included Commands](#try-it-out-included-commands)
-- [Quick Start](#quick-start)
-- [Documentation](#documentation)
-- [Available Tools](#available-tools)
-- [Important Notes](#important-notes)
-- [Contributing](#contributing)
-- [License](#license)
+- [MCP Tools](#mcp-tools)
+- [Screening Fields](#screening-fields)
+- [Pre-built Strategies](#pre-built-strategies)
+- [Investor Commands](#investor-commands)
+- [Operators](#operators)
+- [Development](#development)
+- [Disclaimer](#disclaimer)
+
+---
 
 ## Features
 
-**Built for research-driven investment discovery:**
+- **100+ screener fields** including Piotroski F-Score, Altman Z-Score, Graham Number, analyst consensus, and dividend growth streaks
+- **18 filter operators** including `crosses_above` / `crosses_below` for golden cross detection
+- **14 pre-built strategies** covering value, growth, quality, GARP, deep value, breakouts, compounders, and macro monitoring
+- **9 investor workflow commands** — from `/due-diligence` to `/macro-dashboard` — built on top of the MCP tools
+- **Multi-asset coverage** — stocks, ETFs, forex, and crypto with asset-specific field discovery via `list_fields`
+- **Smart caching and rate limiting** — configurable TTL and requests-per-minute to keep usage responsible
 
-- 🔍 **Multi-asset screening** - Dedicated tools for stocks, forex, crypto, and ETFs with advanced filters
-- 📊 **75+ investment metrics** - Fundamental (valuation, margins, returns), technical (RSI, moving averages), and performance fields with TTM/FQ/FY variants
-- 🎯 **7 proven strategies & presets** - Pre-configured screens for quality, value, dividend, momentum, growth investing, plus global market indexes
-- 💡 **AI-powered exploration** - Natural language queries through Claude ("Find undervalued companies with strong balance sheets")
-- 💰 **Deep financial analysis** - EV, EV/EBIT, EV/EBITDA, PEG, gross/operating margins, ROIC, ROA, ROE
-- ⚡ **Research-optimized** - Minimal (7 fields) for quick scans vs extended (35 fields) for comprehensive analysis
-- 🏦 **Exchange filtering** - Focus on NASDAQ, NYSE, CBOE, or primary listings only
-- 🌍 **Global coverage** - Screen stocks across multiple markets (America, Europe, Asia) and 9,000+ cryptocurrencies
+---
 
 ## Installation
 
@@ -85,25 +52,27 @@ Unlike hedge funds competing on speed and information access, you can compete on
 npm install -g tradingview-mcp-server
 ```
 
-### Option 2: Clone Repository (with demo commands)
+### Option 2: Clone Repository (includes demo commands)
 
 ```bash
 git clone https://github.com/fiale-plus/tradingview-mcp-server.git
 cd tradingview-mcp-server
 npm install
 
-# Quick setup - creates project-level MCP config
+# Quick setup — creates project-level MCP config
 ./local-setup.sh          # Linux/Mac
 local-setup.bat           # Windows
 
 # Restart Claude Code and try: /market-regime or /run-screener
 ```
 
+---
+
 ## Configuration
 
 ### Claude Desktop
 
-Add to your Claude config file (`~/Library/Application Support/Claude/claude_desktop_config.json` on Mac):
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` on Mac:
 
 ```json
 {
@@ -139,314 +108,211 @@ Enable in `.claude/settings.local.json`:
 }
 ```
 
-**Optional environment variables:**
-- `CACHE_TTL_SECONDS` - Cache duration (default: 300)
-- `RATE_LIMIT_RPM` - Requests per minute (default: 10)
+### Environment Variables
 
-## Try It Out: Included Commands
-
-The repository includes two ready-to-use Claude Code commands that demonstrate practical workflows:
-
-### `/market-regime` - Check Market Health
-
-Quickly assess overall market conditions by analyzing major indexes relative to their all-time highs.
-
-```bash
-# In Claude Code, run:
-/market-regime
-```
-
-**What you get:**
-- Color-coded status table (🟢/🟡/🔴) for Nasdaq, OMX Stockholm 30, and Nikkei 225
-- Drawdown calculations from all-time highs
-- Market regime summary (bull/correction/bear)
-- Use before making new allocations or for weekly portfolio reviews
-
-### `/run-screener` - Interactive Stock Screening
-
-Run pre-configured screening strategies and save results to CSV for further analysis.
-
-```bash
-# In Claude Code, run:
-/run-screener
-```
-
-**What you get:**
-- Interactive preset selection (quality, value, dividend, momentum, growth)
-- Summary table of top results with key metrics
-- Complete results saved to `docs/local/screening-runs/{preset}_{timestamp}.csv`
-- Perfect for building watchlists and learning different investment styles
-
-**First-time setup:**
-```bash
-# Quick setup script (recommended)
-./local-setup.sh          # Linux/Mac
-local-setup.bat           # Windows
-
-# Or manually copy files:
-cp .mcp.json.example .mcp.json
-cp .claude/settings.json.example .claude/settings.local.json
-
-# Restart Claude Code to load MCP server and commands
-```
-
-See [`.claude/commands/README.md`](.claude/commands/README.md) for detailed command documentation.
+| Variable | Default | Description |
+|---|---|---|
+| `CACHE_TTL_SECONDS` | `300` | How long to cache API responses (seconds) |
+| `RATE_LIMIT_RPM` | `10` | Maximum API requests per minute |
 
 ---
 
-## Quick Start
+## MCP Tools
 
-### Learning Investment Strategies
+Eight tools are exposed to Claude:
 
-Explore proven investment approaches with pre-configured strategies:
+| Tool | Description | Key Parameters |
+|---|---|---|
+| `screen_stocks` | Screen stocks by fundamental and technical criteria | `filters`, `markets`, `sort_by`, `limit`, `columns` |
+| `screen_forex` | Screen forex pairs by technical criteria | `filters`, `sort_by`, `limit` |
+| `screen_crypto` | Screen cryptocurrencies by market and technical criteria | `filters`, `sort_by`, `limit` |
+| `screen_etf` | Screen ETFs by performance and technical criteria | `filters`, `markets`, `sort_by`, `limit` |
+| `lookup_symbols` | Direct lookup by ticker — required for indexes like `TVC:SPX` | `symbols` (up to 100), `columns` |
+| `list_fields` | Discover available fields for any asset type | `asset_type` (`stock`, `forex`, `crypto`, `etf`), `category` |
+| `get_preset` | Retrieve a pre-configured screening strategy by key | `preset_name` |
+| `list_presets` | List all available preset strategies with descriptions | — |
 
-```
-I want to learn about quality investing - show me quality stocks
-```
+### Filter Structure
 
-```
-Find dividend stocks that could provide steady income
-```
+All screening tools accept filters in this shape:
 
-```
-What makes a good value investment? Screen for undervalued companies
-```
-
-### Research-Driven Stock Selection
-
-Build your investment thesis systematically:
-
-```
-Find companies with:
-- Strong return on equity (>15%)
-- Reasonable valuation (P/E < 25)
-- Significant scale (market cap > $1B)
-- Low debt levels
+```json
+{ "field": "return_on_equity", "operator": "greater", "value": 15 }
+{ "field": "RSI", "operator": "in_range", "value": [40, 65] }
+{ "field": "SMA50", "operator": "crosses_above", "value": "SMA200" }
+{ "field": "exchange", "operator": "in_range", "value": ["NASDAQ", "NYSE"] }
 ```
 
-```
-I'm interested in profitable companies trading below their intrinsic value.
-Screen for stocks with EV/EBITDA < 10 and positive free cash flow.
-```
+Cross-field comparison (second example above) enables golden cross / death cross detection without needing a value on the right-hand side.
 
-### Understanding Investment Metrics
+---
 
-```
-What financial metrics can I use for fundamental analysis?
-```
+## Screening Fields
 
-```
-Explain the difference between P/E ratio and PEG ratio
-```
+Use `list_fields` to browse fields. Pass `asset_type` to get tailored lists for each asset class.
 
-```
-What's the difference between gross margin and operating margin?
-```
+### Stocks (~80 fields)
 
-## Documentation
+**Valuation**
+`price_earnings_ttm`, `price_book_fq`, `price_sales_current`, `enterprise_value_current`, `enterprise_value_ebitda_ttm`, `enterprise_value_to_ebit_ttm`, `price_earnings_growth_ttm` (PEG), `ebitda`
 
-### 📚 Comprehensive Guides
+**Profitability & Returns**
+`return_on_equity`, `return_on_assets`, `return_on_invested_capital_fq`, `gross_margin_ttm`, `operating_margin_ttm`, `net_margin_ttm`, `after_tax_margin`, `pre_tax_margin_ttm`, `free_cash_flow_margin_ttm`
 
-- **[Preset Strategies](docs/presets.md)** - All 7 preset strategies with detailed criteria, use cases, and examples
-- **[Field Reference](docs/fields.md)** - Complete guide to all 75+ fields with descriptions and usage examples
-- **[Development Guide](docs/development.md)** - Local setup, testing, and extending the server
+**Growth**
+`total_revenue_yoy_growth_ttm`, `earnings_per_share_diluted_yoy_growth_ttm`, `revenue_per_share_ttm`, `total_revenue`, `net_income`, `earnings_per_share_diluted_ttm`
 
-### 🔧 Advanced Topics
+**Balance Sheet**
+`debt_to_equity`, `total_debt`, `total_assets`, `current_ratio`, `free_cash_flow_ttm`, `free_cash_flow_fq`
 
-- **[Field Variants (TTM/FQ/FY)](docs/fields.md#understanding-field-variants)** - Understanding time periods
-- **[Column Optimization](docs/presets.md#performance-characteristics)** - Minimal vs extended column sets
-- **[Custom Presets](docs/development.md#creating-new-presets)** - Creating your own screening strategies
+**Dividends**
+`dividend_yield_recent`, `dividends_yield_current`, `dividend_payout_ratio_ttm`, `continuous_dividend_payout_years`, `dps_yoy_growth_ttm`
 
-## Available Tools
+**Composite Scores** (unique differentiators)
 
-### `screen_stocks`
+| Field | Description |
+|---|---|
+| `piotroski_f_score_ttm` | 0–9 financial strength composite. Score ≥7 = strong, ≤2 = weak |
+| `altman_z_score_ttm` | Bankruptcy predictor. >2.99 = safe, 1.81–2.99 = grey zone, <1.81 = distress |
+| `graham_numbers_ttm` | Intrinsic value = sqrt(22.5 × EPS × BVPS). Price below = undervalued |
 
-Screen stocks based on filters.
+**Analyst Data**
+`Recommend.All` (composite −1 to +1), `analyst_recommendations_buy`, `analyst_recommendations_sell`, `analyst_recommendations_neutral`, `price_target_average`, `price_target_high`, `price_target_low`
 
-**Parameters:**
-- `filters` - Array of filter conditions (field, operator, value)
-- `markets` - Markets to scan (default: `["america"]`)
-- `sort_by` - Field to sort by (default: `"market_cap_basic"`)
-- `sort_order` - `"asc"` or `"desc"` (default: `"desc"`)
-- `limit` - Number of results (1-200, default: 20)
-- `columns` - Optional array of columns to return (default: minimal 7 fields for performance)
+**Technical**
+`RSI`, `SMA50`, `SMA200`, `EMA10`, `VWAP`, `ATR`, `ADX`, `Volatility.M`, `beta_1_year`, `beta_3_year`, `beta_5_year`, `Recommend.MA`, `Recommend.Other`
 
-**Operators:**
-- `greater`, `less`, `greater_or_equal`, `less_or_equal`
-- `equal`, `not_equal`
-- `in_range` - For value ranges like `[45, 65]`
-- `match` - For text search
+**Performance & Price Levels**
+`close`, `change`, `volume`, `average_volume_90d_calc`, `average_volume_30d_calc`, `relative_volume_10d_calc`, `Perf.5D`, `Perf.W`, `Perf.1M`, `Perf.3M`, `Perf.6M`, `Perf.Y`, `Perf.YTD`, `Perf.3Y`, `Perf.5Y`, `Perf.10Y`, `Perf.All`, `price_52_week_high`, `price_52_week_low`, `all_time_high`, `all_time_low`, `High.All`
 
-### `list_fields`
+**Metadata**
+`sector`, `industry`, `exchange`, `market`, `is_primary`, `indexes`, `fundamental_currency_code`, `earnings_release_next_trading_date_fq`
 
-List available fields for filtering.
+### ETFs
+`expense_ratio`, `shares_outstanding`, `dividends_yield_current`, `close`, `volume`, `Perf.W` through `Perf.Y`, `RSI`, `ATR`
 
-**Parameters:**
-- `asset_type` - `"stock"`, `"forex"`, or `"crypto"` (default: `"stock"`)
-- `category` - `"fundamental"`, `"technical"`, or `"performance"` (optional)
+### Crypto
+`close`, `change`, `volume`, `market_cap_basic`, `RSI`, `ATR`, `Volatility.M`, `Perf.W` through `Perf.Y`
 
-### `get_preset`
+### Forex
+`close`, `change`, `volume`, `RSI`, `ATR`, `ADX`, `Volatility.D`, `SMA50`, `SMA200`, `Perf.W` through `Perf.3M`
 
-Get a pre-configured screening strategy.
+---
 
-**Available Presets:**
-- `quality_stocks` - Conservative quality (ROE >12%, low debt, low volatility)
-- `value_stocks` - Undervalued (P/E <15, P/B <1.5)
-- `dividend_stocks` - High yield (>3%, low debt)
-- `momentum_stocks` - Technical strength (RSI 50-70, golden cross)
-- `growth_stocks` - High growth (ROE >20%, margins >15%)
-- `quality_growth_screener` - Comprehensive 16-filter screen with 35 extended columns
+## Pre-built Strategies
 
-See **[Preset Strategies Guide](docs/presets.md)** for detailed criteria and usage.
+Retrieve any preset with `get_preset` or browse all with `list_presets`.
 
-### `list_presets`
+| Key | Name | Style | What It Screens For |
+|---|---|---|---|
+| `quality_stocks` | Quality Stocks (Conservative) | Quality | ROE >12%, low debt, low volatility, golden cross |
+| `value_stocks` | Value Stocks | Value | P/E <15, P/B <1.5, ROE >10% |
+| `dividend_stocks` | Dividend Stocks | Income | Yield >3%, large cap, D/E <1.0 |
+| `momentum_stocks` | Momentum Stocks | Momentum | RSI 50–70, golden cross, 1M performance >5% |
+| `growth_stocks` | Growth Stocks | Growth | ROE >20%, operating margin >15% |
+| `quality_growth_screener` | Quality Growth Screener | Quality + Growth | 16 filters: ROE, margins, revenue growth, technicals, exchange filter |
+| `quality_compounder` | Quality Compounders (Munger/Buffett) | Compounder | Gross margin >40%, ROIC >15%, FCF margin >15%, growing revenue |
+| `garp` | GARP (Growth at Reasonable Price) | GARP | PEG <2, ROE >15%, revenue growth >10% |
+| `deep_value` | Deep Value (Contrarian) | Deep Value | P/E <10, P/B <1.5, positive FCF |
+| `breakout_scanner` | Breakout Scanner | Momentum | Near 52-week high, golden cross, RSI 50–75, above-average volume |
+| `earnings_momentum` | Earnings Momentum | Earnings | EPS growth YoY >20%, revenue growth >10%, RSI 45–70 |
+| `dividend_growth` | Dividend Growth (Compounding Income) | Dividend Growth | Yield 1–6%, payout ratio <70%, positive FCF, consecutive years paying |
+| `macro_assets` | Macro Asset Monitor | Macro | VIX, DXY, 10Y yield, Gold, WTI Oil, Bitcoin — direct symbol lookup |
+| `market_indexes` | Global Market Indexes | Market Regime | 13 global indexes (US, Europe, Asia, Nordic) with ATH and performance data |
 
-List all available preset strategies.
+---
 
-### `screen_forex`
+## Investor Commands
 
-Screen forex pairs based on technical criteria.
+The repository ships with 9 ready-to-use Claude Code commands in `.claude/commands/`. Clone the repo and run `./local-setup.sh` to activate them.
 
-**Parameters:**
-- `filters` - Array of filter conditions (field, operator, value)
-- `sort_by` - Field to sort by (default: `"volume"`)
-- `sort_order` - `"asc"` or `"desc"` (default: `"desc"`)
-- `limit` - Number of results (1-200, default: 20)
+| Command | Usage | What It Does |
+|---|---|---|
+| `/market-regime` | `/market-regime` | Analyzes Nasdaq, OMX Stockholm 30, and Nikkei 225 vs ATH. Shows drawdown, RSI, and bull/correction/bear regime status |
+| `/run-screener` | `/run-screener` | Interactive wizard to pick a preset strategy, run it, display a compact table, and save results to CSV |
+| `/due-diligence` | `/due-diligence AAPL` | Structured due diligence report: valuation, quality, growth, balance sheet, dividends, technicals, performance, and checklist assessment |
+| `/compare-peers` | `/compare-peers AAPL MSFT GOOGL` | Side-by-side comparison of 2–5 stocks across valuation, quality, growth, and momentum with category rankings |
+| `/sector-rotation` | `/sector-rotation` | Screens top stocks in all 11 GICS sectors, calculates average performance, assigns Accelerating/Decelerating signals, and recommends a preset |
+| `/smart-screen` | `/smart-screen` | Determines current market regime (bull/correction/bear) from SPX, then auto-selects and runs the most appropriate preset |
+| `/macro-dashboard` | `/macro-dashboard` | Multi-asset snapshot: US and global indexes, VIX, DXY, 10Y yield, Gold, Oil, BTC with auto-interpreted macro signals |
+| `/portfolio-risk` | `/portfolio-risk AAPL MSFT JPM XOM` | Portfolio concentration risk, sector breakdown, beta analysis, and diversification recommendations |
+| `/investment-thesis` | `/investment-thesis NVDA` | Data-driven investment thesis with bull/bear case, key metrics table, technical setup, entry/exit framework, and monitoring checklist |
 
-**Example fields:** `close`, `volume`, `change`, `RSI`, `SMA50`, `SMA200`, `Volatility.M`
+---
 
-### `screen_crypto`
+## Operators
 
-Screen cryptocurrencies based on technical and market criteria.
+All screening tools support the following operators in filter conditions:
 
-**Parameters:**
-- `filters` - Array of filter conditions (field, operator, value)
-- `sort_by` - Field to sort by (default: `"market_cap_basic"`)
-- `sort_order` - `"asc"` or `"desc"` (default: `"desc"`)
-- `limit` - Number of results (1-200, default: 20)
+| Operator | Description | Example |
+|---|---|---|
+| `greater` | Field > value | `return_on_equity > 15` |
+| `less` | Field < value | `price_earnings_ttm < 20` |
+| `greater_or_equal` | Field >= value | `close >= 10` |
+| `less_or_equal` | Field <= value | `Volatility.M <= 3` |
+| `equal` | Exact match | `sector = "Technology"` |
+| `not_equal` | Not equal | `exchange != "OTC"` |
+| `in_range` | Value within `[min, max]` or in a list | `RSI in [45, 65]` or `exchange in ["NASDAQ", "NYSE"]` |
+| `not_in_range` | Value outside range or list | `RSI not_in [70, 100]` |
+| `crosses` | Field crosses the reference (either direction) | `SMA50 crosses SMA200` |
+| `crosses_above` | Field crosses above the reference | `SMA50 crosses_above SMA200` (golden cross) |
+| `crosses_below` | Field crosses below the reference | `SMA50 crosses_below SMA200` (death cross) |
+| `match` | Text contains substring | `name match "tech"` |
+| `above_percent` | Field is N% above reference | `close above_percent SMA200` |
+| `below_percent` | Field is N% below reference | `close below_percent SMA200` |
+| `has` | Field contains value (list fields) | `indexes has "S&P 500"` |
+| `has_none_of` | Field contains none of the values | filters out specific index members |
+| `empty` | Field has no value | `dividend_yield_recent empty` |
+| `not_empty` | Field has a value | `all_time_high not_empty` |
 
-**Example fields:** `close`, `market_cap_basic`, `volume`, `change`, `Perf.1M`, `Perf.3M`, `Perf.Y`
+String fields (`sector`, `exchange`, `industry`, `market`) use `equal` for single values and `in_range` for lists.
 
-### `screen_etf`
+---
 
-Screen ETFs (Exchange-Traded Funds) based on performance and technical criteria.
+## Development
 
-**Parameters:**
-- `filters` - Array of filter conditions (field, operator, value)
-- `markets` - Markets to scan (default: `["america"]`)
-- `sort_by` - Field to sort by (default: `"market_cap_basic"`)
-- `sort_order` - `"asc"` or `"desc"` (default: `"desc"`)
-- `limit` - Number of results (1-200, default: 20)
-- `columns` - Optional array of columns to return
-
-**Example fields:** `close`, `volume`, `change`, `Perf.1M`, `Perf.Y`, `RSI`, `beta_1_year`
-
-### `lookup_symbols`
-
-Look up specific symbols (stocks, indexes, ETFs) by ticker. **Use this for market indexes** like TVC:SPX, TVC:DJI, OMXSTO:OMXS30 that cannot be found via screening.
-
-**Parameters:**
-- `symbols` - Array of ticker symbols (e.g., `["TVC:SPX", "NASDAQ:AAPL", "OMXSTO:OMXS30"]`). Maximum 100 symbols.
-- `columns` - Optional array of columns to include
-
-**Default columns:** `name`, `close`, `change`, `volume`, `market_cap_basic`, `all_time_high`, `all_time_low`, `price_52_week_high`, `price_52_week_low`
-
-**Use Cases:**
-- **Market regime analysis** - Check if indexes are at all-time highs
-- **Direct symbol lookup** - Faster than screening for known tickers
-- **Portfolio comparison** - Compare your holdings side-by-side
-- **Benchmark analysis** - Compare against market indexes
-
-**Example:** Get S&P 500, Nasdaq, and OMX Stockholm 30 with market regime data
-```javascript
-lookup_symbols({
-  symbols: ["TVC:SPX", "TVC:IXIC", "OMXSTO:OMXS30"],
-  columns: ["close", "all_time_high", "price_52_week_high", "Perf.Y", "RSI"]
-})
+```bash
+npm install          # Install dependencies
+npm run build        # Compile TypeScript to dist/
+npm test             # Run all tests
+npm run test:watch   # Run tests in watch mode
+npm run dev          # Run directly with tsx (no build step)
 ```
 
-## Key Features at a Glance
+Run a single test file:
 
-### 75+ Available Fields
+```bash
+npm test -- fields.test.ts
+```
 
-The server provides comprehensive coverage across categories:
+After making changes, restart Claude to reload the MCP server (no hot-reload).
 
-- **Fundamental** - Core metrics (ROE, P/E, P/B), valuation (EV, EV/EBIT, PEG), margins (gross, operating, pre-tax), returns (ROA, ROIC), balance sheet (debt, assets, current ratio)
-- **Technical** - RSI, moving averages (SMA50, SMA200), volatility, beta
-- **Performance** - Price, volume, growth metrics, sector/industry
+### Adding a New Field
 
-See **[Complete Field Reference](docs/fields.md)** for all 75+ fields with descriptions and examples.
+1. Add to `STOCK_FIELDS` in `src/tools/fields.ts` with `name`, `label`, `category`, `type`, `description`
+2. Optionally add to `EXTENDED_COLUMNS` in `src/tools/screen.ts`
 
-### 7 Preset Strategies
+### Adding a New Preset
 
-Pre-configured screens for common investment strategies:
+Add to `PRESETS` in `src/resources/presets.ts` with `filters`, `markets`, `sort_by`, `sort_order`, and optional `columns`.
 
-| Preset | Style | Key Criteria | Columns |
-|--------|-------|--------------|---------|
-| `quality_stocks` | Conservative | ROE >12%, low debt, low volatility | 7 default |
-| `value_stocks` | Value | P/E <15, P/B <1.5 | 7 default |
-| `dividend_stocks` | Income | Yield >3%, low debt | 7 default |
-| `momentum_stocks` | Momentum | RSI 50-70, golden cross | 7 default |
-| `growth_stocks` | Growth | ROE >20%, margins >15% | 7 default |
-| `quality_growth_screener` | Comprehensive | 16 filters, deep analysis | 35 extended |
-| `market_indexes` | Market Regime | 13 global indexes (US, EU, Asia) | 16 extended |
+### Adding a New Tool
 
-See **[Preset Strategies Guide](docs/presets.md)** for detailed criteria, use cases, and examples.
+1. Create implementation in `src/tools/`
+2. Register in `ListToolsRequestSchema` handler in `src/index.ts`
+3. Add case in `CallToolRequestSchema` handler
 
-## Important Notes
-
-⚠️ **Unofficial API**: This server uses TradingView's unofficial scanner API. It may change without notice.
-
-- No authentication required
-- Same access level as TradingView website without login
-- No official documentation or support from TradingView
-- Use responsibly with rate limiting
-
-## Investment Focus & Limitations
-
-This tool is designed for **research and position selection**, not intraday trading:
-
-- **Current fundamentals snapshot** - Latest quarterly/annual data for investment decisions (no tick-by-tick historical data needed)
-- **Research-paced rate limits** - Conservative default (10 req/min) supports thorough analysis, not high-frequency trading
-- **Strategic timeframes** - Daily/weekly data updates align with multi-month investment horizons
-- **Fundamental-first approach** - Emphasizes financial metrics over intraday price action
-
-**By design**, this tool doesn't support:
-- Real-time tick data or intraday charts (not needed for position investing)
-- High-frequency screening (research takes time and thought)
-- Options chains or derivatives (focused on equity fundamentals)
-- News feeds or sentiment analysis (focus on numbers and metrics)
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-For development setup and guidelines, see the **[Development Guide](docs/development.md)**.
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
+---
 
 ## Disclaimer
 
-**Not Investment Advice**
+This is an **unofficial** tool. It is not affiliated with, endorsed by, or connected to TradingView. It uses TradingView's public scanner API, which may change without notice. No authentication is required; access level is the same as the TradingView website without login.
 
-This tool provides stock screening capabilities for informational and educational purposes only. It is **not investment advice, financial advice, or a recommendation** to buy or sell any security.
+**Not investment advice.** Screening results are for informational and educational purposes only. All investment decisions are your sole responsibility. Past performance does not indicate future results. Consult qualified financial advisors before making investment decisions.
 
-- All investment decisions are your sole responsibility
-- Past performance does not indicate future results
-- Screening results do not constitute investment recommendations
-- Always conduct your own research and due diligence
-- Consult qualified financial advisors before making investment decisions
-- You may lose money investing in securities
+This software is provided "AS IS" under the [MIT License](LICENSE), without warranty of any kind.
 
-**Software License**
-
-This software is provided "AS IS" under the [MIT License](LICENSE), without warranty of any kind, express or implied. The authors and contributors are not liable for any damages or losses arising from use of this software.
-
-**Third-Party Services**
-
-This is an unofficial tool and is not affiliated with, endorsed by, or connected to TradingView. Use at your own risk. TradingView's unofficial API may change without notice.
+---
 
 ## Links
 
@@ -459,4 +325,4 @@ This is an unofficial tool and is not affiliated with, endorsed by, or connected
 
 **Smarter screens, not faster trades.**
 
-Built with ❤️ using the [Model Context Protocol](https://modelcontextprotocol.io)
+Built with the [Model Context Protocol](https://modelcontextprotocol.io)
