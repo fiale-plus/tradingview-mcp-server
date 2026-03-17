@@ -143,7 +143,7 @@ export const PRESETS: Record<string, Preset> = {
       "Durable competitive advantage compounders: gross margin >40%, ROIC >15%, FCF margin >15%, growing revenue, low debt. Ideal for long-term buy-and-hold investors.",
     filters: [
       { field: "gross_margin_ttm", operator: "greater", value: 40 },
-      { field: "return_on_equity", operator: "greater", value: 15 },
+      { field: "return_on_invested_capital_fq", operator: "greater", value: 15 },
       { field: "free_cash_flow_margin_ttm", operator: "greater", value: 15 },
       { field: "total_revenue_yoy_growth_ttm", operator: "greater", value: 5 },
       { field: "debt_to_equity", operator: "less", value: 0.8 },
@@ -152,7 +152,7 @@ export const PRESETS: Record<string, Preset> = {
       { field: "is_primary", operator: "equal", value: true },
     ],
     markets: ["america"],
-    sort_by: "return_on_equity",
+    sort_by: "return_on_invested_capital_fq",
     sort_order: "desc",
   },
 
