@@ -20,18 +20,25 @@ Interactive stock screening using pre-configured investment strategies. Results 
    **Question 1** - "Select from common strategies:"
    - Header: "Strategy"
    - multiSelect: false
-   - Options (4 choices):
+   - Options (7 choices):
      - label: "Quality Stocks", description: "High-quality, low-volatility stocks with strong fundamentals and uptrends (conservative)"
      - label: "Value Stocks", description: "Undervalued stocks with low P/E and P/B ratios"
      - label: "Dividend Stocks", description: "High dividend yield with consistent payout"
      - label: "Momentum Stocks", description: "Strong recent performance and technical momentum"
+     - label: "Growth Stocks", description: "High-growth companies with strong revenue and earnings expansion"
+     - label: "Dividend Growth", description: "Consistent dividend payers with growing payouts and strong FCF"
+     - label: "Deep Value", description: "Contrarian screen: P/E <10, P/B <1.5, positive earnings and FCF"
 
    **Question 2** - "Select from advanced strategies:"
    - Header: "Advanced"
    - multiSelect: false
-   - Options (3 choices):
-     - label: "Growth Stocks", description: "High-growth companies with strong revenue and earnings expansion"
+   - Options (7 choices):
      - label: "Quality Growth", description: "Comprehensive quality + growth screen with technical filters (advanced)"
+     - label: "Quality Compounder", description: "Durable compounders: gross margin >40%, ROIC >15%, FCF margin >15% (Munger/Buffett style)"
+     - label: "GARP", description: "Growth at Reasonable Price: PEG <2, ROE >15%, revenue growth >10%"
+     - label: "Breakout Scanner", description: "Technical breakouts: near 52-week highs, golden cross, above-average volume"
+     - label: "Earnings Momentum", description: "Strong EPS growth YoY >20%, revenue growth >10%, above SMA50"
+     - label: "Macro Assets", description: "Key macro assets: VIX, DXY, yields, gold, oil, BTC (not a stock screen)"
      - label: "Market Indexes", description: "Global market indexes for market regime analysis (not a stock screen)"
 
    **Processing the user's selection**:
@@ -43,7 +50,14 @@ Interactive stock screening using pre-configured investment strategies. Results 
      - "Dividend Stocks" → dividend_stocks
      - "Momentum Stocks" → momentum_stocks
      - "Growth Stocks" → growth_stocks
+     - "Dividend Growth" → dividend_growth
+     - "Deep Value" → deep_value
      - "Quality Growth" → quality_growth_screener
+     - "Quality Compounder" → quality_compounder
+     - "GARP" → garp
+     - "Breakout Scanner" → breakout_scanner
+     - "Earnings Momentum" → earnings_momentum
+     - "Macro Assets" → macro_assets
      - "Market Indexes" → market_indexes
 
 3. **Fetch the preset configuration** using `mcp__tradingview__get_preset`
@@ -52,7 +66,7 @@ Interactive stock screening using pre-configured investment strategies. Results 
 
 4. **Run the screener**:
    - For filter-based presets: Use `mcp__tradingview__screen_stocks` with preset configuration
-   - For symbol-based presets (market_indexes): Use `mcp__tradingview__lookup_symbols` with preset symbols
+   - For symbol-based presets (market_indexes, macro_assets): Use `mcp__tradingview__lookup_symbols` with preset symbols
    - Request limit: 50 results (or less if preset specifies)
 
 5. **Display compact summary table** (BEFORE saving to CSV):
@@ -104,6 +118,6 @@ Interactive stock screening using pre-configured investment strategies. Results 
 
 ## Important Notes:
 - Handle both filter-based screening (stocks) and symbol-based lookup (indexes)
-- For market_indexes preset, explain this is market regime analysis, not stock screening
+- For market_indexes and macro_assets presets, explain these are market regime/macro analysis, not stock screening
 - If screener returns 0 results, explain possible reasons (filters too strict, market conditions)
 - Always create output directory before writing CSV (see step 6)

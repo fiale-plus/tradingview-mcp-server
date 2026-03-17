@@ -16,11 +16,11 @@ Identify which sectors are leading and lagging the market by screening the top l
    - columns: ["name", "close", "Perf.W", "Perf.1M", "Perf.3M", "Perf.Y", "RSI", "sector", "market_cap_basic"]
 
    The 11 sectors and their filter values:
-   - Technology: `{field: "sector", operator: "equal", value: "Technology"}, {field: "market_cap_basic", operator: "greater", value: 1000000000}`
+   - Technology: `{field: "sector", operator: "equal", value: "Electronic Technology"}, {field: "market_cap_basic", operator: "greater", value: 1000000000}`
    - Healthcare: `{field: "sector", operator: "equal", value: "Health Technology"}, {field: "market_cap_basic", operator: "greater", value: 1000000000}`
    - Financials: `{field: "sector", operator: "equal", value: "Finance"}, {field: "industry", operator: "not_equal", value: "Real Estate Investment Trusts"}, {field: "market_cap_basic", operator: "greater", value: 1000000000}`
-   - Consumer Cyclical: `{field: "sector", operator: "equal", value: "Consumer Cyclicals"}, {field: "market_cap_basic", operator: "greater", value: 1000000000}`
-   - Consumer Defensive: `{field: "sector", operator: "equal", value: "Consumer Non-Cyclicals"}, {field: "market_cap_basic", operator: "greater", value: 1000000000}`
+   - Consumer Cyclical: `{field: "sector", operator: "equal", value: "Consumer Durables"}, {field: "market_cap_basic", operator: "greater", value: 1000000000}`
+   - Consumer Defensive: `{field: "sector", operator: "equal", value: "Consumer Non-Durables"}, {field: "market_cap_basic", operator: "greater", value: 1000000000}`
    - Energy: `{field: "sector", operator: "equal", value: "Energy Minerals"}, {field: "market_cap_basic", operator: "greater", value: 1000000000}`
    - Industrials: `{field: "sector", operator: "equal", value: "Producer Manufacturing"}, {field: "market_cap_basic", operator: "greater", value: 1000000000}`
    - Communication Services: `{field: "sector", operator: "equal", value: "Technology Services"}, {field: "market_cap_basic", operator: "greater", value: 1000000000}`

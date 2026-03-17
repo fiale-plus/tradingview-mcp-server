@@ -19,7 +19,7 @@ Fetch a real-time snapshot of global market conditions across equities, currenci
    - columns: ["name", "close", "change", "Perf.W", "Perf.1M", "Perf.Y", "RSI"]
 
    **Batch 3 — Macro Signals:**
-   - symbols: ["TVC:VIX", "TVC:DXY", "TVC:TNX", "TVC:GOLD", "TVC:USOIL", "CRYPTOCAP:BTC"]
+   - symbols: ["TVC:VIX", "TVC:DXY", "TVC:US10Y", "TVC:GOLD", "NYMEX:CL1!", "CRYPTOCAP:BTC"]
    - columns: ["name", "close", "change", "Perf.W", "Perf.1M", "Perf.Y", "RSI"]
 
 2. **Display results in three sections**
