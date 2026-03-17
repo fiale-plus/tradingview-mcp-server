@@ -43,10 +43,10 @@ For local development, use `npm run dev` which runs TypeScript directly via tsx 
 
 **Tools** (`src/tools/`)
 - `screen.ts` - Stock/forex/crypto/ETF screening and symbol lookup. Contains `OPERATOR_MAP` for filter operators and `DEFAULT_COLUMNS`/`EXTENDED_COLUMNS` for response fields
-- `fields.ts` - Field metadata and listing (75+ fields across fundamental/technical/performance categories)
+- `fields.ts` - Field metadata and listing (~100 fields across fundamental/technical/performance categories, for stock/etf/crypto/forex asset types)
 
 **Resources** (`src/resources/`)
-- `presets.ts` - Pre-configured screening strategies (quality_stocks, value_stocks, dividend_stocks, momentum_stocks, growth_stocks, quality_growth_screener, market_indexes). Presets can be filter-based or symbol-based (for direct lookup)
+- `presets.ts` - Pre-configured screening strategies (quality_stocks, value_stocks, dividend_stocks, momentum_stocks, growth_stocks, quality_growth_screener, quality_compounder, garp, deep_value, breakout_scanner, earnings_momentum, dividend_growth, macro_assets, market_indexes). Presets can be filter-based or symbol-based (for direct lookup)
 
 **Utilities** (`src/utils/`)
 - `cache.ts` - In-memory cache with TTL
@@ -58,8 +58,18 @@ For local development, use `npm run dev` which runs TypeScript directly via tsx 
 3. `screen_crypto` - Screen cryptocurrencies
 4. `screen_etf` - Screen ETFs
 5. `lookup_symbols` - Direct symbol lookup (for indexes like TVC:SPX)
-6. `list_fields` - List available screening fields
+6. `list_fields` - List available screening fields (`asset_type`: stock, forex, crypto, etf)
 7. `get_preset` / `list_presets` - Access pre-configured strategies
+
+### Filter Operators
+`OPERATOR_MAP` in `src/tools/screen.ts` maps 18 MCP operators to TradingView API operations:
+- Numeric comparisons: `greater`, `less`, `greater_or_equal`, `less_or_equal`, `equal`, `not_equal`
+- Range: `in_range`, `not_in_range`
+- Cross-field: `crosses`, `crosses_above`, `crosses_below`
+- String: `match`
+- New (v2): `above_percent`, `below_percent`, `has`, `has_none_of`, `empty`, `not_empty`
+
+The `empty` and `not_empty` operators require no `value` property.
 
 ### Data Flow
 1. Tool call received → validate input → check cache
@@ -95,3 +105,12 @@ Add to `PRESETS` in `src/resources/presets.ts` with filters array, markets, sort
 Project includes ready-to-use commands in `.claude/commands/`:
 - `/market-regime` - Analyze global market indexes relative to ATH
 - `/run-screener` - Interactive stock screening with preset strategies
+- `/smart-screen` - Auto-select best strategy based on current market regime and run it
+- `/macro-dashboard` - Multi-asset macro snapshot (US/global indexes, VIX, DXY, yields, gold, oil, crypto)
+- `/sector-rotation` - Cross-sector performance ranking across all 11 GICS sectors
+- `/due-diligence <SYMBOL>` - Structured due diligence report for a single stock
+- `/compare-peers <SYM1> <SYM2> ...` - Side-by-side comparison of 2–5 stocks
+- `/portfolio-risk <SYM1> <SYM2> ...` - Portfolio concentration and risk analysis
+- `/investment-thesis <SYMBOL>` - Data-driven investment thesis with bull/bear case
+
+See `.claude/commands/README.md` for full usage details and examples.
