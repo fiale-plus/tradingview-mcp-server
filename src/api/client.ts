@@ -60,4 +60,12 @@ export class TradingViewClient {
   async scanCrypto(payload: ScreenerRequest): Promise<ScreenerResponse> {
     return this.makeRequest("/crypto/scan", payload);
   }
+
+  async scanBonds(payload: ScreenerRequest): Promise<ScreenerResponse> {
+    return this.makeRequest("/bonds/scan", payload);
+  }
+
+  async scanFutures(payload: ScreenerRequest): Promise<ScreenerResponse> {
+    return this.makeRequest("/futures/scan", payload);
+  }
 }

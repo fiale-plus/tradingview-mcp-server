@@ -127,7 +127,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {
             asset_type: {
               type: "string",
-              enum: ["stock", "forex", "crypto"],
+              enum: ["stock", "forex", "crypto", "etf"],
               description: "Type of asset. Default: 'stock'",
             },
             category: {

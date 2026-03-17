@@ -58,11 +58,28 @@ describe("FieldsTool", () => {
     assert.ok(allPerformance, "All fields should be performance");
   });
 
-  it("should return message for unsupported asset types", () => {
+  it("should return fields for forex asset type", () => {
     const result = fieldsTool.listFields({ asset_type: "forex" });
 
-    assert.ok(result.message, "Should have message");
-    assert.strictEqual(result.fields.length, 0, "Should have no fields");
+    assert.strictEqual(result.asset_type, "forex");
+    assert.ok(result.field_count > 0, "Should have forex fields");
+    assert.ok(Array.isArray(result.fields), "Fields should be an array");
+  });
+
+  it("should return fields for crypto asset type", () => {
+    const result = fieldsTool.listFields({ asset_type: "crypto" });
+
+    assert.strictEqual(result.asset_type, "crypto");
+    assert.ok(result.field_count > 0, "Should have crypto fields");
+    assert.ok(Array.isArray(result.fields), "Fields should be an array");
+  });
+
+  it("should return fields for etf asset type", () => {
+    const result = fieldsTool.listFields({ asset_type: "etf" });
+
+    assert.strictEqual(result.asset_type, "etf");
+    assert.ok(result.field_count > 0, "Should have etf fields");
+    assert.ok(Array.isArray(result.fields), "Fields should be an array");
   });
 
   it("should include field metadata", () => {

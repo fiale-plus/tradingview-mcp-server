@@ -540,24 +540,316 @@ const STOCK_FIELDS: FieldMetadata[] = [
   },
 ];
 
+// ETF-specific fields (verified against TradingView API)
+const ETF_FIELDS: FieldMetadata[] = [
+  // Fundamental
+  {
+    name: "market_cap_basic",
+    label: "AUM (approx)",
+    category: "fundamental",
+    type: "currency",
+    description: "Total assets under management (approximate)",
+  },
+  {
+    name: "expense_ratio",
+    label: "Expense Ratio",
+    category: "fundamental",
+    type: "percent",
+    description: "Annual fund operating expense as % of assets",
+  },
+  {
+    name: "shares_outstanding",
+    label: "Shares Outstanding",
+    category: "fundamental",
+    type: "number",
+    description: "Total number of ETF shares outstanding",
+  },
+  {
+    name: "dividends_yield_current",
+    label: "Distribution Yield",
+    category: "fundamental",
+    type: "percent",
+    description: "Current distribution yield",
+  },
+  {
+    name: "exchange",
+    label: "Exchange",
+    category: "performance",
+    type: "string",
+    description: "Listed exchange",
+  },
+  // Performance
+  {
+    name: "close",
+    label: "Price (NAV)",
+    category: "performance",
+    type: "currency",
+    description: "Current ETF price / NAV",
+  },
+  {
+    name: "change",
+    label: "Change %",
+    category: "performance",
+    type: "percent",
+    description: "Daily price change",
+  },
+  {
+    name: "volume",
+    label: "Volume",
+    category: "performance",
+    type: "number",
+    description: "Trading volume",
+  },
+  {
+    name: "Perf.W",
+    label: "Weekly Performance",
+    category: "performance",
+    type: "percent",
+    description: "1-week return",
+  },
+  {
+    name: "Perf.1M",
+    label: "Monthly Performance",
+    category: "performance",
+    type: "percent",
+    description: "1-month return",
+  },
+  {
+    name: "Perf.3M",
+    label: "3-Month Performance",
+    category: "performance",
+    type: "percent",
+    description: "3-month return",
+  },
+  {
+    name: "Perf.Y",
+    label: "Yearly Performance",
+    category: "performance",
+    type: "percent",
+    description: "1-year return",
+  },
+  {
+    name: "Perf.YTD",
+    label: "YTD Performance",
+    category: "performance",
+    type: "percent",
+    description: "Year-to-date return",
+  },
+  // Technical
+  {
+    name: "RSI",
+    label: "RSI (14)",
+    category: "technical",
+    type: "number",
+    description: "Relative Strength Index",
+  },
+  {
+    name: "ATR",
+    label: "Average True Range",
+    category: "technical",
+    type: "number",
+    description: "Volatility measure",
+  },
+];
+
+// Crypto-specific fields (verified against TradingView API)
+// Note: market_cap_basic and circulating_supply/total_supply return null for most crypto assets
+const CRYPTO_FIELDS: FieldMetadata[] = [
+  // Performance
+  {
+    name: "close",
+    label: "Price (USD)",
+    category: "performance",
+    type: "currency",
+    description: "Current price in USD",
+  },
+  {
+    name: "change",
+    label: "Change %",
+    category: "performance",
+    type: "percent",
+    description: "24h price change",
+  },
+  {
+    name: "volume",
+    label: "24h Volume",
+    category: "performance",
+    type: "currency",
+    description: "24-hour trading volume",
+  },
+  {
+    name: "Perf.W",
+    label: "Weekly Performance",
+    category: "performance",
+    type: "percent",
+    description: "7-day price change",
+  },
+  {
+    name: "Perf.1M",
+    label: "Monthly Performance",
+    category: "performance",
+    type: "percent",
+    description: "30-day price change",
+  },
+  {
+    name: "Perf.3M",
+    label: "3-Month Performance",
+    category: "performance",
+    type: "percent",
+    description: "90-day price change",
+  },
+  {
+    name: "Perf.Y",
+    label: "Yearly Performance",
+    category: "performance",
+    type: "percent",
+    description: "1-year price change",
+  },
+  // Technical
+  {
+    name: "RSI",
+    label: "RSI (14)",
+    category: "technical",
+    type: "number",
+    description: "Relative Strength Index",
+  },
+  {
+    name: "ATR",
+    label: "Average True Range",
+    category: "technical",
+    type: "number",
+    description: "Volatility measure",
+  },
+  {
+    name: "Volatility.M",
+    label: "Monthly Volatility",
+    category: "technical",
+    type: "percent",
+    description: "30-day price volatility",
+  },
+  // Fundamental (market_cap_basic is included but often null for DeFi/DEX pairs)
+  {
+    name: "market_cap_basic",
+    label: "Market Cap",
+    category: "fundamental",
+    type: "currency",
+    description: "Total market capitalization (available for major coins on centralized exchanges)",
+  },
+];
+
+// Forex-specific fields (verified against TradingView API)
+// Note: spread is not a valid API field
+const FOREX_FIELDS: FieldMetadata[] = [
+  // Performance
+  {
+    name: "close",
+    label: "Exchange Rate",
+    category: "performance",
+    type: "number",
+    description: "Current exchange rate",
+  },
+  {
+    name: "change",
+    label: "Change %",
+    category: "performance",
+    type: "percent",
+    description: "Daily rate change",
+  },
+  {
+    name: "volume",
+    label: "Volume",
+    category: "performance",
+    type: "number",
+    description: "Trading volume",
+  },
+  {
+    name: "Perf.W",
+    label: "Weekly Performance",
+    category: "performance",
+    type: "percent",
+    description: "7-day rate change",
+  },
+  {
+    name: "Perf.1M",
+    label: "Monthly Performance",
+    category: "performance",
+    type: "percent",
+    description: "30-day rate change",
+  },
+  {
+    name: "Perf.3M",
+    label: "3-Month Performance",
+    category: "performance",
+    type: "percent",
+    description: "90-day rate change",
+  },
+  // Technical
+  {
+    name: "RSI",
+    label: "RSI (14)",
+    category: "technical",
+    type: "number",
+    description: "Relative Strength Index",
+  },
+  {
+    name: "ATR",
+    label: "Average True Range (ATR)",
+    category: "technical",
+    type: "number",
+    description: "Volatility measure",
+  },
+  {
+    name: "ADX",
+    label: "ADX",
+    category: "technical",
+    type: "number",
+    description: "Average Directional Index (trend strength)",
+  },
+  {
+    name: "Volatility.D",
+    label: "Daily Volatility",
+    category: "technical",
+    type: "percent",
+    description: "Daily price volatility",
+  },
+  {
+    name: "SMA50",
+    label: "SMA 50",
+    category: "technical",
+    type: "number",
+    description: "50-period Simple Moving Average",
+  },
+  {
+    name: "SMA200",
+    label: "SMA 200",
+    category: "technical",
+    type: "number",
+    description: "200-period Simple Moving Average",
+  },
+];
+
 export class FieldsTool {
   listFields(input: ListFieldsInput): any {
     const { asset_type = "stock", category } = input;
 
-    // For MVP, only stock fields are implemented
-    if (asset_type !== "stock") {
-      return {
-        message: `Fields for ${asset_type} will be available in future versions`,
-        fields: [],
-      };
+    let allFields: FieldMetadata[];
+    switch (asset_type) {
+      case "forex":
+        allFields = FOREX_FIELDS;
+        break;
+      case "crypto":
+        allFields = CRYPTO_FIELDS;
+        break;
+      case "etf":
+        allFields = ETF_FIELDS;
+        break;
+      case "stock":
+      default:
+        allFields = STOCK_FIELDS;
+        break;
     }
 
-    let fields = STOCK_FIELDS;
-
-    // Filter by category if specified
-    if (category) {
-      fields = fields.filter((f) => f.category === category);
-    }
+    const fields = category ? allFields.filter((f) => f.category === category) : allFields;
 
     return {
       asset_type,

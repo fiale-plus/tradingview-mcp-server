@@ -68,7 +68,7 @@ export interface ScreenStocksInput {
 }
 
 export interface ListFieldsInput {
-  asset_type?: "stock" | "forex" | "crypto";
+  asset_type?: "stock" | "forex" | "crypto" | "etf";
   category?: "fundamental" | "technical" | "performance";
 }
 
