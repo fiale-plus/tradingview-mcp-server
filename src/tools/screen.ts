@@ -208,6 +208,10 @@ export class ScreenTool {
       columns: inputColumns,
     } = input;
 
+    if (limit < 1 || limit > 200) {
+      throw new Error("Limit must be between 1 and 200");
+    }
+
     const cacheKey = JSON.stringify({ type: "forex", filters, sort_by, sort_order, limit, columns: inputColumns });
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
@@ -252,6 +256,10 @@ export class ScreenTool {
       limit = 20,
       columns: inputColumns,
     } = input;
+
+    if (limit < 1 || limit > 200) {
+      throw new Error("Limit must be between 1 and 200");
+    }
 
     const cacheKey = JSON.stringify({ type: "crypto", filters, sort_by, sort_order, limit, columns: inputColumns });
     const cached = this.cache.get(cacheKey);

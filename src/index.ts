@@ -201,7 +201,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   field: {
                     type: "string",
                     description:
-                      "Field name to filter on. String fields (sector, exchange, industry, market) support 'equal' and 'in_range' operators. Cross-field comparison: use another field name as value (e.g., SMA50 crosses_above SMA200 for golden cross).",
+                      "Field name to filter on. Common fields: RSI, ATR, ADX, close, change, volume, SMA50, SMA200, Perf.W, Perf.1M, Perf.3M. Cross-field comparison: use another field name as value (e.g., SMA50 crosses_above SMA200).",
                   },
                   operator: {
                     type: "string",
@@ -215,11 +215,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 },
                 required: ["field", "operator", "value"],
                 examples: [
-                  {"field": "return_on_equity", "operator": "greater", "value": 15},
                   {"field": "RSI", "operator": "in_range", "value": [40, 60]},
+                  {"field": "change", "operator": "greater", "value": 0.5},
+                  {"field": "ATR", "operator": "greater", "value": 0.001},
                   {"field": "SMA50", "operator": "crosses_above", "value": "SMA200"},
-                  {"field": "sector", "operator": "equal", "value": "Technology"},
-                  {"field": "exchange", "operator": "in_range", "value": ["NASDAQ", "NYSE"]}
+                  {"field": "volume", "operator": "greater", "value": 1000}
                 ],
               },
             },
@@ -267,7 +267,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   field: {
                     type: "string",
                     description:
-                      "Field name to filter on. String fields (sector, exchange, industry, market) support 'equal' and 'in_range' operators. Cross-field comparison: use another field name as value (e.g., SMA50 crosses_above SMA200 for golden cross).",
+                      "Field name to filter on. Common fields: market_cap_basic, RSI, close, change, volume, Perf.1M, Perf.3M, Volatility.M. Cross-field comparison: use another field name as value.",
                   },
                   operator: {
                     type: "string",
@@ -281,11 +281,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 },
                 required: ["field", "operator", "value"],
                 examples: [
-                  {"field": "return_on_equity", "operator": "greater", "value": 15},
-                  {"field": "RSI", "operator": "in_range", "value": [40, 60]},
-                  {"field": "SMA50", "operator": "crosses_above", "value": "SMA200"},
-                  {"field": "sector", "operator": "equal", "value": "Technology"},
-                  {"field": "exchange", "operator": "in_range", "value": ["NASDAQ", "NYSE"]}
+                  {"field": "RSI", "operator": "in_range", "value": [40, 70]},
+                  {"field": "market_cap_basic", "operator": "greater", "value": 1000000000},
+                  {"field": "change", "operator": "greater", "value": 2},
+                  {"field": "volume", "operator": "greater", "value": 10000000},
+                  {"field": "Perf.1M", "operator": "greater", "value": 10}
                 ],
               },
             },
