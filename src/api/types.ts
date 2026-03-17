@@ -5,7 +5,7 @@
 export interface Filter {
   left: string;
   operation: FilterOperation;
-  right: number | string | boolean | [number, number] | string[];
+  right?: any;  // optional — not needed for empty/nempty operators
 }
 
 export type FilterOperation =
@@ -20,7 +20,13 @@ export type FilterOperation =
   | "crosses"
   | "crosses_above"
   | "crosses_below"
-  | "match";
+  | "match"
+  | "above%"
+  | "below%"
+  | "has"
+  | "has_none_of"
+  | "empty"
+  | "nempty";
 
 export interface ScreenerRequest {
   filter: Filter[];

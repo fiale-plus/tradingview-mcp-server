@@ -83,10 +83,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   },
                   value: {
                     description:
-                      "Value to compare against (number, string for field comparison, or array [min, max] for in_range)",
+                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or array [min, max] for in_range.",
                   },
                 },
-                required: ["field", "operator", "value"],
+                required: ["field", "operator"],
                 examples: [
                   {"field": "return_on_equity", "operator": "greater", "value": 15},
                   {"field": "RSI", "operator": "in_range", "value": [40, 60]},
@@ -210,10 +210,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   },
                   value: {
                     description:
-                      "Value to compare against (number, string for field comparison, or array [min, max] for in_range)",
+                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or array [min, max] for in_range.",
                   },
                 },
-                required: ["field", "operator", "value"],
+                required: ["field", "operator"],
                 examples: [
                   {"field": "RSI", "operator": "in_range", "value": [40, 60]},
                   {"field": "change", "operator": "greater", "value": 0.5},
@@ -276,10 +276,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   },
                   value: {
                     description:
-                      "Value to compare against (number, string for field comparison, or array [min, max] for in_range)",
+                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or array [min, max] for in_range.",
                   },
                 },
-                required: ["field", "operator", "value"],
+                required: ["field", "operator"],
                 examples: [
                   {"field": "RSI", "operator": "in_range", "value": [40, 70]},
                   {"field": "market_cap_basic", "operator": "greater", "value": 1000000000},
@@ -342,10 +342,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   },
                   value: {
                     description:
-                      "Value to compare against (number, string for field comparison, or array [min, max] for in_range)",
+                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or array [min, max] for in_range.",
                   },
                 },
-                required: ["field", "operator", "value"],
+                required: ["field", "operator"],
                 examples: [
                   {"field": "return_on_equity", "operator": "greater", "value": 15},
                   {"field": "RSI", "operator": "in_range", "value": [40, 60]},

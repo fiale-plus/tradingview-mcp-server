@@ -26,6 +26,12 @@ const OPERATOR_MAP: Record<string, FilterOperation> = {
   crosses_above: "crosses_above",
   crosses_below: "crosses_below",
   match: "match",
+  above_percent: "above%",
+  below_percent: "below%",
+  has: "has",
+  has_none_of: "has_none_of",
+  empty: "empty",
+  not_empty: "nempty",
 };
 
 // Minimal default columns for lean responses
@@ -102,7 +108,8 @@ export class ScreenTool {
         );
       }
 
-      if (!f.field || !f.operator || f.value === undefined) {
+      const noValueOperators = ["empty", "not_empty"];
+      if (!f.field || !f.operator || (f.value === undefined && !noValueOperators.includes(f.operator))) {
         throw new Error(
           `Invalid filter at index ${index}: missing required properties (field: ${f.field}, operator: ${f.operator}, value: ${f.value})`
         );
