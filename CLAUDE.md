@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TradingView MCP Server is an unofficial Model Context Protocol server that provides access to TradingView's market screener API. It enables AI-powered stock, forex, crypto, and ETF screening through Claude Desktop or Claude Code.
+TradingView MCP Server is an unofficial Model Context Protocol server **and CLI tool** that provides access to TradingView's market screener API. It enables AI-powered stock, forex, crypto, and ETF screening through Claude Desktop, Claude Code, or the standalone `tradingview-cli` command.
 
 ## Build and Development Commands
 
@@ -13,7 +13,8 @@ npm install          # Install dependencies
 npm run build        # Compile TypeScript to dist/
 npm test             # Run all tests
 npm run test:watch   # Run tests in watch mode
-npm run dev          # Run directly with tsx (no build step)
+npm run dev          # Run MCP server directly with tsx (no build step)
+npm run dev:cli      # Run CLI directly with tsx (no build step)
 ```
 
 ### Running a single test file
@@ -28,12 +29,23 @@ For local development, use `npm run dev` which runs TypeScript directly via tsx 
 
 ## Architecture
 
-### Entry Point and MCP Server Setup
-`src/index.ts` - Creates the MCP server, registers tools and resources, handles tool calls. Initializes core components:
+### Dual Entry Points
+The package has two entry points sharing all core logic:
+
+**MCP Server** — `src/index.ts`
+Creates the MCP server, registers tools and resources, handles tool calls via stdio. Initializes core components:
 - `TradingViewClient` - API client
 - `Cache` - Response caching (configurable TTL)
 - `RateLimiter` - Request throttling (configurable RPM)
 - `ScreenTool`, `FieldsTool`, `PresetsTool` - Tool implementations
+
+**CLI** — `src/cli.ts`
+Standalone CLI using Node's built-in `util.parseArgs`. Reuses the same tool classes. Output formats: JSON (default), CSV, table. No `cache.startCleanup()` (CLI is short-lived).
+
+**CLI Helpers** (`src/cli/`)
+- `parseArgs.ts` - Option configs, input builders, preset merging
+- `formatters.ts` - JSON/CSV/table output formatters
+- `help.ts` - Help text for all commands
 
 ### Core Components
 

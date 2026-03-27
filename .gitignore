@@ -35,3 +35,9 @@ Thumbs.db
 
 # Local documentation and specs
 docs/local/
+
+# Worktrees
+.worktrees/
+
+# Autoresearch
+.autoresearch/

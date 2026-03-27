@@ -10,9 +10,11 @@
 [![License](https://img.shields.io/github/license/fiale-plus/tradingview-mcp-server?style=flat-square)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue?style=flat-square)](https://modelcontextprotocol.io)
 
-**Unofficial** Model Context Protocol (MCP) server for TradingView's market screener API — stocks, forex, crypto & ETFs.
+**Unofficial** MCP server **and CLI** for TradingView's market screener API — stocks, forex, crypto & ETFs.
 
 ### AI-powered investment research for patient, systematic investors.
+
+**Two modes, one package:** Use as an MCP server with Claude, or as a standalone CLI tool that pipes to `jq`, `csvtool`, or any Unix workflow.
 
 </div>
 
@@ -22,6 +24,7 @@
 
 - [Features](#features)
 - [Installation](#installation)
+- [CLI Usage](#cli-usage)
 - [Configuration](#configuration)
 - [MCP Tools](#mcp-tools)
 - [Screening Fields](#screening-fields)
@@ -35,6 +38,7 @@
 
 ## Features
 
+- **Dual mode: MCP + CLI** — use as an MCP server with Claude or as a standalone `tradingview-cli` command
 - **100+ screener fields** including Piotroski F-Score, Altman Z-Score, Graham Number, analyst consensus, and dividend growth streaks
 - **18 filter operators** including `crosses_above` / `crosses_below` for golden cross detection
 - **14 pre-built strategies** covering value, growth, quality, GARP, deep value, breakouts, compounders, and macro monitoring
@@ -65,6 +69,68 @@ local-setup.bat           # Windows
 
 # Restart Claude Code and try: /market-regime or /run-screener
 ```
+
+---
+
+## CLI Usage
+
+After installing the package, the `tradingview-cli` command is available globally:
+
+```bash
+# List all pre-built screening strategies
+tradingview-cli presets
+
+# Screen stocks using a preset
+tradingview-cli screen stocks --preset quality_stocks --limit 10
+
+# Screen with custom filters
+tradingview-cli screen stocks --filters '[{"field":"price_earnings_ttm","operator":"less","value":15}]'
+
+# Look up specific symbols (indexes, stocks)
+tradingview-cli lookup NASDAQ:AAPL TVC:SPX NYSE:MSFT
+
+# Discover available screening fields
+tradingview-cli fields --asset-type stock --category fundamental
+```
+
+### Output Formats
+
+```bash
+# JSON (default) — pipe to jq
+tradingview-cli screen stocks --preset value_stocks | jq '.stocks[].name'
+
+# CSV — pipe to file or csvtool
+tradingview-cli screen stocks --preset value_stocks -f csv > results.csv
+
+# Table — human-readable terminal output
+tradingview-cli screen stocks --preset value_stocks -f table
+```
+
+### CLI Commands
+
+| Command | Description |
+|---|---|
+| `screen stocks [opts]` | Screen stocks by fundamental/technical criteria |
+| `screen forex [opts]` | Screen forex pairs |
+| `screen crypto [opts]` | Screen cryptocurrencies |
+| `screen etf [opts]` | Screen ETFs |
+| `lookup <symbols...>` | Look up specific symbols by ticker |
+| `fields [opts]` | List available screening fields |
+| `preset <name>` | Get a preset strategy's details |
+| `presets` | List all available presets |
+
+### Screen Options
+
+| Flag | Description |
+|---|---|
+| `--filters <json>` | Filter array as JSON string |
+| `--preset <name>` | Load a preset (merges with `--filters`) |
+| `--markets <market>` | Market to screen (repeatable, stocks/etf only) |
+| `--sort-by <field>` | Sort by field |
+| `--sort-order <asc\|desc>` | Sort direction |
+| `--limit <n>` | Max results (1-200, default 20) |
+| `--columns <col>` | Columns to include (repeatable) |
+| `-f, --format <fmt>` | Output: `json`, `csv`, or `table` |
 
 ---
 
