@@ -1,5 +1,9 @@
 import { describe, it, mock } from "node:test";
 import assert from "node:assert";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 import {
   parseTopLevel,
   parseScreenArgs,
@@ -469,5 +473,134 @@ describe("CLI - Integration", () => {
   it("should handle empty filters array in buildScreenInput", () => {
     const { input } = buildScreenInput({ filters: "[]" }, presetsTool);
     assert.deepStrictEqual(input.filters, []);
+  });
+});
+
+describe("CLI - End-to-End (child process)", () => {
+  const cli = (args: string[]) =>
+    execFileAsync("npx", ["tsx", "src/cli.ts", ...args], {
+      timeout: 10000,
+    });
+
+  it("should show help with --help", async () => {
+    const { stdout } = await cli(["--help"]);
+    assert.ok(stdout.includes("Usage: tradingview-cli"));
+    assert.ok(stdout.includes("screen stocks"));
+  });
+
+  it("should show help with no args", async () => {
+    const { stdout } = await cli([]);
+    assert.ok(stdout.includes("Usage: tradingview-cli"));
+  });
+
+  it("should show version with --version", async () => {
+    const { stdout } = await cli(["--version"]);
+    assert.ok(stdout.startsWith("tradingview-cli v"));
+  });
+
+  it("should list presets as JSON", async () => {
+    const { stdout } = await cli(["presets"]);
+    const result = JSON.parse(stdout);
+    assert.ok(Array.isArray(result));
+    assert.ok(result.length > 0);
+    assert.ok(result[0].key);
+    assert.ok(result[0].name);
+  });
+
+  it("should list presets as CSV", async () => {
+    const { stdout } = await cli(["presets", "-f", "csv"]);
+    const lines = stdout.trim().split("\n");
+    assert.ok(lines[0].includes("key"));
+    assert.ok(lines.length > 5);
+  });
+
+  it("should list presets as table", async () => {
+    const { stdout } = await cli(["presets", "-f", "table"]);
+    assert.ok(stdout.includes("---"));
+    assert.ok(stdout.includes("quality_stocks"));
+  });
+
+  it("should get a specific preset", async () => {
+    const { stdout } = await cli(["preset", "value_stocks"]);
+    const result = JSON.parse(stdout);
+    assert.strictEqual(result.name, "Value Stocks");
+    assert.ok(result.filters.length > 0);
+  });
+
+  it("should list fields for stock fundamental", async () => {
+    const { stdout } = await cli([
+      "fields",
+      "--asset-type",
+      "stock",
+      "--category",
+      "fundamental",
+    ]);
+    const result = JSON.parse(stdout);
+    assert.strictEqual(result.asset_type, "stock");
+    assert.strictEqual(result.category, "fundamental");
+    assert.ok(result.fields.length > 0);
+  });
+
+  it("should list fields for crypto", async () => {
+    const { stdout } = await cli(["fields", "--asset-type", "crypto"]);
+    const result = JSON.parse(stdout);
+    assert.strictEqual(result.asset_type, "crypto");
+    assert.ok(result.fields.length > 0);
+  });
+
+  it("should show screen help", async () => {
+    const { stdout } = await cli(["screen", "stocks", "--help"]);
+    assert.ok(stdout.includes("--filters"));
+    assert.ok(stdout.includes("--preset"));
+  });
+
+  it("should reject unknown command", async () => {
+    await assert.rejects(
+      () => cli(["foobar"]),
+      (err: any) => {
+        assert.ok(err.stderr.includes("Unknown command: foobar"));
+        return true;
+      }
+    );
+  });
+
+  it("should reject screen with invalid asset type", async () => {
+    await assert.rejects(
+      () => cli(["screen", "bonds"]),
+      (err: any) => {
+        assert.ok(err.stderr.includes("invalid asset type"));
+        return true;
+      }
+    );
+  });
+
+  it("should reject preset with missing name", async () => {
+    await assert.rejects(
+      () => cli(["preset"]),
+      (err: any) => {
+        assert.ok(err.stderr.includes("Missing preset name"));
+        return true;
+      }
+    );
+  });
+
+  it("should reject unknown preset name", async () => {
+    await assert.rejects(
+      () => cli(["preset", "nonexistent"]),
+      (err: any) => {
+        assert.ok(err.stderr.includes("Unknown preset: nonexistent"));
+        return true;
+      }
+    );
+  });
+
+  it("should reject lookup with no symbols", async () => {
+    await assert.rejects(
+      () => cli(["lookup"]),
+      (err: any) => {
+        assert.ok(err.stderr.includes("No symbols provided"));
+        return true;
+      }
+    );
   });
 });

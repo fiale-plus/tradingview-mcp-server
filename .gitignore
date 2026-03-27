@@ -38,3 +38,6 @@ docs/local/
 
 # Worktrees
 .worktrees/
+
+# Autoresearch
+.autoresearch/
