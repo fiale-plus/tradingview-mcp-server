@@ -196,6 +196,32 @@ describe("CLI - Input Builders", () => {
       );
       assert.deepStrictEqual(input.markets, ["uk"]);
     });
+
+    it("should use CLI columns when explicitly provided", () => {
+      const { input } = buildScreenInput(
+        { preset: "quality_stocks", columns: ["close", "volume"] },
+        presetsTool
+      );
+      assert.deepStrictEqual(input.columns, ["close", "volume"]);
+    });
+
+    it("should use preset columns when CLI columns not provided", () => {
+      const { input } = buildScreenInput(
+        { preset: "quality_growth_screener" },
+        presetsTool
+      );
+      // quality_growth_screener has custom columns defined
+      const preset = presetsTool.getPreset("quality_growth_screener")!;
+      assert.deepStrictEqual(input.columns, preset.columns);
+    });
+
+    it("should override preset sort-order with CLI flag", () => {
+      const { input } = buildScreenInput(
+        { preset: "quality_stocks", "sort-order": "asc" },
+        presetsTool
+      );
+      assert.strictEqual(input.sort_order, "asc");
+    });
   });
 
   describe("buildLookupInput", () => {
@@ -391,5 +417,57 @@ describe("CLI - Integration", () => {
       const output = formatOutput(result, fmt);
       assert.ok(output.length > 0, `${fmt} format produced empty output`);
     }
+  });
+
+  it("should throw on malformed JSON in --filters", () => {
+    assert.throws(
+      () => buildScreenInput({ filters: "not valid json" }, presetsTool),
+      { name: "SyntaxError" }
+    );
+  });
+
+  it("should handle preset with filters and custom columns together", () => {
+    // quality_growth_screener has both filters and columns
+    const extra = '[{"field":"volume","operator":"greater","value":100000}]';
+    const { input, isSymbolLookup } = buildScreenInput(
+      { preset: "quality_growth_screener", filters: extra },
+      presetsTool
+    );
+    assert.strictEqual(isSymbolLookup, false);
+    const preset = presetsTool.getPreset("quality_growth_screener")!;
+    assert.strictEqual(input.filters.length, preset.filters!.length + 1);
+    assert.deepStrictEqual(input.columns, preset.columns);
+  });
+
+  it("should format all result shapes in CSV", () => {
+    const shapes = [
+      { total_count: 1, pairs: [{ pair: "EURUSD", rate: 1.08 }] },
+      { total_count: 1, cryptocurrencies: [{ coin: "BTC", price: 60000 }] },
+      { total_count: 1, etfs: [{ ticker: "SPY", nav: 500 }] },
+      { total_count: 1, symbols: [{ symbol: "TVC:SPX", close: 5000 }] },
+    ];
+    for (const shape of shapes) {
+      const csv = formatOutput(shape, "csv");
+      const lines = csv.split("\n");
+      assert.strictEqual(lines.length, 2, `Expected header + 1 row for ${JSON.stringify(shape)}`);
+    }
+  });
+
+  it("should format all result shapes in table", () => {
+    const shapes = [
+      { total_count: 1, pairs: [{ pair: "EURUSD", rate: 1.08 }] },
+      { total_count: 1, cryptocurrencies: [{ coin: "BTC", price: 60000 }] },
+      { total_count: 1, etfs: [{ ticker: "SPY", nav: 500 }] },
+    ];
+    for (const shape of shapes) {
+      const table = formatOutput(shape, "table");
+      const lines = table.split("\n");
+      assert.ok(lines.length >= 3, "Table should have header, separator, and data row");
+    }
+  });
+
+  it("should handle empty filters array in buildScreenInput", () => {
+    const { input } = buildScreenInput({ filters: "[]" }, presetsTool);
+    assert.deepStrictEqual(input.filters, []);
   });
 });
