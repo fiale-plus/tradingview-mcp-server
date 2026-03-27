@@ -1,7 +1,7 @@
 {
   "name": "tradingview-mcp-server",
   "version": "0.0.0-dev",
-  "description": "Unofficial MCP server for TradingView stock screener API",
+  "description": "Unofficial MCP server and CLI for TradingView stock screener API",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
