@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
   # Run as a PR check unless the PR is explicitly labeled to skip it
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+    types: [ready_for_review, labeled]
+    branches: [main]
 
 # Only run one at a time
 concurrency:
@@ -28,7 +29,10 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (
         github.event_name == 'pull_request' &&
-        !contains(github.event.pull_request.labels.*.name, 'skip-integration')
+        (
+          github.event.action == 'ready_for_review' ||
+          github.event.label.name == 'run-integration'
+        )
       )
 
     runs-on: ubuntu-latest
