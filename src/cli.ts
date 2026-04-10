@@ -7,7 +7,12 @@
 
 import { createRequire } from "module";
 import { TradingViewClient } from "./api/client.js";
+import { SearchClient } from "./api/search.js";
+import { MetainfoClient } from "./api/metainfo.js";
 import { ScreenTool } from "./tools/screen.js";
+import { SearchTool } from "./tools/search.js";
+import { MetainfoTool } from "./tools/metainfo.js";
+import { TATool } from "./tools/ta.js";
 import { FieldsTool } from "./tools/fields.js";
 import { PresetsTool } from "./resources/presets.js";
 import { Cache } from "./utils/cache.js";
@@ -19,17 +24,29 @@ import {
   parseLookupArgs,
   parseFieldsArgs,
   parsePresetArgs,
+  parseSearchArgs,
+  parseMetainfoArgs,
+  parseTAArgs,
   buildScreenInput,
   buildLookupInput,
   buildFieldsInput,
+  buildSearchInput,
+  buildMetainfoInput,
+  buildTAInput,
+  buildRankTAInput,
 } from "./cli/parseArgs.js";
 import {
   MAIN_HELP,
   SCREEN_HELP,
   LOOKUP_HELP,
+  SEARCH_HELP,
+  METAINFO_HELP,
+  TA_HELP,
+  RANK_TA_HELP,
   FIELDS_HELP,
   PRESET_HELP,
   PRESETS_HELP,
+
 } from "./cli/help.js";
 
 const require = createRequire(import.meta.url);
@@ -41,9 +58,14 @@ const RATE_LIMIT_RPM = parseInt(process.env.RATE_LIMIT_RPM || "10");
 
 // Initialize components (no cache.startCleanup — CLI is short-lived)
 const client = new TradingViewClient();
+const searchClient = new SearchClient();
+const metainfoClient = new MetainfoClient();
 const cache = new Cache(CACHE_TTL);
 const rateLimiter = new RateLimiter(RATE_LIMIT_RPM);
 const screenTool = new ScreenTool(client, cache, rateLimiter);
+const searchTool = new SearchTool(searchClient, cache, rateLimiter);
+const metainfoTool = new MetainfoTool(metainfoClient, cache, rateLimiter);
+const taTool = new TATool(client, cache, rateLimiter);
 const fieldsTool = new FieldsTool();
 const presetsTool = new PresetsTool();
 
@@ -75,6 +97,18 @@ async function main() {
       break;
     case "lookup":
       await handleLookup(argv.slice(1));
+      break;
+    case "search":
+      await handleSearch(argv.slice(1));
+      break;
+    case "metainfo":
+      await handleMetainfo(argv.slice(1));
+      break;
+    case "ta":
+      await handleTA(argv.slice(1));
+      break;
+    case "rank-ta":
+      await handleRankTA(argv.slice(1));
       break;
     case "fields":
       await handleFields(argv.slice(1));
@@ -222,7 +256,65 @@ async function handlePresets(argv: string[]) {
   process.stdout.write(formatOutput(result, format) + "\n");
 }
 
+async function handleSearch(argv: string[]) {
+  const { positionals, values } = parseSearchArgs(argv);
+
+  if (values.help) {
+    process.stdout.write(SEARCH_HELP + "\n");
+    return;
+  }
+
+  const format = (values.format as OutputFormat) || "json";
+  const input = buildSearchInput(positionals, values);
+  const result = await searchTool.searchSymbols(input);
+  process.stdout.write(formatOutput(result, format) + "\n");
+}
+
+async function handleMetainfo(argv: string[]) {
+  const { positionals, values } = parseMetainfoArgs(argv);
+
+  if (values.help) {
+    process.stdout.write(METAINFO_HELP + "\n");
+    return;
+  }
+
+  const format = (values.format as OutputFormat) || "json";
+  const input = buildMetainfoInput(positionals, values);
+  const result = await metainfoTool.getMetainfo(input);
+  process.stdout.write(formatOutput(result, format) + "\n");
+}
+
+async function handleTA(argv: string[]) {
+  const { positionals, values } = parseTAArgs(argv);
+
+  if (values.help) {
+    process.stdout.write(TA_HELP + "\n");
+    return;
+  }
+
+  const format = (values.format as OutputFormat) || "json";
+  const input = buildTAInput(positionals, values);
+  const result = await taTool.getTASummary(input);
+  process.stdout.write(formatOutput(result, format) + "\n");
+}
+
+async function handleRankTA(argv: string[]) {
+  const { positionals, values } = parseTAArgs(argv);
+
+  if (values.help) {
+    process.stdout.write(RANK_TA_HELP + "\n");
+    return;
+  }
+
+  const format = (values.format as OutputFormat) || "json";
+  const input = buildRankTAInput(positionals, values);
+  const result = await taTool.rankByTA(input);
+  process.stdout.write(formatOutput(result, format) + "\n");
+}
+
 main().catch((err) => {
   process.stderr.write(`Error: ${err.message}\n`);
   process.exit(1);
 });
+
+// Experimental tools are not part of core-path — see feat/lab-path branch

@@ -10,6 +10,10 @@ Commands:
   screen crypto    Screen cryptocurrencies
   screen etf       Screen ETFs
   lookup           Look up specific symbols by ticker
+  search           Search for symbols by name or ticker
+  metainfo         Get market metadata and available fields
+  ta               Technical analysis summary for symbols
+  rank-ta          Rank symbols by TA scores
   fields           List available screening fields
   preset           Get a preset screening strategy
   presets          List all available presets
@@ -27,6 +31,10 @@ Examples:
   tradingview-cli screen stocks --preset quality_stocks --limit 10
   tradingview-cli screen stocks --filters '[{"field":"price_earnings_ttm","operator":"less","value":15}]'
   tradingview-cli lookup NASDAQ:AAPL TVC:SPX
+  tradingview-cli search apple --exchange NASDAQ --limit 10
+  tradingview-cli metainfo america
+  tradingview-cli ta NASDAQ:AAPL NASDAQ:NVDA --timeframes 60 240 1D 1W
+  tradingview-cli rank-ta NASDAQ:AAPL NASDAQ:MSFT NASDAQ:NVDA --timeframes 60 1D --weights '{"1D": 3}'
   tradingview-cli fields --asset-type stock --category fundamental
   tradingview-cli presets`;
 
@@ -105,3 +113,111 @@ List all available preset screening strategies.
 Options:
   -f, --format <format>  Output format: json, csv, table (default: json)
   -h, --help             Show help`;
+
+export const SEARCH_HELP = `Usage: tradingview-cli search <query> [options]
+
+Search for TradingView symbols by name, ticker, or description.
+
+Options:
+  --exchange <ex>        Filter by exchange (e.g., NASDAQ, NYSE)
+  --asset-type <type>    Filter by asset type: stock, forex, crypto, cfd, futures, index, economic
+  --limit <n>            Maximum results (1-50, default: 20)
+  --start <n>            Offset for pagination (default: 0)
+  -f, --format <format>  Output format: json, csv, table (default: json)
+  -h, --help             Show help
+
+Examples:
+  tradingview-cli search apple
+  tradingview-cli search bitcoin --asset-type crypto
+  tradingview-cli search microsoft --exchange NASDAQ --limit 5`;
+
+export const METAINFO_HELP = `Usage: tradingview-cli metainfo <market> [options]
+
+Get metadata about a TradingView market screener, including available fields.
+
+Options:
+  --fields <field>       Specific field names to look up (repeatable)
+  --mode <mode>          Output mode: summary (default) or raw
+  -f, --format <format>  Output format: json, csv, table (default: json)
+  -h, --help             Show help
+
+Examples:
+  tradingview-cli metainfo america
+  tradingview-cli metainfo america --fields name --fields close
+  tradingview-cli metainfo america --mode raw`;
+
+export const TA_HELP = `Usage: tradingview-cli ta <symbol...> [options]
+
+Get TradingView-style technical analysis summary for symbols across timeframes.
+
+Options:
+  --timeframes <tf>     Timeframes: 1, 3, 5, 15, 30, 45, 60, 120, 180, 240, 1D, 1W, 1M (repeatable, default: 60 240 1D 1W)
+  --no-components       Hide oscillator/MA score breakdown
+  -f, --format <format> Output format: json, csv, table (default: json)
+  -h, --help            Show help
+
+Examples:
+  tradingview-cli ta NASDAQ:AAPL
+  tradingview-cli ta NASDAQ:AAPL NASDAQ:NVDA --timeframes 60 240 1D 1W
+  tradingview-cli ta NASDAQ:AAPL --no-components`;
+
+export const RANK_TA_HELP = `Usage: tradingview-cli rank-ta <symbol...> [options]
+
+Rank symbols by weighted technical analysis scores.
+
+Options:
+  --timeframes <tf>     Timeframes (repeatable, default: 60 240 1D 1W)
+  --weights <json>      Per-timeframe weights as JSON (default: equal weight)
+  -f, --format <format> Output format: json, csv, table (default: json)
+  -h, --help             Show help
+
+Examples:
+  tradingview-cli rank-ta NASDAQ:AAPL NASDAQ:MSFT NASDAQ:NVDA
+  tradingview-cli rank-ta NASDAQ:AAPL NASDAQ:MSFT --timeframes 60 1D --weights '{"1D": 3}'`;
+
+export const EXPERIMENTAL_BARS_HELP = `Usage: tradingview-cli experimental bars <symbol> [options]
+
+[EXPERIMENTAL] Fetch historical OHLCV bars for a symbol via TradingView WebSocket.
+Requires TV_EXPERIMENTAL_ENABLED=1.
+
+Options:
+  --timeframe <tf>       Timeframe: 1, 3, 5, 15, 30, 45, 60, 120, 180, 240, 1D, 1W, 1M (default: 1D)
+  --limit <n>            Number of bars (default: 300, max: 5000)
+  --extended-session     Include extended/pre-market session
+  -f, --format <format>  Output format: json, csv, table (default: json)
+  -h, --help             Show help
+
+Examples:
+  TV_EXPERIMENTAL_ENABLED=1 tradingview-cli experimental bars BINANCE:BTCUSDT --timeframe 60
+  TV_EXPERIMENTAL_ENABLED=1 tradingview-cli experimental bars NASDAQ:AAPL --timeframe 1D --limit 100`;
+
+export const EXPERIMENTAL_STREAM_QUOTES_HELP = `Usage: tradingview-cli experimental stream-quotes <symbol...> [options]
+
+[EXPERIMENTAL] Stream real-time quotes for symbols for a bounded duration.
+Requires TV_EXPERIMENTAL_ENABLED=1.
+
+Options:
+  --fields <field>       Quote fields to request (repeatable)
+  --duration <seconds>   Collection duration in seconds (default: 10, max: 60)
+  -f, --format <format>  Output format: json, csv, table (default: json)
+  -h, --help             Show help
+
+Examples:
+  TV_EXPERIMENTAL_ENABLED=1 tradingview-cli experimental stream-quotes NASDAQ:AAPL --duration 10
+  TV_EXPERIMENTAL_ENABLED=1 tradingview-cli experimental stream-quotes BINANCE:BTCUSDT NASDAQ:NVDA --fields lp bid ask --duration 15`;
+
+export const EXPERIMENTAL_STREAM_BARS_HELP = `Usage: tradingview-cli experimental stream-bars <symbol> [options]
+
+[EXPERIMENTAL] Stream bar updates for a symbol for a bounded duration.
+Requires TV_EXPERIMENTAL_ENABLED=1.
+
+Options:
+  --timeframe <tf>       Timeframe (default: 1, i.e., 1-minute)
+  --duration <seconds>   Collection duration in seconds (default: 30, max: 120)
+  --mode <mode>          Streaming mode: rolling or close_only (default: rolling)
+  -f, --format <format>  Output format: json, csv, table (default: json)
+  -h, --help             Show help
+
+Examples:
+  TV_EXPERIMENTAL_ENABLED=1 tradingview-cli experimental stream-bars BINANCE:BTCUSDT --timeframe 1 --duration 30
+  TV_EXPERIMENTAL_ENABLED=1 tradingview-cli experimental stream-bars BINANCE:BTCUSDT --mode close_only --duration 60`;

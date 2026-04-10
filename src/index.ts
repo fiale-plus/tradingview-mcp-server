@@ -15,7 +15,12 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 import { TradingViewClient } from "./api/client.js";
+import { SearchClient } from "./api/search.js";
+import { MetainfoClient } from "./api/metainfo.js";
 import { ScreenTool } from "./tools/screen.js";
+import { SearchTool } from "./tools/search.js";
+import { MetainfoTool } from "./tools/metainfo.js";
+import { TATool } from "./tools/ta.js";
 import { FieldsTool } from "./tools/fields.js";
 import { PresetsTool, PRESETS } from "./resources/presets.js";
 import { Cache } from "./utils/cache.js";
@@ -31,9 +36,14 @@ const RATE_LIMIT_RPM = parseInt(process.env.RATE_LIMIT_RPM || "10");
 
 // Initialize components
 const client = new TradingViewClient();
+const searchClient = new SearchClient();
+const metainfoClient = new MetainfoClient();
 const cache = new Cache(CACHE_TTL);
 const rateLimiter = new RateLimiter(RATE_LIMIT_RPM);
 const screenTool = new ScreenTool(client, cache, rateLimiter);
+const searchTool = new SearchTool(searchClient, cache, rateLimiter);
+const metainfoTool = new MetainfoTool(metainfoClient, cache, rateLimiter);
+const taTool = new TATool(client, cache, rateLimiter);
 const fieldsTool = new FieldsTool();
 const presetsTool = new PresetsTool();
 
@@ -419,6 +429,132 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           idempotentHint: true,
         },
       },
+      {
+        name: "search_symbols",
+        description:
+          "Search for TradingView symbols by name, ticker, or description. Discover exact symbol identifiers for stocks, forex, crypto, and more. Use this before screening when you need to find the correct symbol format.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description: "Search query (e.g., 'apple', 'bitcoin', ' ethereum')",
+            },
+            exchange: {
+              type: "string",
+              description: "Filter by exchange (e.g., 'NASDAQ', 'NYSE')",
+            },
+            asset_type: {
+              type: "string",
+              enum: ["stock", "forex", "crypto", "cfd", "futures", "index", "economic"],
+              description: "Filter by asset type",
+            },
+            limit: {
+              type: "number",
+              description: "Maximum results to return (1-50, default: 20)",
+              minimum: 1,
+              maximum: 50,
+            },
+            start: {
+              type: "number",
+              description: "Offset for pagination (default: 0)",
+            },
+          },
+          required: ["query"],
+        },
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
+        },
+      },
+      {
+        name: "get_market_metainfo",
+        description:
+          "Get metadata about a TradingView market screener, including available fields and their types. Useful for discovering what fields can be used in screening queries.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            market: {
+              type: "string",
+              description: "Market to get metainfo for (e.g., 'america', 'uk', 'germany', 'france')",
+            },
+            fields: {
+              type: "array",
+              items: { type: "string" },
+              description: "Optional: specific field names to look up. If omitted, returns all available fields.",
+            },
+            mode: {
+              type: "string",
+              enum: ["summary", "raw"],
+              description: "Output mode: 'summary' for normalized output (default), 'raw' for passthrough.",
+            },
+          },
+          required: ["market"],
+        },
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
+        },
+      },
+      {
+        name: "get_ta_summary",
+        description:
+          "Get TradingView-style technical analysis summary for one or more symbols across multiple timeframes. Returns buy/sell/neutral labels and recommendation scores based on oscillators and moving averages.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            symbols: {
+              type: "array",
+              items: { type: "string" },
+              description: "Array of ticker symbols (e.g., ['NASDAQ:AAPL', 'NASDAQ:NVDA']). Maximum 50 symbols.",
+            },
+            timeframes: {
+              type: "array",
+              items: { type: "string" },
+              description: "Timeframes for TA analysis. Valid: '1', '3', '5', '15', '30', '45', '60', '120', '180', '240', '1D', '1W', '1M'. Default: ['60', '240', '1D', '1W']",
+            },
+            include_components: {
+              type: "boolean",
+              description: "Include oscillator and moving average scores breakdown (default: true)",
+            },
+          },
+          required: ["symbols"],
+        },
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
+        },
+      },
+      {
+        name: "rank_by_ta",
+        description:
+          "Rank symbols by weighted technical analysis scores across timeframes. Useful for comparing which symbols have the strongest overall TA signals.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            symbols: {
+              type: "array",
+              items: { type: "string" },
+              description: "Array of ticker symbols to rank (e.g., ['NASDAQ:AAPL', 'NASDAQ:MSFT', 'NASDAQ:NVDA']). Maximum 50.",
+            },
+            timeframes: {
+              type: "array",
+              items: { type: "string" },
+              description: "Timeframes for TA analysis (default: ['60', '240', '1D', '1W'])",
+            },
+            weights: {
+              type: "object",
+              description: "Per-timeframe weights for ranking. Unspecified timeframes default to weight 1. Example: {\"1D\": 3, \"1W\": 2}",
+            },
+          },
+          required: ["symbols"],
+        },
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
+        },
+      },
+
     ],
   };
 });
@@ -526,6 +662,54 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "lookup_symbols": {
         const result = await screenTool.lookupSymbols(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "search_symbols": {
+        const result = await searchTool.searchSymbols(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "get_market_metainfo": {
+        const result = await metainfoTool.getMetainfo(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "get_ta_summary": {
+        const result = await taTool.getTASummary(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "rank_by_ta": {
+        const result = await taTool.rankByTA(args as any);
         return {
           content: [
             {

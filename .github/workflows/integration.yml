@@ -1,0 +1,73 @@
+name: Integration Tests
+
+on:
+  # Run weekly on Saturday at 12:00 UTC
+  schedule:
+    - cron: "0 12 * * 6"
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+  # Run as a PR check unless the PR is explicitly labeled to skip it
+  pull_request:
+    types: [ready_for_review, labeled]
+    branches: [main]
+
+# Only run one at a time
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  integration:
+    # Skip PR checks when the PR has the skip label
+    if: >
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'pull_request' &&
+        (
+          github.event.action == 'ready_for_review' ||
+          github.event.label.name == 'run-integration'
+        )
+      )
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run integration tests
+        env:
+          TV_INTEGRATION: "1"
+        run: npx tsx --test src/tests/integration/core-tools.test.ts
+
+      - name: Comment PR with results
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const outcome = "${{ job.status }}" === "success" ? "✅ Passed" : "❌ Failed";
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `### Integration Test Results\n\n${outcome} — hit real TradingView API endpoints.\n\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`
+            });

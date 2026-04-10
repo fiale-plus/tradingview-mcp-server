@@ -51,10 +51,16 @@ Standalone CLI using Node's built-in `util.parseArgs`. Reuses the same tool clas
 
 **API Layer** (`src/api/`)
 - `client.ts` - HTTP client for TradingView scanner API endpoints (`/global/scan`, `/forex/scan`, `/crypto/scan`)
+- `search.ts` - Symbol search via TradingView symbol-search v3 endpoint
+- `metainfo.ts` - Market metainfo via scanner `/metainfo` endpoint
+- `ta.ts` - Technical analysis summary and ranking via scanner Recommend.All/Other/MA fields
 - `types.ts` - TypeScript interfaces for API requests/responses
 
 **Tools** (`src/tools/`)
 - `screen.ts` - Stock/forex/crypto/ETF screening and symbol lookup. Contains `OPERATOR_MAP` for filter operators and `DEFAULT_COLUMNS`/`EXTENDED_COLUMNS` for response fields
+- `search.ts` - Symbol search tool wrapper (MCP + CLI)
+- `metainfo.ts` - Market metainfo tool wrapper
+- `ta.ts` - Technical analysis summary (`get_ta_summary`) and ranking (`rank_by_ta`) tool wrappers
 - `fields.ts` - Field metadata and listing (~100 fields across fundamental/technical/performance categories, for stock/etf/crypto/forex asset types)
 
 **Resources** (`src/resources/`)
@@ -72,6 +78,10 @@ Standalone CLI using Node's built-in `util.parseArgs`. Reuses the same tool clas
 5. `lookup_symbols` - Direct symbol lookup (for indexes like TVC:SPX)
 6. `list_fields` - List available screening fields (`asset_type`: stock, forex, crypto, etf)
 7. `get_preset` / `list_presets` - Access pre-configured strategies
+8. `search_symbols` - Search for TradingView symbols by name/ticker/description
+9. `get_market_metainfo` - Get metadata about a market screener and available fields
+10. `get_ta_summary` - TradingView-style technical analysis summary with buy/sell/neutral labels
+11. `rank_by_ta` - Rank symbols by weighted TA scores across timeframes
 
 ### Filter Operators
 `OPERATOR_MAP` in `src/tools/screen.ts` maps 18 MCP operators to TradingView API operations:
@@ -111,6 +121,15 @@ Add to `PRESETS` in `src/resources/presets.ts` with filters array, markets, sort
 1. Create implementation in `src/tools/`
 2. Register in `ListToolsRequestSchema` handler in `src/index.ts`
 3. Add case in `CallToolRequestSchema` handler
+
+### When to use each tool:
+- `search_symbols` — discover exact symbol identifiers before screening
+- `lookup_symbols` — get current data for known tickers (including indexes)
+- `screen_stocks/forex/crypto/etf` — find securities matching criteria
+- `get_ta_summary` — get technical consensus (buy/sell/neutral) for specific symbols
+- `rank_by_ta` — compare and rank symbols by multi-timeframe TA alignment
+- `get_market_metainfo` — discover available fields for a market
+- `list_fields` — browse field metadata by category
 
 ## Claude Code Commands
 
