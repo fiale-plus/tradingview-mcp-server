@@ -27,6 +27,7 @@
 - [CLI Usage](#cli-usage)
 - [Configuration](#configuration)
 - [MCP Tools](#mcp-tools)
+- [Experimental Lab Features](#experimental-lab-features)
 - [Screening Fields](#screening-fields)
 - [Pre-built Strategies](#pre-built-strategies)
 - [Investor Commands](#investor-commands)
@@ -45,6 +46,7 @@
 - **Symbol discovery** — search for TradingView symbols by name, ticker, or description via `search_symbols`
 - **Technical analysis** — TradingView-style buy/sell/neutral summaries and multi-timeframe TA ranking via `get_ta_summary` and `rank_by_ta`
 - **Market metadata** — discover available screener fields per market via `get_market_metainfo`
+- **Experimental WebSocket lab tools** — opt-in historical bars and bounded streams via `experimental_get_bars`, `experimental_stream_quotes`, and `experimental_stream_bars`
 - **9 investor workflow commands** — from `/due-diligence` to `/macro-dashboard` — built on top of the MCP tools
 - **Multi-asset coverage** — stocks, ETFs, forex, and crypto with asset-specific field discovery via `list_fields`
 - **Smart caching and rate limiting** — configurable TTL and requests-per-minute to keep usage responsible
@@ -106,6 +108,11 @@ tradingview-cli ta NASDAQ:AAPL NASDAQ:NVDA
 
 # Rank symbols by TA score
 tradingview-cli rank-ta NASDAQ:AAPL NASDAQ:MSFT NASDAQ:NVDA --timeframes 60,1D --weights '{"1D":3}'
+
+# Experimental WebSocket tools (requires TV_EXPERIMENTAL_ENABLED=1)
+tradingview-cli experimental bars BINANCE:BTCUSDT --timeframe 60
+tradingview-cli experimental stream-quotes NASDAQ:AAPL --duration 10
+tradingview-cli experimental stream-bars BINANCE:BTCUSDT --timeframe 1 --duration 30
 ```
 
 ### Output Formats
@@ -134,6 +141,9 @@ tradingview-cli screen stocks --preset value_stocks -f table
 | `metainfo <market> [opts]` | Get metadata about a market screener |
 | `ta <symbols...> [opts]` | Get technical analysis summary for symbols |
 | `rank-ta <symbols...> [opts]` | Rank symbols by weighted TA scores |
+| `experimental bars <symbol> [opts]` | Fetch historical OHLCV bars via TradingView WebSocket |
+| `experimental stream-quotes <symbol...> [opts]` | Stream bounded real-time quotes |
+| `experimental stream-bars <symbol> [opts]` | Stream bounded bar updates |
 | `fields [opts]` | List available screening fields |
 | `preset <name>` | Get a preset strategy's details |
 | `presets` | List all available presets |
@@ -199,12 +209,17 @@ Enable in `.claude/settings.local.json`:
 |---|---|---|
 | `CACHE_TTL_SECONDS` | `300` | How long to cache API responses (seconds) |
 | `RATE_LIMIT_RPM` | `10` | Maximum API requests per minute |
+| `TV_EXPERIMENTAL_ENABLED` | `false` | Enable experimental WebSocket tools (`1`/`true` to enable) |
+| `TV_WS_ENDPOINT` | `data` | WebSocket server: `data`, `prodata`, or `widgetdata` |
+| `TV_WS_TIMEOUT_MS` | `10000` | WebSocket connection timeout in milliseconds |
+| `TV_SESSION_ID` | — | TradingView session ID for authenticated access |
+| `TV_SESSION_SIGN` | — | TradingView session signature for authenticated access |
 
 ---
 
 ## MCP Tools
 
-Twelve tools are exposed to Claude:
+Fifteen tools are exposed to Claude:
 
 | Tool | Description | Key Parameters |
 |---|---|---|
@@ -220,6 +235,9 @@ Twelve tools are exposed to Claude:
 | `rank_by_ta` | Rank symbols by weighted TA scores across timeframes | `symbols`, `timeframes`, `weights` |
 | `get_preset` | Retrieve a pre-configured screening strategy by key | `preset_name` |
 | `list_presets` | List all available preset strategies with descriptions | — |
+| `experimental_get_bars` | Fetch historical OHLCV bars via WebSocket (experimental) | `symbol`, `timeframe`, `limit`, `extended_session` |
+| `experimental_stream_quotes` | Collect bounded quote updates via WebSocket (experimental) | `symbols`, `fields`, `duration_seconds` |
+| `experimental_stream_bars` | Collect bounded bar updates via WebSocket (experimental) | `symbol`, `timeframe`, `duration_seconds`, `mode` |
 
 ### Filter Structure
 
@@ -290,6 +308,33 @@ Use `rank_by_ta` to compare symbols by weighted technical alignment:
 ```
 
 Returns ranked list with per-timeframe breakdown and weighted average score.
+
+---
+
+## Experimental Lab Features
+
+These tools are opt-in and require `TV_EXPERIMENTAL_ENABLED=1`.
+
+### `experimental_get_bars`
+Fetch historical OHLCV bars via TradingView WebSocket.
+
+```json
+{ "symbol": "BINANCE:BTCUSDT", "timeframe": "60", "limit": 300, "extended_session": false }
+```
+
+### `experimental_stream_quotes`
+Collect bounded quote updates for one or more symbols.
+
+```json
+{ "symbols": ["NASDAQ:AAPL"], "fields": ["lp", "bid", "ask"], "duration_seconds": 10 }
+```
+
+### `experimental_stream_bars`
+Collect bounded bar updates in rolling or close-only mode.
+
+```json
+{ "symbol": "BINANCE:BTCUSDT", "timeframe": "1", "duration_seconds": 30, "mode": "rolling" }
+```
 
 ---
 
@@ -429,6 +474,12 @@ Run a single test file:
 
 ```bash
 npm test -- fields.test.ts
+```
+
+Run experimental lab integration tests:
+
+```bash
+npm run test:integration:lab
 ```
 
 After making changes, restart Claude to reload the MCP server (no hot-reload).
