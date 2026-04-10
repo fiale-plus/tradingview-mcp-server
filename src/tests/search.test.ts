@@ -1,7 +1,7 @@
 import { describe, it, mock } from "node:test";
 import assert from "node:assert";
 import { SearchTool } from "../tools/search.js";
-import { normalizeSearchResults } from "../api/search.js";
+import { filterSearchResults, normalizeSearchResults } from "../api/search.js";
 import type { SearchClient } from "../api/search.js";
 import type { Cache } from "../utils/cache.js";
 import type { RateLimiter } from "../utils/rateLimit.js";
@@ -146,5 +146,23 @@ describe("SearchClient - pagination normalization", () => {
     assert.strictEqual(results.count, 3);
     assert.strictEqual(results.symbols.length, 1);
     assert.strictEqual(results.symbols[0].symbol, "NASDAQ:MSFT");
+  });
+});
+
+describe("SearchClient - asset type filtering", () => {
+  it("should narrow mixed results to the requested asset type", () => {
+    const rawResults = [
+      { symbol: "NASDAQ:AAPL", ticker: "AAPL", exchange: "NASDAQ", type: "stock" },
+      { symbol: "BINANCE:BTCUSDT", ticker: "BTCUSDT", exchange: "CRYPTO", type: "spot" },
+      { symbol: "NYSE:SPY", ticker: "SPY", exchange: "NYSE", type: "fund" },
+    ];
+
+    const filtered = filterSearchResults(rawResults, "crypto");
+    const normalized = normalizeSearchResults(filtered, 0, 10);
+
+    assert.strictEqual(filtered.length, 1);
+    assert.strictEqual(normalized.count, 1);
+    assert.strictEqual(normalized.symbols[0].symbol, "CRYPTO:BTCUSDT");
+    assert.strictEqual(normalized.symbols[0].exchange, "CRYPTO");
   });
 });

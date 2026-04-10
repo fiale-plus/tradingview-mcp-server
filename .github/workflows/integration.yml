@@ -6,9 +6,9 @@ on:
     - cron: "0 12 * * 6"
   # Allow manual trigger from GitHub UI
   workflow_dispatch:
-  # Allow triggering from PRs with a label
+  # Run as a PR check unless the PR is explicitly labeled to skip it
   pull_request:
-    types: [labeled]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 # Only run one at a time
 concurrency:
@@ -17,11 +17,14 @@ concurrency:
 
 jobs:
   integration:
-    # Only run if: scheduled, manual dispatch, or PR has 'run-integration' label
+    # Skip PR checks when the PR has the skip label
     if: >
       github.event_name == 'schedule' ||
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' && github.event.label.name == 'run-integration')
+      (
+        github.event_name == 'pull_request' &&
+        !contains(github.event.pull_request.labels.*.name, 'skip-integration')
+      )
 
     runs-on: ubuntu-latest
     timeout-minutes: 10

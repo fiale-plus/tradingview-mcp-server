@@ -59,6 +59,29 @@ const TYPE_MAP: Record<string, string> = {
   bond: "bond",
 };
 
+function inferAssetType(item: any): string {
+  const rawType = item.type?.toLowerCase() || "";
+  const exchange = (item.exchange || item.exchange_name || "").toLowerCase();
+
+  if (rawType === "spot" || exchange === "crypto") return "crypto";
+  if (rawType === "fund" || rawType === "etf") return "etf";
+  if (rawType === "dr") return "stock";
+  if (rawType === "bond") return "bond";
+
+  return TYPE_MAP[rawType] || rawType || "unknown";
+}
+
+export function filterSearchResults(
+  rawResults: any[],
+  assetType?: SearchSymbolsInput["asset_type"]
+): any[] {
+  if (!assetType) {
+    return rawResults;
+  }
+
+  return rawResults.filter((item) => inferAssetType(item) === assetType);
+}
+
 export function normalizeSearchResults(
   rawResults: any[],
   start: number,
@@ -116,13 +139,6 @@ export class SearchClient {
       exchange: exchange || "",
     });
 
-    if (asset_type) {
-      // TradingView symbol-search v3 rejects the 'type' param with 400
-      // ("forbidden_set_type_with_search_type_api"). We keep the param
-      // in our interface for forward-compat but skip sending it for now.
-      // Filtering by type is done client-side after results arrive.
-    }
-
     const url = `${SEARCH_BASE}/symbol_search/v3/?${params.toString()}`;
 
     const controller = new AbortController();
@@ -150,7 +166,8 @@ export class SearchClient {
       // TradingView symbol search v3 returns an array of results
       // Each result has: symbol, type, exchange, description, currency, etc.
       const rawResults: any[] = Array.isArray(data) ? data : (data.symbols || data.results || []);
-      const normalized = normalizeSearchResults(rawResults, start, clampedLimit);
+      const filteredResults = filterSearchResults(rawResults, asset_type);
+      const normalized = normalizeSearchResults(filteredResults, start, clampedLimit);
 
       return {
         query: query.trim(),

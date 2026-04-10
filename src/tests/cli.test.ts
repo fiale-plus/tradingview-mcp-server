@@ -15,6 +15,9 @@ import {
   buildScreenInput,
   buildLookupInput,
   buildFieldsInput,
+  buildMetainfoInput,
+  buildTAInput,
+  buildRankTAInput,
 } from "../cli/parseArgs.js";
 import {
   formatOutput,
@@ -293,6 +296,36 @@ describe("CLI - Input Builders", () => {
       const result = buildFieldsInput({});
       assert.strictEqual(result.asset_type, undefined);
       assert.strictEqual(result.category, undefined);
+    });
+  });
+
+  describe("buildMetainfoInput", () => {
+    it("should split comma-separated --fields values", () => {
+      const result = buildMetainfoInput(
+        ["america"],
+        { fields: ["name,close,market_cap_basic"] }
+      );
+      assert.deepStrictEqual(result.fields, ["name", "close", "market_cap_basic"]);
+    });
+  });
+
+  describe("buildTAInput", () => {
+    it("should split comma-separated timeframes", () => {
+      const result = buildTAInput(
+        ["NASDAQ:AAPL"],
+        { timeframes: ["60,1D"] }
+      );
+      assert.deepStrictEqual(result.timeframes, ["60", "1D"]);
+    });
+  });
+
+  describe("buildRankTAInput", () => {
+    it("should split comma-separated timeframes", () => {
+      const result = buildRankTAInput(
+        ["NASDAQ:AAPL", "NASDAQ:MSFT"],
+        { timeframes: ["60,240,1D"] }
+      );
+      assert.deepStrictEqual(result.timeframes, ["60", "240", "1D"]);
     });
   });
 });

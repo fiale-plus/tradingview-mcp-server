@@ -83,6 +83,16 @@ function parseWithRepeatableArgs(
   });
 }
 
+function splitCommaSeparatedValues(values: string[] | undefined): string[] | undefined {
+  if (!values) {
+    return undefined;
+  }
+
+  return values.flatMap((value) =>
+    value.split(",").map((part) => part.trim()).filter(Boolean)
+  );
+}
+
 export const TOP_LEVEL_OPTIONS = {
   help: { type: "boolean" as const, short: "h" },
   version: { type: "boolean" as const, short: "v" },
@@ -352,17 +362,9 @@ export function buildMetainfoInput(positionals: string[], values: Record<string,
     throw new Error("No market provided. Usage: tradingview-cli metainfo <market>");
   }
 
-  // Support both --fields name --fields close AND --fields name,close
-  let fields: string[] | undefined;
-  if (values.fields) {
-    fields = (values.fields as string[]).flatMap((f: string) =>
-      f.includes(",") ? f.split(",").map((s) => s.trim()) : [f]
-    );
-  }
-
   return {
     market,
-    fields,
+    fields: splitCommaSeparatedValues(values.fields as string[] | undefined),
     mode: (values.mode as "summary" | "raw") || undefined,
   };
 }
@@ -377,7 +379,7 @@ export function buildTAInput(positionals: string[], values: Record<string, any>)
   }
   return {
     symbols,
-    timeframes: values.timeframes as string[] | undefined,
+    timeframes: splitCommaSeparatedValues(values.timeframes as string[] | undefined),
     include_components: values["no-components"] ? false : true,
   };
 }
@@ -400,7 +402,7 @@ export function buildRankTAInput(positionals: string[], values: Record<string, a
   }
   return {
     symbols,
-    timeframes: values.timeframes as string[] | undefined,
+    timeframes: splitCommaSeparatedValues(values.timeframes as string[] | undefined),
     weights,
   };
 }
