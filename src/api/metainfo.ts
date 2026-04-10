@@ -111,10 +111,12 @@ export class MetainfoClient {
           if (typeof field === "string") {
             fields.push({ name: field });
           } else if (field && typeof field === "object") {
+            // TradingView metainfo uses compact keys: n=name, t=type, r=range
+            // Some endpoints use verbose keys: propName, title, kind
             fields.push({
-              name: field.name || field.id || field.propName || String(field),
-              label: field.title || field.shortName || field.label || field.name,
-              type: field.kind || field.type || field.dataType,
+              name: field.n || field.name || field.id || field.propName || String(field),
+              label: field.title || field.shortName || field.label || field.n || field.name,
+              type: field.t || field.kind || field.type || field.dataType,
               description: field.description || field.shortDescription,
             });
           }

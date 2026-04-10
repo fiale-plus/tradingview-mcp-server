@@ -351,9 +351,18 @@ export function buildMetainfoInput(positionals: string[], values: Record<string,
   if (!market) {
     throw new Error("No market provided. Usage: tradingview-cli metainfo <market>");
   }
+
+  // Support both --fields name --fields close AND --fields name,close
+  let fields: string[] | undefined;
+  if (values.fields) {
+    fields = (values.fields as string[]).flatMap((f: string) =>
+      f.includes(",") ? f.split(",").map((s) => s.trim()) : [f]
+    );
+  }
+
   return {
     market,
-    fields: values.fields as string[] | undefined,
+    fields,
     mode: (values.mode as "summary" | "raw") || undefined,
   };
 }

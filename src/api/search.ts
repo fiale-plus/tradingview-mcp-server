@@ -66,6 +66,9 @@ export function normalizeSearchResults(
 ): NormalizedSearchResults {
   const totalMatches = rawResults.length;
 
+  // Strip HTML emphasis tags from TradingView highlighting
+  const stripTags = (s: string) => s.replace(/<\/?em>/g, "");
+
   const symbols: SearchSymbolResult[] = rawResults
     .slice(start, start + limit)
     .map((item: any) => {
@@ -76,12 +79,12 @@ export function normalizeSearchResults(
         : tickerName;
 
       return {
-        symbol: fullSymbol,
-        ticker: tickerName,
-        description: item.description || item.name || "",
-        exchange: exchangeName,
+        symbol: stripTags(fullSymbol),
+        ticker: stripTags(tickerName),
+        description: stripTags(item.description || item.name || ""),
+        exchange: stripTags(exchangeName),
         type: TYPE_MAP[item.type?.toLowerCase() || ""] || item.type?.toLowerCase() || "unknown",
-        currency: item.currency || undefined,
+        currency: item.currency || item.currency_code || undefined,
       };
     });
 
@@ -114,7 +117,10 @@ export class SearchClient {
     });
 
     if (asset_type) {
-      params.set("type", asset_type);
+      // TradingView symbol-search v3 rejects the 'type' param with 400
+      // ("forbidden_set_type_with_search_type_api"). We keep the param
+      // in our interface for forward-compat but skip sending it for now.
+      // Filtering by type is done client-side after results arrive.
     }
 
     const url = `${SEARCH_BASE}/symbol_search/v3/?${params.toString()}`;
@@ -127,6 +133,8 @@ export class SearchClient {
         method: "GET",
         headers: {
           "User-Agent": `tradingview-mcp-server/${pkg.version}`,
+          "Origin": "https://www.tradingview.com",
+          "Referer": "https://www.tradingview.com/",
         },
         signal: controller.signal,
       });
