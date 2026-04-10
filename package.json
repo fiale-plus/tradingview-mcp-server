@@ -46,11 +46,13 @@
   "author": "Community",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.28.0",
-    "node-fetch": "^3.3.2"
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "node-fetch": "^3.3.2",
+    "ws": "8.20.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.19",
+    "@types/ws": "8.18.1",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3"
   },
