@@ -42,6 +42,9 @@
 - **100+ screener fields** including Piotroski F-Score, Altman Z-Score, Graham Number, analyst consensus, and dividend growth streaks
 - **18 filter operators** including `crosses_above` / `crosses_below` for golden cross detection
 - **14 pre-built strategies** covering value, growth, quality, GARP, deep value, breakouts, compounders, and macro monitoring
+- **Symbol discovery** — search for TradingView symbols by name, ticker, or description via `search_symbols`
+- **Technical analysis** — TradingView-style buy/sell/neutral summaries and multi-timeframe TA ranking via `get_ta_summary` and `rank_by_ta`
+- **Market metadata** — discover available screener fields per market via `get_market_metainfo`
 - **9 investor workflow commands** — from `/due-diligence` to `/macro-dashboard` — built on top of the MCP tools
 - **Multi-asset coverage** — stocks, ETFs, forex, and crypto with asset-specific field discovery via `list_fields`
 - **Smart caching and rate limiting** — configurable TTL and requests-per-minute to keep usage responsible
@@ -91,6 +94,18 @@ tradingview-cli lookup NASDAQ:AAPL TVC:SPX NYSE:MSFT
 
 # Discover available screening fields
 tradingview-cli fields --asset-type stock --category fundamental
+
+# Search for a symbol
+tradingview-cli search apple --exchange NASDAQ
+
+# Get market metadata
+tradingview-cli metainfo america --fields name,close,market_cap_basic
+
+# Technical analysis summary
+tradingview-cli ta NASDAQ:AAPL NASDAQ:NVDA
+
+# Rank symbols by TA score
+tradingview-cli rank-ta NASDAQ:AAPL NASDAQ:MSFT NASDAQ:NVDA --timeframes 60,1D --weights '{"1D":3}'
 ```
 
 ### Output Formats
@@ -115,6 +130,10 @@ tradingview-cli screen stocks --preset value_stocks -f table
 | `screen crypto [opts]` | Screen cryptocurrencies |
 | `screen etf [opts]` | Screen ETFs |
 | `lookup <symbols...>` | Look up specific symbols by ticker |
+| `search <query> [opts]` | Search for symbols by name, ticker, or description |
+| `metainfo <market> [opts]` | Get metadata about a market screener |
+| `ta <symbols...> [opts]` | Get technical analysis summary for symbols |
+| `rank-ta <symbols...> [opts]` | Rank symbols by weighted TA scores |
 | `fields [opts]` | List available screening fields |
 | `preset <name>` | Get a preset strategy's details |
 | `presets` | List all available presets |
@@ -185,7 +204,7 @@ Enable in `.claude/settings.local.json`:
 
 ## MCP Tools
 
-Eight tools are exposed to Claude:
+Twelve tools are exposed to Claude:
 
 | Tool | Description | Key Parameters |
 |---|---|---|
@@ -195,6 +214,10 @@ Eight tools are exposed to Claude:
 | `screen_etf` | Screen ETFs by performance and technical criteria | `filters`, `markets`, `sort_by`, `limit` |
 | `lookup_symbols` | Direct lookup by ticker — required for indexes like `TVC:SPX` | `symbols` (up to 100), `columns` |
 | `list_fields` | Discover available fields for any asset type | `asset_type` (`stock`, `forex`, `crypto`, `etf`), `category` |
+| `search_symbols` | Search for symbols by name, ticker, or description | `query`, `exchange`, `asset_type`, `limit` |
+| `get_market_metainfo` | Get metadata about a market screener and available fields | `market`, `fields`, `mode` (`summary`/`raw`) |
+| `get_ta_summary` | TradingView-style technical analysis summary (buy/sell/neutral) | `symbols`, `timeframes`, `include_components` |
+| `rank_by_ta` | Rank symbols by weighted TA scores across timeframes | `symbols`, `timeframes`, `weights` |
 | `get_preset` | Retrieve a pre-configured screening strategy by key | `preset_name` |
 | `list_presets` | List all available preset strategies with descriptions | — |
 
@@ -210,6 +233,63 @@ All screening tools accept filters in this shape:
 ```
 
 Cross-field comparison (second example above) enables golden cross / death cross detection without needing a value on the right-hand side.
+
+### Symbol Discovery
+
+Use `search_symbols` to find exact TradingView identifiers before screening:
+
+```json
+// Search for Apple
+{ "query": "apple" }
+
+// Narrow by exchange and type
+{ "query": "bitcoin", "exchange": "BINANCE", "asset_type": "crypto" }
+```
+
+Returns normalized symbols with exchange, type, and currency.
+
+### Market Metainfo
+
+Use `get_market_metainfo` to discover available fields for a market:
+
+```json
+// All fields for US stocks
+{ "market": "america" }
+
+// Specific fields only
+{ "market": "america", "fields": ["name", "close", "market_cap_basic"] }
+
+// Raw passthrough for debugging
+{ "market": "america", "mode": "raw" }
+```
+
+### Technical Analysis Summary
+
+Use `get_ta_summary` for TradingView-style buy/sell/neutral labels:
+
+```json
+// Single symbol, default timeframes (60m, 4H, 1D, 1W)
+{ "symbols": ["NASDAQ:AAPL"] }
+
+// Multiple symbols with custom timeframes
+{ "symbols": ["NASDAQ:AAPL", "NASDAQ:NVDA"], "timeframes": ["60", "240", "1D", "1W"] }
+```
+
+Returns labels (`strong_buy`, `buy`, `neutral`, `sell`, `strong_sell`) plus raw scores based on oscillators and moving averages.
+
+### TA Ranking
+
+Use `rank_by_ta` to compare symbols by weighted technical alignment:
+
+```json
+// Equal-weight ranking
+{ "symbols": ["NASDAQ:AAPL", "NASDAQ:MSFT", "NASDAQ:NVDA"] }
+
+// Weight daily timeframe 3x more
+{ "symbols": ["NASDAQ:AAPL", "NASDAQ:MSFT"], "weights": { "1D": 3, "1W": 2 } }
+```
+
+Returns ranked list with per-timeframe breakdown and weighted average score.
 
 ---
 

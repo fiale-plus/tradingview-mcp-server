@@ -9,7 +9,9 @@ import {
   parseScreenArgs,
   parseLookupArgs,
   parseFieldsArgs,
+  parseMetainfoArgs,
   parsePresetArgs,
+  parseTAArgs,
   buildScreenInput,
   buildLookupInput,
   buildFieldsInput,
@@ -71,7 +73,7 @@ describe("CLI - Argument Parsing", () => {
     });
 
     it("should parse multiple --columns", () => {
-      const { values } = parseScreenArgs(["--columns", "close", "--columns", "volume"]);
+      const { values } = parseScreenArgs(["--columns", "close", "volume"]);
       assert.deepStrictEqual(values.columns, ["close", "volume"]);
     });
 
@@ -98,11 +100,11 @@ describe("CLI - Argument Parsing", () => {
         "NASDAQ:AAPL",
         "--columns",
         "close",
-        "--columns",
         "change",
+        "volume",
       ]);
       assert.deepStrictEqual(positionals, ["NASDAQ:AAPL"]);
-      assert.deepStrictEqual(values.columns, ["close", "change"]);
+      assert.deepStrictEqual(values.columns, ["close", "change", "volume"]);
     });
   });
 
@@ -111,6 +113,35 @@ describe("CLI - Argument Parsing", () => {
       const { values } = parseFieldsArgs(["--asset-type", "forex", "--category", "technical"]);
       assert.strictEqual(values["asset-type"], "forex");
       assert.strictEqual(values.category, "technical");
+    });
+  });
+
+  describe("Metainfo args parsing", () => {
+    it("should parse space-separated --fields values", () => {
+      const { positionals, values } = parseMetainfoArgs([
+        "america",
+        "--fields",
+        "name",
+        "close",
+        "volume",
+      ]);
+      assert.deepStrictEqual(positionals, ["america"]);
+      assert.deepStrictEqual(values.fields, ["name", "close", "volume"]);
+    });
+  });
+
+  describe("TA args parsing", () => {
+    it("should parse space-separated --timeframes values", () => {
+      const { positionals, values } = parseTAArgs([
+        "NASDAQ:AAPL",
+        "--timeframes",
+        "60",
+        "240",
+        "1D",
+        "1W",
+      ]);
+      assert.deepStrictEqual(positionals, ["NASDAQ:AAPL"]);
+      assert.deepStrictEqual(values.timeframes, ["60", "240", "1D", "1W"]);
     });
   });
 
@@ -486,6 +517,7 @@ describe("CLI - End-to-End (child process)", () => {
     const { stdout } = await cli(["--help"]);
     assert.ok(stdout.includes("Usage: tradingview-cli"));
     assert.ok(stdout.includes("screen stocks"));
+    assert.ok(!stdout.includes("experimental bars"));
   });
 
   it("should show help with no args", async () => {
