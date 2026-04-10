@@ -42,6 +42,13 @@ Creates the MCP server, registers tools and resources, handles tool calls via st
 **CLI** — `src/cli.ts`
 Standalone CLI using Node's built-in `util.parseArgs`. Reuses the same tool classes. Output formats: JSON (default), CSV, table. No `cache.startCleanup()` (CLI is short-lived).
 
+Experimental CLI commands require `TV_EXPERIMENTAL_ENABLED=1`:
+```bash
+TV_EXPERIMENTAL_ENABLED=1 tradingview-cli experimental bars BINANCE:BTCUSDT --timeframe 60
+TV_EXPERIMENTAL_ENABLED=1 tradingview-cli experimental stream-quotes NASDAQ:AAPL --duration 10
+TV_EXPERIMENTAL_ENABLED=1 tradingview-cli experimental stream-bars BINANCE:BTCUSDT --timeframe 1 --duration 30
+```
+
 **CLI Helpers** (`src/cli/`)
 - `parseArgs.ts` - Option configs, input builders, preset merging
 - `formatters.ts` - JSON/CSV/table output formatters
@@ -56,11 +63,23 @@ Standalone CLI using Node's built-in `util.parseArgs`. Reuses the same tool clas
 - `ta.ts` - Technical analysis summary and ranking via scanner Recommend.All/Other/MA fields
 - `types.ts` - TypeScript interfaces for API requests/responses
 
+**WebSocket Layer** (`src/ws/`) — EXPERIMENTAL
+- `types.ts` - Bar, Quote, Timeframe, and configuration types
+- `errors.ts` - TvWsError, ConnectionError, AuthError, SymbolError, TimeoutError
+- `protocol.ts` - Packet encode/decode, session ID generation, message creation helpers
+- `auth.ts` - Auth token handling and experimental feature gating
+- `client.ts` - TvWsClient WebSocket connection with session dispatch
+- `session.ts` - ChartSession and QuoteSession for bar data and quote streaming
+- `parser.ts` - Bar and quote data parsing from raw WebSocket messages
+- `index.ts` - Barrel export for the ws module
+
 **Tools** (`src/tools/`)
 - `screen.ts` - Stock/forex/crypto/ETF screening and symbol lookup. Contains `OPERATOR_MAP` for filter operators and `DEFAULT_COLUMNS`/`EXTENDED_COLUMNS` for response fields
 - `search.ts` - Symbol search tool wrapper (MCP + CLI)
 - `metainfo.ts` - Market metainfo tool wrapper
 - `ta.ts` - Technical analysis summary (`get_ta_summary`) and ranking (`rank_by_ta`) tool wrappers
+- `bars.ts` - Experimental `experimental_get_bars` tool (WebSocket, gated by TV_EXPERIMENTAL_ENABLED)
+- `stream.ts` - Experimental `experimental_stream_quotes` and `experimental_stream_bars` tools (WebSocket, gated)
 - `fields.ts` - Field metadata and listing (~100 fields across fundamental/technical/performance categories, for stock/etf/crypto/forex asset types)
 
 **Resources** (`src/resources/`)
@@ -82,6 +101,9 @@ Standalone CLI using Node's built-in `util.parseArgs`. Reuses the same tool clas
 9. `get_market_metainfo` - Get metadata about a market screener and available fields
 10. `get_ta_summary` - TradingView-style technical analysis summary with buy/sell/neutral labels
 11. `rank_by_ta` - Rank symbols by weighted TA scores across timeframes
+12. `experimental_get_bars` - [EXPERIMENTAL] Fetch historical OHLCV bars via WebSocket (requires `TV_EXPERIMENTAL_ENABLED=1`)
+13. `experimental_stream_quotes` - [EXPERIMENTAL] Stream real-time quotes (bounded duration) via WebSocket (requires `TV_EXPERIMENTAL_ENABLED=1`)
+14. `experimental_stream_bars` - [EXPERIMENTAL] Stream bar updates (bounded duration) via WebSocket (requires `TV_EXPERIMENTAL_ENABLED=1`)
 
 ### Filter Operators
 `OPERATOR_MAP` in `src/tools/screen.ts` maps 18 MCP operators to TradingView API operations:
@@ -103,6 +125,13 @@ The `empty` and `not_empty` operators require no `value` property.
 Environment variables (set in `.mcp.json`):
 - `CACHE_TTL_SECONDS` - Cache duration (default: 300)
 - `RATE_LIMIT_RPM` - Requests per minute (default: 10)
+
+Experimental (WebSocket features):
+- `TV_EXPERIMENTAL_ENABLED` - Enable experimental tools (default: false, set to `1` or `true` to enable)
+- `TV_SESSION_ID` - TradingView session ID for authenticated access
+- `TV_SESSION_SIGN` - TradingView session signature
+- `TV_WS_TIMEOUT_MS` - WebSocket timeout in milliseconds (default: 10000)
+- `TV_WS_ENDPOINT` - WebSocket server: `data`, `prodata`, or `widgetdata` (default: `data`)
 
 ## Testing
 
