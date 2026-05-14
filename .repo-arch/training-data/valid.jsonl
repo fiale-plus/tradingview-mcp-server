@@ -1,0 +1,7 @@
+{"messages":[{"role":"user","content":"Is there test coverage for packages/unknown/pkg.ts?"},{"role":"assistant","content":"No historical warnings found. Standard review applies."}]}
+{"messages":[{"role":"user","content":"Is there test coverage for src/new-feature.ts?"},{"role":"assistant","content":"No historical warnings found. Standard review applies."}]}
+{"messages":[{"role":"user","content":"Can you review src/unknown-file.ts and tell me the risk?"},{"role":"assistant","content":"No historical warnings found. Standard review applies."}]}
+{"messages":[{"role":"user","content":"What should I know before modifying packages/unknown/pkg.ts?"},{"role":"assistant","content":"No historical warnings found. Standard review applies."}]}
+{"messages":[{"role":"user","content":"Review this change touching src/new-feature.ts.\nWhat risks should I check?"},{"role":"assistant","content":"No historical warnings found. Standard review applies."}]}
+{"messages":[{"role":"user","content":"What should I know before modifying src/new-feature.ts?"},{"role":"assistant","content":"No historical warnings found. Standard review applies."}]}
+{"messages":[{"role":"user","content":"What should I know before modifying packages/missing/module.ts?"},{"role":"assistant","content":"No historical warnings found. Standard review applies."}]}
