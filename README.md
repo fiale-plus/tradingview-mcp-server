@@ -24,6 +24,7 @@
 
 ## Table of Contents
 
+- [Demo](#demo)
 - [Features](#features)
 - [Installation](#installation)
 - [CLI Usage](#cli-usage)
@@ -37,6 +38,12 @@
 - [Disclaimer](#disclaimer)
 
 ---
+
+## Demo
+
+<div align="center">
+  <img src="docs/images/demo.webp" alt="TradingView MCP Server Demo" width="100%">
+</div>
 
 ## Features
 
