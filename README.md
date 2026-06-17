@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/images/demo.webp" alt="TradingView MCP Server Demo" width="100%">
+  <img src="docs/images/banner.svg" alt="TradingView MCP Server banner" width="100%">
 </div>
 
 <div align="center">
@@ -18,10 +18,13 @@
 
 </div>
 
+# TradingView MCP Server
+
 ---
 
 ## Table of Contents
 
+- [Demo](#demo)
 - [Features](#features)
 - [Installation](#installation)
 - [CLI Usage](#cli-usage)
@@ -35,6 +38,12 @@
 - [Disclaimer](#disclaimer)
 
 ---
+
+## Demo
+
+<div align="center">
+  <img src="docs/images/demo.webp" alt="TradingView MCP Server Demo" width="100%">
+</div>
 
 ## Features
 
