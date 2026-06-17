@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/images/demo.webp" alt="TradingView MCP Server Demo" width="100%">
+  <img src="docs/images/banner.svg" alt="TradingView MCP Server banner" width="100%">
 </div>
 
 <div align="center">
@@ -17,6 +17,8 @@
 **Two modes, one package:** Use as an MCP server with Claude, or as a standalone CLI tool that pipes to `jq`, `csvtool`, or any Unix workflow.
 
 </div>
+
+# TradingView MCP Server
 
 ---
 
