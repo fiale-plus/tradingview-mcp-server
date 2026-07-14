@@ -11,12 +11,13 @@ export interface Preset {
   filters?: Array<{
     field: string;
     operator: string;
-    value: number | string | boolean | [number, number] | string[];
+    value?: number | string | boolean | [number, number] | [string, number] | string[];
   }>;
   symbols?: string[]; // For direct symbol lookup (e.g., indexes)
   markets?: string[];
   sort_by?: string;
   sort_order?: "asc" | "desc";
+  limit?: number;
   columns?: string[]; // Optional: override default columns for this preset
 }
 

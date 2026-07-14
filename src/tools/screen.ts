@@ -86,6 +86,47 @@ export const EXTENDED_COLUMNS = [
   "fundamental_currency_code",
 ];
 
+export function validateScreenFilters(
+  filters: ScreenStocksInput["filters"]
+): Filter[] {
+  return filters.map((f, index) => {
+    if (!f || typeof f !== "object" || Array.isArray(f)) {
+      throw new Error(
+        `Invalid filter at index ${index}: expected object with {field, operator, value}, got ${typeof f}`
+      );
+    }
+
+    if (!f.field || !f.operator) {
+      throw new Error(
+        `Invalid filter at index ${index}: missing required properties (field: ${f.field}, operator: ${f.operator}, value: ${f.value})`
+      );
+    }
+    if (typeof f.field !== "string" || typeof f.operator !== "string") {
+      throw new Error(`Invalid filter at index ${index}: field and operator must be non-empty strings`);
+    }
+    const noValueOperators = ["empty", "not_empty"];
+    if (f.value === undefined && !noValueOperators.includes(f.operator)) {
+      throw new Error(
+        `Invalid filter at index ${index}: missing required properties (field: ${f.field}, operator: ${f.operator}, value: ${f.value})`
+      );
+    }
+
+    if (!Object.hasOwn(OPERATOR_MAP, f.operator)) {
+      throw new Error(
+        `Unknown operator: ${f.operator}. Valid operators: ${Object.keys(OPERATOR_MAP).join(", ")}`
+      );
+    }
+    const operation = OPERATOR_MAP[f.operator];
+    if (!operation) {
+      throw new Error(
+        `Unknown operator: ${f.operator}. Valid operators: ${Object.keys(OPERATOR_MAP).join(", ")}`
+      );
+    }
+
+    return { left: f.field, operation, right: f.value };
+  });
+}
+
 export class ScreenTool {
   constructor(
     private client: TradingViewClient,
@@ -100,34 +141,7 @@ export class ScreenTool {
   private validateAndConvertFilters(
     filters: ScreenStocksInput["filters"]
   ): Filter[] {
-    return filters.map((f, index) => {
-      // Validate filter structure
-      if (!f || typeof f !== "object" || Array.isArray(f)) {
-        throw new Error(
-          `Invalid filter at index ${index}: expected object with {field, operator, value}, got ${typeof f}`
-        );
-      }
-
-      const noValueOperators = ["empty", "not_empty"];
-      if (!f.field || !f.operator || (f.value === undefined && !noValueOperators.includes(f.operator))) {
-        throw new Error(
-          `Invalid filter at index ${index}: missing required properties (field: ${f.field}, operator: ${f.operator}, value: ${f.value})`
-        );
-      }
-
-      const operation = OPERATOR_MAP[f.operator];
-      if (!operation) {
-        throw new Error(
-          `Unknown operator: ${f.operator}. Valid operators: ${Object.keys(OPERATOR_MAP).join(", ")}`
-        );
-      }
-
-      return {
-        left: f.field,
-        operation,
-        right: f.value,
-      };
-    });
+    return validateScreenFilters(filters);
   }
 
   async screenStocks(input: ScreenStocksInput): Promise<any> {

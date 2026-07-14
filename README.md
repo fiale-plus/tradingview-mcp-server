@@ -95,6 +95,9 @@ tradingview-cli presets
 # Screen stocks using a preset
 tradingview-cli screen stocks --preset quality_stocks --limit 10
 
+# Or load a strict versioned JSON preset file
+tradingview-cli screen stocks --preset-file ./my-preset.json --limit 10
+
 # Screen with custom filters
 tradingview-cli screen stocks --filters '[{"field":"price_earnings_ttm","operator":"less","value":15}]'
 
@@ -152,7 +155,8 @@ tradingview-cli screen stocks --preset value_stocks -f table
 | Flag | Description |
 |---|---|
 | `--filters <json>` | Filter array as JSON string |
-| `--preset <name>` | Load a preset (merges with `--filters`) |
+| `--preset <name>` | Load a built-in preset (exclusive with `--preset-file`) |
+| `--preset-file <path>` | Load a strict `schemaVersion: 1` JSON preset file (exclusive with `--preset`) |
 | `--markets <market>` | Market to screen (repeatable, stocks/etf only) |
 | `--sort-by <field>` | Sort by field |
 | `--sort-order <asc\|desc>` | Sort direction |

@@ -27,7 +27,7 @@ Screen stocks based on fundamental and technical criteria. Returns stocks matchi
 |-------|------|----------|-------|
 | `field` | `string` | Yes | Field name to filter on. String fields (sector, exchange, industry, market) support `equal` and `in_range`. Cross-field comparison: use another field name as value (e.g., `SMA50 crosses_above SMA200`). |
 | `operator` | `string` | Yes | One of the 18 supported operators (see Operators section) |
-| `value` | `number \| string \| [number, number] \| string[]` | Conditional | Not required for `empty` and `not_empty` operators. Use array `[min, max]` for `in_range`. |
+| `value` | `number \| string \| boolean \| [number, number] \| [string, number] \| string[]` | Conditional | Not required for `empty` and `not_empty`. Operator-specific shapes are listed below. |
 
 **Default columns:** `name`, `close`, `market_cap_basic`, `return_on_equity`, `price_earnings_ttm`, `debt_to_equity`, `exchange`
 
@@ -263,10 +263,10 @@ All 18 operators supported by the filter system:
 
 | Operator | TradingView Operation | Value Type | Description | Example |
 |----------|-----------------------|------------|-------------|---------|
-| `greater` | `greater` | number | Field > value | `{"field": "return_on_equity", "operator": "greater", "value": 15}` |
-| `less` | `less` | number | Field < value | `{"field": "price_earnings_ttm", "operator": "less", "value": 20}` |
-| `greater_or_equal` | `egreater` | number | Field >= value | `{"field": "market_cap_basic", "operator": "greater_or_equal", "value": 1000000000}` |
-| `less_or_equal` | `eless` | number | Field <= value | `{"field": "Volatility.M", "operator": "less_or_equal", "value": 3}` |
+| `greater` | `greater` | number / field name | Field > value or field | `{"field": "return_on_equity", "operator": "greater", "value": 15}` |
+| `less` | `less` | number / field name | Field < value or field | `{"field": "price_earnings_ttm", "operator": "less", "value": 20}` |
+| `greater_or_equal` | `egreater` | number / field name | Field >= value or field | `{"field": "market_cap_basic", "operator": "greater_or_equal", "value": 1000000000}` |
+| `less_or_equal` | `eless` | number / field name | Field <= value or field | `{"field": "Volatility.M", "operator": "less_or_equal", "value": 3}` |
 | `equal` | `equal` | string / number / boolean | Field = value | `{"field": "sector", "operator": "equal", "value": "Technology"}` |
 | `not_equal` | `nequal` | string / number | Field != value | `{"field": "industry", "operator": "not_equal", "value": "Real Estate Investment Trusts"}` |
 | `in_range` | `in_range` | `[min, max]` or `string[]` | Field between min and max (inclusive), or field matches any string in array | `{"field": "RSI", "operator": "in_range", "value": [40, 70]}` |
@@ -275,9 +275,9 @@ All 18 operators supported by the filter system:
 | `crosses_above` | `crosses_above` | string (field name) | Field crosses above another field (bullish) | `{"field": "SMA50", "operator": "crosses_above", "value": "SMA200"}` |
 | `crosses_below` | `crosses_below` | string (field name) | Field crosses below another field (bearish) | `{"field": "SMA50", "operator": "crosses_below", "value": "SMA200"}` |
 | `match` | `match` | string | String pattern match | `{"field": "sector", "operator": "match", "value": "Tech"}` |
-| `above_percent` | `above%` | number | Field is X% above another field | `{"field": "close", "operator": "above_percent", "value": 5}` |
-| `below_percent` | `below%` | number | Field is X% below another field | `{"field": "close", "operator": "below_percent", "value": 10}` |
-| `has` | `has` | string / string[] | Field contains value (for set/list fields) | `{"field": "indexes", "operator": "has", "value": "S&P 500"}` |
+| `above_percent` | `above%` | `[field, percent]` | Field is X% above another field | `{"field": "close", "operator": "above_percent", "value": ["SMA200", 5]}` |
+| `below_percent` | `below%` | `[field, percent]` | Field is X% below another field | `{"field": "close", "operator": "below_percent", "value": ["SMA200", 10]}` |
+| `has` | `has` | `string[]` | Field contains one of the listed values (for set/list fields) | `{"field": "indexes", "operator": "has", "value": ["S&P 500"]}` |
 | `has_none_of` | `has_none_of` | string[] | Field contains none of the given values | `{"field": "indexes", "operator": "has_none_of", "value": ["S&P 500"]}` |
 | `empty` | `empty` | (none) | Field is null/empty — no value required | `{"field": "earnings_release_next_trading_date_fq", "operator": "empty"}` |
 | `not_empty` | `nempty` | (none) | Field is not null/empty — no value required | `{"field": "dividend_yield_recent", "operator": "not_empty"}` |
