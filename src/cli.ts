@@ -18,6 +18,7 @@ import { PresetsTool } from "./resources/presets.js";
 import { Cache } from "./utils/cache.js";
 import { RateLimiter } from "./utils/rateLimit.js";
 import { formatOutput, type OutputFormat } from "./cli/formatters.js";
+import { loadPresetFile } from "./cli/presetFile.js";
 import {
   parseTopLevel,
   parseScreenArgs,
@@ -152,16 +153,28 @@ async function handleScreen(subPositionals: string[], fullArgv: string[]) {
   }
 
   const format = (values.format as OutputFormat) || "json";
+  if (values.preset && values["preset-file"]) {
+    throw new Error("--preset and --preset-file are mutually exclusive");
+  }
+  const loadedPreset = values["preset-file"]
+    ? loadPresetFile(values["preset-file"] as string)
+    : undefined;
+  if (loadedPreset) {
+    process.stderr.write(
+      `Loaded preset file ${loadedPreset.provenance.basename} sha256=${loadedPreset.provenance.sha256}\n`
+    );
+  }
   const { input, isSymbolLookup, symbols } = buildScreenInput(
     values,
-    presetsTool
+    presetsTool,
+    loadedPreset?.preset
   );
 
   let result: any;
 
   if (isSymbolLookup) {
     process.stderr.write(
-      `Note: preset '${values.preset}' uses direct symbol lookup\n`
+      `Note: preset '${values.preset ?? loadedPreset?.provenance.basename}' uses direct symbol lookup\n`
     );
     result = await screenTool.lookupSymbols({
       symbols: symbols!,

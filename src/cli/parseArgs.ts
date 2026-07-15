@@ -4,7 +4,7 @@
 
 import { parseArgs } from "node:util";
 import type { ScreenStocksInput, ListFieldsInput } from "../api/types.js";
-import type { PresetsTool } from "../resources/presets.js";
+import type { Preset, PresetsTool } from "../resources/presets.js";
 
 // Option configs for util.parseArgs
 
@@ -101,6 +101,7 @@ export const TOP_LEVEL_OPTIONS = {
 export const SCREEN_OPTIONS = {
   filters: { type: "string" as const },
   preset: { type: "string" as const },
+  "preset-file": { type: "string" as const },
   markets: { type: "string" as const, multiple: true },
   "sort-by": { type: "string" as const },
   "sort-order": { type: "string" as const },
@@ -265,14 +266,19 @@ export interface ScreenBuildResult {
  */
 export function buildScreenInput(
   values: Record<string, any>,
-  presetsTool: PresetsTool
+  presetsTool: PresetsTool,
+  filePreset?: Preset
 ): ScreenBuildResult {
   let base: Partial<ScreenStocksInput> & { symbols?: string[] } = {};
   let isSymbolLookup = false;
   let symbols: string[] | undefined;
 
-  if (values.preset) {
-    const preset = presetsTool.getPreset(values.preset);
+  if (values.preset && values["preset-file"]) {
+    throw new Error("--preset and --preset-file are mutually exclusive");
+  }
+
+  if (values.preset || filePreset) {
+    const preset = filePreset ?? presetsTool.getPreset(values.preset);
     if (!preset) {
       throw new Error(
         `Unknown preset: ${values.preset}. Run 'tradingview-cli presets' to see available presets.`
@@ -290,6 +296,7 @@ export function buildScreenInput(
         sort_by: preset.sort_by,
         sort_order: preset.sort_order,
         columns: preset.columns,
+        limit: preset.limit,
       };
     }
   }
@@ -301,7 +308,7 @@ export function buildScreenInput(
     markets: values.markets ?? base.markets,
     sort_by: values["sort-by"] ?? base.sort_by,
     sort_order: values["sort-order"] ?? base.sort_order,
-    limit: values.limit ? parseInt(values.limit, 10) : undefined,
+    limit: values.limit ? parseInt(values.limit, 10) : base.limit,
     columns: values.columns ?? base.columns,
   };
 

@@ -42,7 +42,8 @@ export const SCREEN_HELP = `Usage: tradingview-cli screen <stocks|forex|crypto|e
 
 Options:
   --filters <json>       Filter array as JSON string
-  --preset <name>        Load a preset strategy (merges with --filters)
+  --preset <name>        Load a built-in preset (exclusive with --preset-file)
+  --preset-file <path>   Load a versioned preset JSON file (exclusive with --preset)
   --markets <market>     Market to screen (repeatable, stocks/etf only)
   --sort-by <field>      Field to sort by
   --sort-order <asc|desc> Sort direction

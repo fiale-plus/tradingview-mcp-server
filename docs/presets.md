@@ -24,6 +24,7 @@ Each preset codifies the criteria that define an investment approach - quality, 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Preset Files](#preset-files)
 - [Quality Stocks (Conservative)](#quality-stocks-conservative)
 - [Value Stocks](#value-stocks)
 - [Dividend Stocks](#dividend-stocks)
@@ -42,6 +43,34 @@ Presets can be accessed via:
 - **Resource**: `preset://preset_name` - Access via MCP resources
 
 Each preset is designed for a specific investment strategy and returns different column sets based on the analysis depth required.
+
+## Preset Files
+
+The CLI can load a local preset explicitly without changing the built-in registry:
+
+```bash
+tradingview-cli screen stocks --preset-file ./my-preset.json
+```
+
+`--preset-file` and `--preset` are mutually exclusive. Paths resolve from the current working directory, symlinks resolve to a regular file, and files are limited to 1 MiB. The CLI validates UTF-8 JSON, strict keys, operators, limits, and value shapes before screening. Diagnostics expose only the basename and SHA-256 hash, not the absolute path.
+
+```json
+{
+  "schemaVersion": 1,
+  "name": "Common US shares",
+  "description": "Example research preset",
+  "filters": [
+    { "field": "typespecs", "operator": "has", "value": ["common"] }
+  ],
+  "markets": ["america"],
+  "sort_by": "market_cap_basic",
+  "sort_order": "desc",
+  "limit": 25,
+  "columns": ["name", "close", "market_cap_basic"]
+}
+```
+
+A preset must define exactly one of `filters` or `symbols`. It cannot import other files, reference URLs, or contain unknown metadata keys.
 
 ---
 

@@ -617,6 +617,19 @@ describe("CLI - End-to-End (child process)", () => {
     const { stdout } = await cli(["screen", "stocks", "--help"]);
     assert.ok(stdout.includes("--filters"));
     assert.ok(stdout.includes("--preset"));
+    assert.ok(stdout.includes("--preset-file"));
+  });
+
+  it("should reject multiple preset sources before accessing the file", async () => {
+    await assert.rejects(
+      () => cli(["screen", "stocks", "--preset", "quality_stocks", "--preset-file", "/private/missing.json"]),
+      (err: any) => {
+        assert.ok(err.stderr.includes("--preset and --preset-file are mutually exclusive"));
+        assert.ok(!err.stderr.includes("Unable to load preset file"));
+        assert.ok(!err.stderr.includes("/private/missing.json"));
+        return true;
+      }
+    );
   });
 
   it("should reject unknown command", async () => {
