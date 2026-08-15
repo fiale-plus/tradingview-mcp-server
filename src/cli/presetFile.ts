@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import type { Preset } from "../resources/presets.js";
-import { validateScreenFilters } from "../tools/screen.js";
+import { validateScreenFilters } from "../api/validation.js";
 
 const MAX_PRESET_BYTES = 1024 * 1024;
 const TOP_LEVEL_KEYS = new Set([
@@ -38,65 +38,6 @@ function assertExactKeys(value: Record<string, unknown>, allowed: Set<string>, c
   if (unknown.length) throw new Error(`${context} has unknown keys: ${unknown.join(", ")}`);
 }
 
-function validateFilterValue(value: unknown, operator: string, context: string) {
-  const isFiniteNumber = (item: unknown): item is number =>
-    typeof item === "number" && Number.isFinite(item);
-  const isNonEmptyString = (item: unknown): item is string =>
-    typeof item === "string" && item.length > 0;
-  const isNumericRange = (item: unknown): item is [number, number] =>
-    Array.isArray(item) && item.length === 2 && item.every(isFiniteNumber);
-  const isStringList = (item: unknown): item is string[] =>
-    Array.isArray(item) && item.length > 0 && item.every(isNonEmptyString);
-
-  if (["empty", "not_empty"].includes(operator)) {
-    if (value !== undefined) throw new Error(`${context} operator ${operator} does not accept a value`);
-    return;
-  }
-  if (["greater", "less", "greater_or_equal", "less_or_equal"].includes(operator)) {
-    if (!(isFiniteNumber(value) || isNonEmptyString(value))) {
-      throw new Error(`${context} operator ${operator} requires a finite number or field-name string`);
-    }
-    return;
-  }
-  if (operator === "equal") {
-    if (!(isNonEmptyString(value) || isFiniteNumber(value) || typeof value === "boolean")) {
-      throw new Error(`${context} operator equal requires a non-empty string, finite number, or boolean`);
-    }
-    return;
-  }
-  if (operator === "not_equal") {
-    if (!(isNonEmptyString(value) || isFiniteNumber(value))) {
-      throw new Error(`${context} operator not_equal requires a non-empty string or finite number`);
-    }
-    return;
-  }
-  if (operator === "in_range") {
-    // TradingView also uses in_range as membership for string fields.
-    if (!(isNumericRange(value) || isStringList(value))) {
-      throw new Error(`${context} operator in_range requires two finite numbers or a non-empty string array`);
-    }
-    return;
-  }
-  if (operator === "not_in_range") {
-    if (!isNumericRange(value)) throw new Error(`${context} operator not_in_range requires two finite numbers`);
-    return;
-  }
-  if (["crosses", "crosses_above", "crosses_below", "match"].includes(operator)) {
-    if (!isNonEmptyString(value)) throw new Error(`${context} operator ${operator} requires a non-empty string`);
-    return;
-  }
-  if (["above_percent", "below_percent"].includes(operator)) {
-    if (!Array.isArray(value) || value.length !== 2 || !isNonEmptyString(value[0]) || !isFiniteNumber(value[1])) {
-      throw new Error(`${context} operator ${operator} requires [field, finite percent]`);
-    }
-    return;
-  }
-  if (["has", "has_none_of"].includes(operator)) {
-    if (!isStringList(value)) throw new Error(`${context} operator ${operator} requires a non-empty string array`);
-    return;
-  }
-  // Unknown operators are rejected by the shared runtime validator.
-}
 
 function stringArray(value: unknown, context: string): string[] | undefined {
   if (value === undefined) return undefined;
@@ -128,9 +69,8 @@ export function validatePresetDocument(document: unknown): Preset {
       assertExactKeys(filter as Record<string, unknown>, FILTER_KEYS, `Preset filter[${index}]`);
       const record = filter as Record<string, unknown>;
       if (typeof record.field !== "string" || !record.field || typeof record.operator !== "string" || !record.operator) throw new Error(`Preset filter[${index}] field and operator must be non-empty strings`);
-      validateFilterValue(record.value, record.operator, `Preset filter[${index}]`);
     }
-    validateScreenFilters(filters as any);
+    validateScreenFilters(filters);
   }
 
   if (value.sort_order !== undefined && value.sort_order !== "asc" && value.sort_order !== "desc") {

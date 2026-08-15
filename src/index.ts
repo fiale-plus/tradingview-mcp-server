@@ -25,6 +25,18 @@ import { FieldsTool } from "./tools/fields.js";
 import { PresetsTool, PRESETS } from "./resources/presets.js";
 import { Cache } from "./utils/cache.js";
 import { RateLimiter } from "./utils/rateLimit.js";
+import { FILTER_VALUE_SCHEMA, OUTPUT_SCHEMAS } from "./api/schemas.js";
+import {
+  validateEmptyToolInput,
+  validateListFieldsInput,
+  validateLookupInput,
+  validateMetainfoInput,
+  validatePresetInput,
+  validateRankByTAInput,
+  validateScreenInput,
+  validateSearchInput,
+  validateTASummaryInput,
+} from "./api/validation.js";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
@@ -63,6 +75,31 @@ const server = new Server(
     },
   }
 );
+function asStructuredContent(value: unknown): Record<string, unknown> {
+  if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return { data: value };
+}
+
+function createToolResult(
+  displayValue: unknown,
+  structuredValue: unknown = displayValue
+): {
+  content: [{ type: "text"; text: string }];
+  structuredContent: Record<string, unknown>;
+} {
+  return {
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(displayValue, null, 2) ?? "null",
+      },
+    ],
+    structuredContent: asStructuredContent(structuredValue),
+  };
+}
+
 
 // List available tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -91,11 +128,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                     description: "Comparison operator",
                     enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match", "above_percent", "below_percent", "has", "has_none_of", "empty", "not_empty"],
                   },
-                  value: {
-                    description:
-                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or [min, max] array for in_range. For above_percent/below_percent, use [field_name, percent_number] e.g. ['SMA200', 10] means 10% above/below SMA200. For has/has_none_of, use an array of strings for set-type fields like typespecs.",
-                  },
+                  value: FILTER_VALUE_SCHEMA,
                 },
+                additionalProperties: false,
                 required: ["field", "operator"],
                 examples: [
                   {"field": "return_on_equity", "operator": "greater", "value": 15},
@@ -135,8 +170,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Optional: specific columns to include in results. If not provided, uses minimal default columns. Presets may define extended column sets.",
             },
           },
+          additionalProperties: false,
           required: [],
         },
+        outputSchema: OUTPUT_SCHEMAS.screen_stocks,
         annotations: {
           readOnlyHint: true,
           idempotentHint: true,
@@ -160,7 +197,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Filter fields by category. If omitted, returns all categories",
             },
           },
+          additionalProperties: false,
         },
+        outputSchema: OUTPUT_SCHEMAS.list_fields,
         annotations: {
           readOnlyHint: true,
           idempotentHint: true,
@@ -179,8 +218,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 "Key of preset to retrieve. See tool description for available keys.",
             },
           },
+          additionalProperties: false,
           required: ["preset_name"],
         },
+        outputSchema: OUTPUT_SCHEMAS.get_preset,
         annotations: {
           readOnlyHint: true,
           idempotentHint: true,
@@ -192,7 +233,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         inputSchema: {
           type: "object",
           properties: {},
+          additionalProperties: false,
         },
+        outputSchema: OUTPUT_SCHEMAS.list_presets,
         annotations: {
           readOnlyHint: true,
           idempotentHint: true,
@@ -221,11 +264,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                     description: "Comparison operator",
                     enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match", "above_percent", "below_percent", "has", "has_none_of", "empty", "not_empty"],
                   },
-                  value: {
-                    description:
-                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or [min, max] array for in_range. For above_percent/below_percent, use [field_name, percent_number] e.g. ['SMA200', 10].",
-                  },
+                  value: FILTER_VALUE_SCHEMA,
                 },
+                additionalProperties: false,
                 required: ["field", "operator"],
                 examples: [
                   {"field": "RSI", "operator": "in_range", "value": [40, 60]},
@@ -258,8 +299,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Optional: specific columns to include in results. If not provided, uses default columns.",
             },
           },
+          additionalProperties: false,
           required: [],
         },
+        outputSchema: OUTPUT_SCHEMAS.screen_forex,
         annotations: {
           readOnlyHint: true,
           idempotentHint: true,
@@ -288,11 +331,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                     description: "Comparison operator",
                     enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match", "above_percent", "below_percent", "has", "has_none_of", "empty", "not_empty"],
                   },
-                  value: {
-                    description:
-                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or [min, max] array for in_range. For above_percent/below_percent, use [field_name, percent_number] e.g. ['SMA200', 10].",
-                  },
+                  value: FILTER_VALUE_SCHEMA,
                 },
+                additionalProperties: false,
                 required: ["field", "operator"],
                 examples: [
                   {"field": "RSI", "operator": "in_range", "value": [40, 70]},
@@ -325,8 +366,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Optional: specific columns to include in results. If not provided, uses default columns.",
             },
           },
+          additionalProperties: false,
           required: [],
         },
+        outputSchema: OUTPUT_SCHEMAS.screen_crypto,
         annotations: {
           readOnlyHint: true,
           idempotentHint: true,
@@ -355,11 +398,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                     description: "Comparison operator",
                     enum: ["greater", "less", "greater_or_equal", "less_or_equal", "equal", "not_equal", "in_range", "not_in_range", "crosses", "crosses_above", "crosses_below", "match", "above_percent", "below_percent", "has", "has_none_of", "empty", "not_empty"],
                   },
-                  value: {
-                    description:
-                      "Value to compare against. Not required for 'empty' and 'not_empty' operators. Use number, string, or [min, max] array for in_range. For above_percent/below_percent, use [field_name, percent_number] e.g. ['SMA200', 10].",
-                  },
+                  value: FILTER_VALUE_SCHEMA,
                 },
+                additionalProperties: false,
                 required: ["field", "operator"],
                 examples: [
                   {"field": "return_on_equity", "operator": "greater", "value": 15},
@@ -397,8 +438,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Optional: specific columns to include in results. If not provided, uses minimal default columns.",
             },
           },
+          additionalProperties: false,
           required: [],
         },
+        outputSchema: OUTPUT_SCHEMAS.screen_etf,
         annotations: {
           readOnlyHint: true,
           idempotentHint: true,
@@ -422,8 +465,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Optional: specific columns to include. Default: name, close, change, volume, market_cap_basic, all_time_high, all_time_low, price_52_week_high, price_52_week_low.",
             },
           },
+          additionalProperties: false,
           required: ["symbols"],
         },
+        outputSchema: OUTPUT_SCHEMAS.lookup_symbols,
         annotations: {
           readOnlyHint: true,
           idempotentHint: true,
@@ -460,8 +505,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Offset for pagination (default: 0)",
             },
           },
+          additionalProperties: false,
           required: ["query"],
         },
+        outputSchema: OUTPUT_SCHEMAS.search_symbols,
         annotations: {
           readOnlyHint: true,
           idempotentHint: true,
@@ -489,8 +536,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Output mode: 'summary' for normalized output (default), 'raw' for passthrough.",
             },
           },
+          additionalProperties: false,
           required: ["market"],
         },
+        outputSchema: OUTPUT_SCHEMAS.get_market_metainfo,
         annotations: {
           readOnlyHint: true,
           idempotentHint: true,
@@ -518,8 +567,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Include oscillator and moving average scores breakdown (default: true)",
             },
           },
+          additionalProperties: false,
           required: ["symbols"],
         },
+        outputSchema: OUTPUT_SCHEMAS.get_ta_summary,
         annotations: {
           readOnlyHint: true,
           idempotentHint: true,
@@ -547,8 +598,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Per-timeframe weights for ranking. Unspecified timeframes default to weight 1. Example: {\"1D\": 3, \"1W\": 2}",
             },
           },
+          additionalProperties: false,
           required: ["symbols"],
         },
+        outputSchema: OUTPUT_SCHEMAS.rank_by_ta,
         annotations: {
           readOnlyHint: true,
           idempotentHint: true,
@@ -565,32 +618,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
 
     switch (name) {
-      case "screen_stocks": {
-        const result = await screenTool.screenStocks(args as any);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
-      }
+      case "screen_stocks":
+        return createToolResult(
+          await screenTool.screenStocks(validateScreenInput(args ?? {}))
+        );
 
-      case "list_fields": {
-        const result = fieldsTool.listFields(args as any);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
-      }
+      case "list_fields":
+        return createToolResult(
+          fieldsTool.listFields(validateListFieldsInput(args ?? {}))
+        );
 
       case "get_preset": {
-        const preset = presetsTool.getPreset((args as any).preset_name);
+        const { preset_name } = validatePresetInput(args);
+        const preset = presetsTool.getPreset(preset_name);
         if (!preset) {
           return {
             content: [
@@ -602,123 +642,54 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             isError: true,
           };
         }
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(preset, null, 2),
-            },
-          ],
-        };
+        return createToolResult(preset);
       }
 
       case "list_presets": {
+        validateEmptyToolInput(args ?? {});
         const presets = presetsTool.listPresets();
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(presets, null, 2),
-            },
-          ],
-        };
+        return createToolResult(presets, { presets });
       }
 
-      case "screen_forex": {
-        const result = await screenTool.screenForex(args as any);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
-      }
+      case "screen_forex":
+        return createToolResult(
+          await screenTool.screenForex(validateScreenInput(args ?? {}, false))
+        );
 
-      case "screen_crypto": {
-        const result = await screenTool.screenCrypto(args as any);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
-      }
+      case "screen_crypto":
+        return createToolResult(
+          await screenTool.screenCrypto(validateScreenInput(args ?? {}, false))
+        );
 
-      case "screen_etf": {
-        const result = await screenTool.screenETF(args as any);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
-      }
+      case "screen_etf":
+        return createToolResult(
+          await screenTool.screenETF(validateScreenInput(args ?? {}))
+        );
 
-      case "lookup_symbols": {
-        const result = await screenTool.lookupSymbols(args as any);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
-      }
+      case "lookup_symbols":
+        return createToolResult(
+          await screenTool.lookupSymbols(validateLookupInput(args))
+        );
 
-      case "search_symbols": {
-        const result = await searchTool.searchSymbols(args as any);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
-      }
+      case "search_symbols":
+        return createToolResult(
+          await searchTool.searchSymbols(validateSearchInput(args))
+        );
 
-      case "get_market_metainfo": {
-        const result = await metainfoTool.getMetainfo(args as any);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
-      }
+      case "get_market_metainfo":
+        return createToolResult(
+          await metainfoTool.getMetainfo(validateMetainfoInput(args))
+        );
 
-      case "get_ta_summary": {
-        const result = await taTool.getTASummary(args as any);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
-      }
+      case "get_ta_summary":
+        return createToolResult(
+          await taTool.getTASummary(validateTASummaryInput(args))
+        );
 
-      case "rank_by_ta": {
-        const result = await taTool.rankByTA(args as any);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
-      }
+      case "rank_by_ta":
+        return createToolResult(
+          await taTool.rankByTA(validateRankByTAInput(args))
+        );
 
       default:
         return {
