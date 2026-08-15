@@ -1,7 +1,9 @@
 import type { MetainfoInput } from "./metainfo.js";
 import type { SearchSymbolsInput } from "./search.js";
 import {
+  DEFAULT_TIMEFRAMES,
   VALID_TIMEFRAMES,
+  validateTAWeights,
   type RanksByTAInput,
   type TASummaryInput,
   type Timeframe,
@@ -390,6 +392,7 @@ export function validateRankByTAInput(value: unknown): RanksByTAInput {
       weights[timeframe] = weight;
     }
   }
+  validateTAWeights(weights, timeframes ?? DEFAULT_TIMEFRAMES);
   return {
     symbols,
     ...(timeframes === undefined ? {} : { timeframes }),

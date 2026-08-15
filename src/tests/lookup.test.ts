@@ -189,8 +189,9 @@ describe("ScreenTool - lookupSymbols Integration", () => {
 
       const result = await screenTool.lookupSymbols({ symbols });
 
-      // Should return cached result without calling client
-      assert.deepStrictEqual(result, cachedResult);
+      // Preserve the cached collection while adding cache provenance.
+      assert.deepStrictEqual(result.symbols, cachedResult.symbols);
+      assert.equal(result.metadata.cache_hit, true);
 
       // Verify scanStocks was not called
       const callCount = (mockClient.scanStocks as any).mock.calls.length;

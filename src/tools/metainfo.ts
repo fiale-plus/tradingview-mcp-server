@@ -5,6 +5,11 @@
 import type { MetainfoClient, MetainfoInput } from "../api/metainfo.js";
 import type { Cache } from "../utils/cache.js";
 import type { RateLimiter } from "../utils/rateLimit.js";
+import {
+  createResultMetadata,
+  withCacheHitMetadata,
+  withResultMetadata,
+} from "../utils/resultMetadata.js";
 
 export class MetainfoTool {
   constructor(
@@ -30,7 +35,12 @@ export class MetainfoTool {
     // Check cache
     const cached = this.cache.get(cacheKey);
     if (cached) {
-      return cached;
+      const cachedFields = cached.metainfo?.fields;
+      return withCacheHitMetadata(cached, {
+        source: `https://scanner.tradingview.com/${input.market}/metainfo`,
+        requested_count: input.fields?.length ?? 0,
+        returned_count: Array.isArray(cachedFields) ? cachedFields.length : 0,
+      });
     }
 
     // Rate limit
@@ -39,9 +49,16 @@ export class MetainfoTool {
     // Make request
     const result = await this.client.getMetainfo(input);
 
-    // Cache result
-    this.cache.set(cacheKey, result);
+    const resultWithMetadata = withResultMetadata(
+      result,
+      createResultMetadata({
+        source: `https://scanner.tradingview.com/${input.market}/metainfo`,
+        requested_count: input.fields?.length ?? 0,
+        returned_count: Array.isArray(result.metainfo?.fields) ? result.metainfo.fields.length : 0,
+      }),
+    );
+    this.cache.set(cacheKey, resultWithMetadata);
 
-    return result;
+    return resultWithMetadata;
   }
 }

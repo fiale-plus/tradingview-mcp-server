@@ -6,6 +6,11 @@ import { createRequire } from "module";
 import type { SearchClient, SearchSymbolsInput } from "../api/search.js";
 import type { Cache } from "../utils/cache.js";
 import type { RateLimiter } from "../utils/rateLimit.js";
+import {
+  createResultMetadata,
+  withCacheHitMetadata,
+  withResultMetadata,
+} from "../utils/resultMetadata.js";
 
 const require = createRequire(import.meta.url);
 const pkg = require("../../package.json");
@@ -40,7 +45,11 @@ export class SearchTool {
     // Check cache
     const cached = this.cache.get(cacheKey);
     if (cached) {
-      return cached;
+      return withCacheHitMetadata(cached, {
+        source: "https://symbol-search.tradingview.com/symbol_search/v3",
+        requested_count: input.limit ?? 20,
+        returned_count: Array.isArray(cached.symbols) ? cached.symbols.length : 0,
+      });
     }
 
     // Rate limit
@@ -50,8 +59,16 @@ export class SearchTool {
     const result = await this.client.searchSymbols(input);
 
     // Cache result
-    this.cache.set(cacheKey, result);
+    const resultWithMetadata = withResultMetadata(
+      result,
+      createResultMetadata({
+        source: "https://symbol-search.tradingview.com/symbol_search/v3",
+        requested_count: input.limit ?? 20,
+        returned_count: Array.isArray(result.symbols) ? result.symbols.length : 0,
+      }),
+    );
+    this.cache.set(cacheKey, resultWithMetadata);
 
-    return result;
+    return resultWithMetadata;
   }
 }
