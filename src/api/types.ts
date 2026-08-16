@@ -48,11 +48,19 @@ export interface ScreenerRequest {
   markets?: string[];
 }
 
+export type ScreenerCell =
+  | number
+  | string
+  | boolean
+  | null
+  | ScreenerCell[]
+  | { [key: string]: ScreenerCell };
+
 export interface ScreenerResponse {
   totalCount: number;
   data: Array<{
     s: string; // symbol
-    d: (number | string | boolean | null)[]; // data array
+    d: ScreenerCell[]; // data array
   }>;
 }
 

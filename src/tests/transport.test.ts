@@ -39,6 +39,31 @@ describe("bounded upstream transport", () => {
     assert.equal(attempts, 2);
   });
 
+  it("disposes retryable response bodies before retrying", async () => {
+    const destroy = mock.fn();
+    let attempts = 0;
+    const fetchImpl = mock.fn(async () => {
+      attempts += 1;
+      if (attempts === 1) {
+        return {
+          ...response(503, { error: "busy" }),
+          body: { destroy },
+        };
+      }
+      return response(200, { ok: true });
+    }) as unknown as FetchLike;
+
+    const result = await requestJson(
+      "https://example.test/scan",
+      { method: "GET" },
+      { fetchImpl, retryDelayMs: 0 },
+    );
+
+    assert.deepEqual(result, { ok: true });
+    assert.equal(attempts, 2);
+    assert.equal(destroy.mock.callCount(), 1);
+  });
+
   it("stops after the bounded retry budget", async () => {
     let attempts = 0;
     const fetchImpl = mock.fn(async () => {
@@ -173,6 +198,23 @@ describe("upstream response-shape validation", () => {
     });
 
     assert.deepEqual(result.data[0].d, ["Apple", true]);
+  });
+
+  it("accepts JSON arrays and objects in screener cells", async () => {
+    const fetchImpl = mock.fn(async () => response(200, {
+      totalCount: 1,
+      data: [{ s: "NASDAQ:AAPL", d: [["common"], { type: "map", columns: ["close"] }] }],
+    })) as unknown as FetchLike;
+    const client = new TradingViewClient({ fetchImpl, maxRetries: 0 });
+
+    const result = await client.scanStocks({
+      filter: [],
+      columns: ["typespecs", "map"],
+      sort: { sortBy: "name", sortOrder: "asc" },
+      range: [0, 1],
+    });
+
+    assert.deepEqual(result.data[0].d, [["common"], { type: "map", columns: ["close"] }]);
   });
 
   it("rejects malformed symbol-search payloads", async () => {

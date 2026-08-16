@@ -3,7 +3,7 @@
  */
 
 import { createRequire } from "module";
-import type { ScreenerRequest, ScreenerResponse } from "./types.js";
+import type { ScreenerCell, ScreenerRequest, ScreenerResponse } from "./types.js";
 import {
   requestJson,
   type TransportOptions,
@@ -15,8 +15,22 @@ const pkg = require("../../package.json");
 
 const API_BASE = "https://scanner.tradingview.com";
 
-function isScreenerCell(value: unknown): value is number | string | boolean | null {
-  return value === null || typeof value === "number" || typeof value === "string" || typeof value === "boolean";
+function isScreenerCell(value: unknown): value is ScreenerCell {
+  if (
+    value === null
+    || typeof value === "number"
+    || typeof value === "string"
+    || typeof value === "boolean"
+  ) {
+    return true;
+  }
+  if (Array.isArray(value)) {
+    return value.every(isScreenerCell);
+  }
+  if (typeof value === "object") {
+    return Object.values(value).every(isScreenerCell);
+  }
+  return false;
 }
 
 function isScreenerRow(

@@ -6,6 +6,7 @@ export interface FetchResponse {
   ok: boolean;
   status: number;
   statusText: string;
+  body?: unknown;
   json(): Promise<unknown>;
 }
 
@@ -60,6 +61,23 @@ async function sleep(delayMs: number): Promise<void> {
   if (delayMs > 0) await delay(delayMs);
 }
 
+function disposeResponse(response: FetchResponse): void {
+  const body = response.body;
+  if (typeof body !== "object" || body === null) return;
+
+  const candidate = body as {
+    destroy?: () => void;
+    cancel?: () => Promise<void> | void;
+  };
+  if (typeof candidate.destroy === "function") {
+    candidate.destroy();
+    return;
+  }
+  if (typeof candidate.cancel === "function") {
+    void Promise.resolve(candidate.cancel()).catch(() => {});
+  }
+}
+
 /**
  * Execute one JSON request with a bounded retry budget for transient failures.
  * Parse and response-shape failures are deliberately not retried.
@@ -88,6 +106,7 @@ export async function requestJson(
         throw new UpstreamError("Upstream transport returned a malformed response", "response");
       }
       if (!response.ok) {
+        disposeResponse(response);
         throw new UpstreamError(
           `Upstream request failed with HTTP ${response.status}${response.statusText ? `: ${response.statusText}` : ""}`,
           "http",
