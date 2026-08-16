@@ -254,6 +254,7 @@ describe("ScreenTool - Filter Validation", () => {
                   operator,
                   value: operator === "in_range" || operator === "not_in_range" ? [10, 100]
                     : operator === "above_percent" || operator === "below_percent" ? ["SMA200", 10]
+                    : ["crosses", "crosses_above", "crosses_below", "match"].includes(operator) ? "SMA200"
                     : operator === "has" || operator === "has_none_of" ? ["common"]
                     : 10,
                 },

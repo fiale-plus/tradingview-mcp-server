@@ -6,33 +6,12 @@ import type {
   ScreenStocksInput,
   ScreenerRequest,
   Filter,
-  FilterOperation,
 } from "../api/types.js";
+import { validateScreenFilters } from "../api/validation.js";
 import type { TradingViewClient } from "../api/client.js";
 import type { Cache } from "../utils/cache.js";
 import type { RateLimiter } from "../utils/rateLimit.js";
-
-// Operator mapping from MCP to TradingView API
-const OPERATOR_MAP: Record<string, FilterOperation> = {
-  greater: "greater",
-  less: "less",
-  greater_or_equal: "egreater",
-  less_or_equal: "eless",
-  equal: "equal",
-  not_equal: "nequal",
-  in_range: "in_range",
-  not_in_range: "not_in_range",
-  crosses: "crosses",
-  crosses_above: "crosses_above",
-  crosses_below: "crosses_below",
-  match: "match",
-  above_percent: "above%",
-  below_percent: "below%",
-  has: "has",
-  has_none_of: "has_none_of",
-  empty: "empty",
-  not_empty: "nempty",
-};
+export { validateScreenFilters } from "../api/validation.js";
 
 // Minimal default columns for lean responses
 const DEFAULT_COLUMNS = [
@@ -85,47 +64,6 @@ export const EXTENDED_COLUMNS = [
   "industry",
   "fundamental_currency_code",
 ];
-
-export function validateScreenFilters(
-  filters: ScreenStocksInput["filters"]
-): Filter[] {
-  return filters.map((f, index) => {
-    if (!f || typeof f !== "object" || Array.isArray(f)) {
-      throw new Error(
-        `Invalid filter at index ${index}: expected object with {field, operator, value}, got ${typeof f}`
-      );
-    }
-
-    if (!f.field || !f.operator) {
-      throw new Error(
-        `Invalid filter at index ${index}: missing required properties (field: ${f.field}, operator: ${f.operator}, value: ${f.value})`
-      );
-    }
-    if (typeof f.field !== "string" || typeof f.operator !== "string") {
-      throw new Error(`Invalid filter at index ${index}: field and operator must be non-empty strings`);
-    }
-    const noValueOperators = ["empty", "not_empty"];
-    if (f.value === undefined && !noValueOperators.includes(f.operator)) {
-      throw new Error(
-        `Invalid filter at index ${index}: missing required properties (field: ${f.field}, operator: ${f.operator}, value: ${f.value})`
-      );
-    }
-
-    if (!Object.hasOwn(OPERATOR_MAP, f.operator)) {
-      throw new Error(
-        `Unknown operator: ${f.operator}. Valid operators: ${Object.keys(OPERATOR_MAP).join(", ")}`
-      );
-    }
-    const operation = OPERATOR_MAP[f.operator];
-    if (!operation) {
-      throw new Error(
-        `Unknown operator: ${f.operator}. Valid operators: ${Object.keys(OPERATOR_MAP).join(", ")}`
-      );
-    }
-
-    return { left: f.field, operation, right: f.value };
-  });
-}
 
 export class ScreenTool {
   constructor(
