@@ -2,49 +2,91 @@
  * TradingView API Client
  */
 
-import fetch from "node-fetch";
 import { createRequire } from "module";
 import type { ScreenerRequest, ScreenerResponse } from "./types.js";
+import {
+  requestJson,
+  type TransportOptions,
+  UpstreamError,
+} from "./transport.js";
 
 const require = createRequire(import.meta.url);
 const pkg = require("../../package.json");
 
 const API_BASE = "https://scanner.tradingview.com";
-const API_TIMEOUT = 10000; // 10 seconds
+
+function isScreenerCell(value: unknown): value is number | string | boolean | null {
+  return value === null || typeof value === "number" || typeof value === "string" || typeof value === "boolean";
+}
+
+function isScreenerRow(
+  value: unknown,
+): value is ScreenerResponse["data"][number] {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  if (!("s" in value) || !("d" in value)) return false;
+  return typeof value.s === "string"
+    && Array.isArray(value.d)
+    && value.d.every(isScreenerCell);
+}
+
+function isScreenerResponse(value: unknown): value is ScreenerResponse {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  if (!("totalCount" in value) || !("data" in value)) return false;
+  const totalCount = value.totalCount;
+  const data = value.data;
+  return typeof totalCount === "number"
+    && Number.isInteger(totalCount)
+    && totalCount >= 0
+    && Array.isArray(data)
+    && data.every(isScreenerRow);
+}
+
+export function validateScreenerResponse(
+  value: unknown,
+  endpoint: string,
+): ScreenerResponse {
+  if (!isScreenerResponse(value)) {
+    throw new Error(`TradingView returned malformed screener response for ${endpoint}`);
+  }
+  return value;
+}
 
 export class TradingViewClient {
+  constructor(private readonly transportOptions: TransportOptions = {}) {}
+
   private async makeRequest(
     endpoint: string,
-    payload: ScreenerRequest
+    payload: ScreenerRequest,
   ): Promise<ScreenerResponse> {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), API_TIMEOUT);
-
     try {
-      const response = await fetch(`${API_BASE}${endpoint}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "User-Agent": `tradingview-mcp-server/${pkg.version}`,
+      const data = await requestJson(
+        `${API_BASE}${endpoint}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "User-Agent": `tradingview-mcp-server/${pkg.version}`,
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeout);
-
-      if (!response.ok) {
-        throw new Error(
-          `TradingView API error: ${response.status} ${response.statusText}`
-        );
-      }
-
-      return (await response.json()) as ScreenerResponse;
+        this.transportOptions,
+      );
+      return validateScreenerResponse(data, endpoint);
     } catch (error) {
-      clearTimeout(timeout);
-      if ((error as Error).name === "AbortError") {
-        throw new Error("Request timeout");
+      if (!(error instanceof UpstreamError)) throw error;
+      if (error.kind === "timeout") {
+        throw new Error("Request timeout", { cause: error });
       }
+      if (error.kind === "http") {
+        throw new Error(`TradingView API error: ${error.status} ${error.statusText ?? ""}`.trimEnd(), {
+          cause: error,
+        });
+      }
+      if (error.cause instanceof Error) throw error.cause;
       throw error;
     }
   }

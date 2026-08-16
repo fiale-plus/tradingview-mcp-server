@@ -17,6 +17,7 @@ import { FieldsTool } from "./tools/fields.js";
 import { PresetsTool } from "./resources/presets.js";
 import { Cache } from "./utils/cache.js";
 import { RateLimiter } from "./utils/rateLimit.js";
+import { loadRuntimeConfig } from "./config.js";
 import { formatOutput, type OutputFormat } from "./cli/formatters.js";
 import { loadPresetFile } from "./cli/presetFile.js";
 import {
@@ -54,15 +55,15 @@ const require = createRequire(import.meta.url);
 const pkg = require("../package.json");
 
 // Configuration from environment
-const CACHE_TTL = parseInt(process.env.CACHE_TTL_SECONDS || "300");
-const RATE_LIMIT_RPM = parseInt(process.env.RATE_LIMIT_RPM || "10");
+const { cacheTtlSeconds, rateLimitRpm } = loadRuntimeConfig();
 
-// Initialize components (no cache.startCleanup — CLI is short-lived)
-const client = new TradingViewClient();
-const searchClient = new SearchClient();
-const metainfoClient = new MetainfoClient();
-const cache = new Cache(CACHE_TTL);
-const rateLimiter = new RateLimiter(RATE_LIMIT_RPM);
+// Initialize shared infrastructure before clients so retries consume rate-limit tokens.
+// No cache.startCleanup — the CLI is short-lived.
+const cache = new Cache(cacheTtlSeconds);
+const rateLimiter = new RateLimiter(rateLimitRpm);
+const client = new TradingViewClient({ rateLimiter });
+const searchClient = new SearchClient({ rateLimiter });
+const metainfoClient = new MetainfoClient({ rateLimiter });
 const screenTool = new ScreenTool(client, cache, rateLimiter);
 const searchTool = new SearchTool(searchClient, cache, rateLimiter);
 const metainfoTool = new MetainfoTool(metainfoClient, cache, rateLimiter);

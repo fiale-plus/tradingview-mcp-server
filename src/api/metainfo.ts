@@ -5,14 +5,17 @@
  * Endpoint: POST https://scanner.tradingview.com/{market}/metainfo
  */
 
-import fetch from "node-fetch";
 import { createRequire } from "module";
+import {
+  requestJson,
+  type TransportOptions,
+  UpstreamError,
+} from "./transport.js";
 
 const require = createRequire(import.meta.url);
 const pkg = require("../../package.json");
 
 const API_BASE = "https://scanner.tradingview.com";
-const METAINFO_TIMEOUT = 10000; // 10 seconds
 
 export interface MetainfoField {
   name: string;
@@ -36,59 +39,114 @@ export interface MetainfoSummaryResponse {
     fields: MetainfoField[];
   };
 }
+export interface MetainfoRawResponse {
+  market: string;
+  raw: unknown;
+}
+
+type MetainfoPayload = Record<string, unknown> | unknown[];
+
+function validateMetainfoResponse(value: unknown): MetainfoPayload {
+  if (Array.isArray(value)) {
+    if (
+      value.length === 0
+      || !value.every((field) =>
+        typeof field === "string"
+        || (typeof field === "object" && field !== null && !Array.isArray(field))
+      )
+    ) {
+      throw new Error("TradingView returned malformed metainfo response");
+    }
+    return value;
+  }
+
+  if (typeof value !== "object" || value === null) {
+    throw new Error("TradingView returned malformed metainfo response");
+  }
+
+  if ("fields" in value || "columns" in value) {
+    const fields = "fields" in value ? value.fields : value.columns;
+    if (typeof fields !== "object" || fields === null) {
+      throw new Error("TradingView returned malformed metainfo response");
+    }
+  } else {
+    const values = Object.values(value);
+    if (!values.every((field) => typeof field === "object" && field !== null && !Array.isArray(field))) {
+      throw new Error("TradingView returned malformed metainfo response");
+    }
+  }
+
+  return value as Record<string, unknown>;
+}
 
 export class MetainfoClient {
+  constructor(private readonly transportOptions: TransportOptions = {}) {}
+
   /**
    * Fetch metainfo for a market.
    */
-  async getMetainfo(input: MetainfoInput): Promise<MetainfoSummaryResponse | any> {
+  async getMetainfo(
+    input: MetainfoInput & { mode: "raw" },
+  ): Promise<MetainfoRawResponse>;
+  async getMetainfo(
+    input: MetainfoInput & { mode?: "summary" },
+  ): Promise<MetainfoSummaryResponse>;
+  async getMetainfo(input: MetainfoInput): Promise<MetainfoSummaryResponse | MetainfoRawResponse>;
+  async getMetainfo(
+    input: MetainfoInput,
+  ): Promise<MetainfoSummaryResponse | MetainfoRawResponse> {
     const { market, fields, mode = "summary" } = input;
 
     if (!market || market.trim().length < 1) {
       throw new Error("Market is required (e.g., 'america', 'uk', 'germany')");
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), METAINFO_TIMEOUT);
+    const trimmedMarket = market.trim();
+    const url = `${API_BASE}/${encodeURIComponent(trimmedMarket)}/metainfo`;
 
     try {
-      const url = `${API_BASE}/${encodeURIComponent(market.trim())}/metainfo`;
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "User-Agent": `tradingview-mcp-server/${pkg.version}`,
+      const data = await requestJson(
+        url,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "User-Agent": `tradingview-mcp-server/${pkg.version}`,
+          },
+          body: fields ? JSON.stringify({ fields }) : undefined,
         },
-        body: fields ? JSON.stringify({ fields }) : undefined,
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeout);
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error(`Invalid market: '${market}'. Use markets like 'america', 'uk', 'germany', etc.`);
-        }
-        throw new Error(`Metainfo request failed: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json() as any;
+        this.transportOptions,
+      );
 
       if (mode === "raw") {
         return {
-          market: market.trim(),
+          market: trimmedMarket,
           raw: data,
         };
       }
 
-      // Summary mode: normalize the response
-      return this.normalizeMetainfo(market.trim(), fields, data);
+      // Summary mode: validate and normalize the response.
+      return this.normalizeMetainfo(
+        trimmedMarket,
+        fields,
+        validateMetainfoResponse(data),
+      );
     } catch (error) {
-      clearTimeout(timeout);
-      if ((error as Error).name === "AbortError") {
-        throw new Error("Metainfo request timeout");
+      if (!(error instanceof UpstreamError)) throw error;
+      if (error.kind === "http" && error.status === 404) {
+        throw new Error(`Invalid market: '${market}'. Use markets like 'america', 'uk', 'germany', etc.`, {
+          cause: error,
+        });
       }
+      if (error.kind === "timeout") {
+        throw new Error("Metainfo request timeout", { cause: error });
+      }
+      if (error.kind === "http") {
+        throw new Error(`Metainfo request failed: ${error.status} ${error.statusText ?? ""}`.trimEnd(), {
+          cause: error,
+        });
+      }
+      if (error.cause instanceof Error) throw error.cause;
       throw error;
     }
   }

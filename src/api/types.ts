@@ -52,7 +52,7 @@ export interface ScreenerResponse {
   totalCount: number;
   data: Array<{
     s: string; // symbol
-    d: (number | string | null)[]; // data array
+    d: (number | string | boolean | null)[]; // data array
   }>;
 }
 

@@ -5,14 +5,17 @@
  * Endpoint: GET https://symbol-search.tradingview.com/symbol_search/v3
  */
 
-import fetch from "node-fetch";
 import { createRequire } from "module";
+import {
+  requestJson,
+  type TransportOptions,
+  UpstreamError,
+} from "./transport.js";
 
 const require = createRequire(import.meta.url);
 const pkg = require("../../package.json");
 
 const SEARCH_BASE = "https://symbol-search.tradingview.com";
-const SEARCH_TIMEOUT = 10000; // 10 seconds
 
 export interface SearchSymbolResult {
   symbol: string;
@@ -117,7 +120,35 @@ export function normalizeSearchResults(
   };
 }
 
+function isSearchResult(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  const symbol = "symbol" in value ? value.symbol : undefined;
+  const ticker = "ticker" in value ? value.ticker : undefined;
+  return typeof symbol === "string" || typeof ticker === "string";
+}
+
+function validateSearchResponse(value: unknown): Record<string, unknown>[] {
+  const rawResults = Array.isArray(value)
+    ? value
+    : typeof value === "object" && value !== null && !Array.isArray(value)
+      ? "symbols" in value
+        ? value.symbols
+        : "results" in value
+          ? value.results
+          : undefined
+      : undefined;
+
+  if (!Array.isArray(rawResults) || !rawResults.every(isSearchResult)) {
+    throw new Error("TradingView returned malformed symbol search response");
+  }
+  return rawResults;
+}
+
 export class SearchClient {
+  constructor(private readonly transportOptions: TransportOptions = {}) {}
+
   /**
    * Search for symbols on TradingView.
    */
@@ -141,31 +172,21 @@ export class SearchClient {
 
     const url = `${SEARCH_BASE}/symbol_search/v3/?${params.toString()}`;
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), SEARCH_TIMEOUT);
-
     try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "User-Agent": `tradingview-mcp-server/${pkg.version}`,
-          "Origin": "https://www.tradingview.com",
-          "Referer": "https://www.tradingview.com/",
+      const data = await requestJson(
+        url,
+        {
+          method: "GET",
+          headers: {
+            "User-Agent": `tradingview-mcp-server/${pkg.version}`,
+            "Origin": "https://www.tradingview.com",
+            "Referer": "https://www.tradingview.com/",
+          },
         },
-        signal: controller.signal,
-      });
+        this.transportOptions,
+      );
 
-      clearTimeout(timeout);
-
-      if (!response.ok) {
-        throw new Error(`Symbol search failed: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json() as any;
-
-      // TradingView symbol search v3 returns an array of results
-      // Each result has: symbol, type, exchange, description, currency, etc.
-      const rawResults: any[] = Array.isArray(data) ? data : (data.symbols || data.results || []);
+      const rawResults = validateSearchResponse(data);
       const filteredResults = filterSearchResults(rawResults, asset_type);
       const normalized = normalizeSearchResults(filteredResults, start, clampedLimit);
 
@@ -175,10 +196,16 @@ export class SearchClient {
         symbols: normalized.symbols,
       };
     } catch (error) {
-      clearTimeout(timeout);
-      if ((error as Error).name === "AbortError") {
-        throw new Error("Symbol search request timeout");
+      if (!(error instanceof UpstreamError)) throw error;
+      if (error.kind === "timeout") {
+        throw new Error("Symbol search request timeout", { cause: error });
       }
+      if (error.kind === "http") {
+        throw new Error(`Symbol search failed: ${error.status} ${error.statusText ?? ""}`.trimEnd(), {
+          cause: error,
+        });
+      }
+      if (error.cause instanceof Error) throw error.cause;
       throw error;
     }
   }

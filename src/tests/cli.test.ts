@@ -541,9 +541,10 @@ describe("CLI - Integration", () => {
 });
 
 describe("CLI - End-to-End (child process)", () => {
-  const cli = (args: string[]) =>
+  const cli = (args: string[], env: Record<string, string> = {}) =>
     execFileAsync("npx", ["tsx", "src/cli.ts", ...args], {
       timeout: 10000,
+      env: { ...process.env, ...env },
     });
 
   it("should show help with --help", async () => {
@@ -561,6 +562,16 @@ describe("CLI - End-to-End (child process)", () => {
   it("should show version with --version", async () => {
     const { stdout } = await cli(["--version"]);
     assert.ok(stdout.startsWith("tradingview-cli v"));
+  });
+
+  it("rejects invalid runtime configuration before handling commands", async () => {
+    await assert.rejects(
+      () => cli(["--version"], { RATE_LIMIT_RPM: "fast" }),
+      (err: any) => {
+        assert.ok(err.stderr.includes("RATE_LIMIT_RPM must be an integer between 1 and 60"));
+        return true;
+      },
+    );
   });
 
   it("should list presets as JSON", async () => {
