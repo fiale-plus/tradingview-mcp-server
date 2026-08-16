@@ -55,10 +55,12 @@ describe("result provenance and completeness metadata", () => {
     assert.equal(fresh.metadata.cache_hit, false);
     assert.equal(fresh.metadata.source, "https://scanner.tradingview.com/global/scan");
     assertIsoTimestamp(fresh.metadata.retrieved_at);
+    const freshRetrievedAt = fresh.metadata.retrieved_at;
 
     const cached = await tool.lookupSymbols({ symbols: ["NASDAQ:AAPL", "NASDAQ:MSFT"] });
     assert.equal(cached.metadata.cache_hit, true);
     assert.deepEqual(cached.metadata.missing_symbols, ["NASDAQ:MSFT"]);
+    assert.equal(cached.metadata.retrieved_at, freshRetrievedAt);
     assert.equal(scanStocks.mock.calls.length, 1);
   });
 
@@ -107,6 +109,44 @@ describe("result provenance and completeness metadata", () => {
     assert.equal(info.metadata.requested_count, 1);
     assert.equal(info.metadata.returned_count, 1);
     assert.equal(info.metadata.source, "https://scanner.tradingview.com/america/metainfo");
+    const rawMetainfo = new MetainfoTool(
+      {
+        getMetainfo: mock.fn(async () => ({
+          market: "america",
+          raw: { fields: [{ name: "close" }, { name: "name" }] },
+        })),
+      } as unknown as MetainfoClient,
+      makeCache().cache,
+      makeRateLimiter(),
+    );
+    const rawInfo = await rawMetainfo.getMetainfo({ market: " america ", mode: "raw" });
+    assert.equal(rawInfo.metadata.returned_count, 2);
+    assert.equal(rawInfo.metadata.source, "https://scanner.tradingview.com/america/metainfo");
+    const rootArrayMetainfo = new MetainfoTool(
+      {
+        getMetainfo: mock.fn(async () => ({
+          market: "america",
+          raw: [{ name: "close" }, { name: "name" }],
+        })),
+      } as unknown as MetainfoClient,
+      makeCache().cache,
+      makeRateLimiter(),
+    );
+    const rootArrayInfo = await rootArrayMetainfo.getMetainfo({ market: "america", mode: "raw" });
+    assert.equal(rootArrayInfo.metadata.returned_count, 2);
+
+    const fieldMapMetainfo = new MetainfoTool(
+      {
+        getMetainfo: mock.fn(async () => ({
+          market: "america",
+          raw: { close: { type: "number" }, name: { type: "string" } },
+        })),
+      } as unknown as MetainfoClient,
+      makeCache().cache,
+      makeRateLimiter(),
+    );
+    const fieldMapInfo = await fieldMapMetainfo.getMetainfo({ market: "america", mode: "raw" });
+    assert.equal(fieldMapInfo.metadata.returned_count, 2);
   });
 });
 
@@ -163,6 +203,7 @@ describe("TA missing-data semantics", () => {
     assert.deepEqual(result.excluded_symbols, [
       { symbol: "NASDAQ:AAPL", reason: "missing_symbol" },
     ]);
+    assert.equal(cached.metadata.retrieved_at, result.metadata.retrieved_at);
     assert.deepEqual(result.metadata.missing_symbols, ["NASDAQ:AAPL"]);
   });
 

@@ -380,6 +380,7 @@ export class TAClient {
       metadata: createResultMetadata({
         source: "https://scanner.tradingview.com/global/scan",
         cache_hit: summary.metadata.cache_hit,
+        retrieved_at: summary.metadata.retrieved_at,
         requested_count: symbols.length,
         returned_count: ranked.length,
         missing_symbols: missingSymbols,
