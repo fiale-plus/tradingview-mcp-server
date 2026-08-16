@@ -210,14 +210,20 @@ Enable in `.claude/settings.local.json`:
 
 | Variable | Default | Description |
 |---|---|---|
-| `CACHE_TTL_SECONDS` | `300` | How long to cache API responses (seconds) |
-| `RATE_LIMIT_RPM` | `10` | Maximum API requests per minute |
+| `CACHE_TTL_SECONDS` | `300` | How long to cache API responses. Valid range: `0` (disabled) to `3600` seconds |
+| `RATE_LIMIT_RPM` | `10` | Maximum API requests per minute. Valid range: `1` to `60` |
+
+Invalid values fail before the MCP server starts. These limits protect TradingView's public endpoints; they do not provide a TradingView quota or guarantee availability.
+
+### Upstream limitations
+
+This package is an unofficial client of TradingView's public scanner and symbol-search endpoints. The endpoints are unauthenticated, can change or reject traffic without notice, and may return delayed or incomplete market data. The server does not provide historical data, brokerage execution, alerts, or a TradingView data entitlement.
 
 ---
 
 ## MCP Tools
 
-Twelve tools are exposed to Claude:
+The MCP server exposes twelve tools to any compatible MCP client. The Claude Code commands listed later are repository-local workflows built on top of these tools; they are not additional MCP tools.
 
 | Tool | Description | Key Parameters |
 |---|---|---|
@@ -302,7 +308,31 @@ Use `rank_by_ta` to compare symbols by weighted technical alignment:
 { "symbols": ["NASDAQ:AAPL", "NASDAQ:MSFT"], "weights": { "1D": 3, "1W": 2 } }
 ```
 
-Returns ranked list with per-timeframe breakdown and weighted average score.
+Returns ranked list with per-timeframe breakdown, weighted average score, and structured metadata. See **Response metadata and partial results** below.
+
+### Response metadata and partial results
+
+Screening, lookup, search, market metainfo, and TA/ranking responses include a `metadata` object:
+
+```json
+{
+  "retrieved_at": "2026-08-16T00:00:00.000Z",
+  "source": "https://scanner.tradingview.com/global/scan",
+  "cache_hit": false,
+  "requested_count": 20,
+  "returned_count": 18,
+  "missing_symbols": []
+}
+```
+
+- `retrieved_at` is the source-data retrieval time; cache hits preserve it so callers can assess data age.
+- `source` identifies the public endpoint used.
+- `cache_hit` distinguishes an in-memory response from a new upstream request.
+- `requested_count` and `returned_count` describe the requested and usable result collections.
+- `missing_symbols` lists requested symbols absent from an upstream response. TA responses may also include `unavailable_symbols` when symbols exist but have no usable score.
+- `rank_by_ta` additionally returns `excluded_symbols` with `missing_symbol` or `unavailable_ta` reasons. Missing data is never converted into a neutral score.
+
+`list_fields`, `get_preset`, and `list_presets` return their documented collections without this metadata wrapper. Raw metainfo mode preserves the upstream payload under `raw` rather than normalizing it.
 
 ---
 
@@ -310,7 +340,7 @@ Returns ranked list with per-timeframe breakdown and weighted average score.
 
 Use `list_fields` to browse fields. Pass `asset_type` to get tailored lists for each asset class.
 
-### Stocks (~80 fields)
+### Stocks (104 fields in the built-in stock catalog)
 
 **Valuation**
 `price_earnings_ttm`, `price_book_fq`, `price_sales_current`, `enterprise_value_current`, `enterprise_value_ebitda_ttm`, `enterprise_value_to_ebit_ttm`, `price_earnings_growth_ttm` (PEG), `ebitda`
@@ -379,6 +409,32 @@ Retrieve any preset with `get_preset` or browse all with `list_presets`.
 | `macro_assets` | Macro Asset Monitor | Macro | VIX, DXY, 10Y yield, Gold, WTI Oil, Bitcoin — direct symbol lookup |
 | `market_indexes` | Global Market Indexes | Market Regime | 13 global indexes (US, Europe, Asia, Nordic) with ATH and performance data |
 
+### Versioned preset files
+
+The CLI also accepts a strict, portable JSON preset:
+
+```bash
+tradingview-cli screen stocks --preset-file ./presets/quality.json --limit 20
+```
+
+The file must use `schemaVersion: 1`, include non-empty `name` and `description`, and define exactly one of `filters` or `symbols`. Optional keys are `markets`, `sort_by`, `sort_order`, `limit` (1–200), and `columns`; unknown keys, invalid operators, and invalid value shapes are rejected. `--preset` and `--preset-file` cannot be combined. Files are limited to 1 MiB. The CLI prints the file basename and SHA-256 to stderr after a successful load.
+
+```json
+{
+  "schemaVersion": 1,
+  "name": "Quality with a tighter range",
+  "description": "A reproducible quality screen",
+  "filters": [
+    { "field": "return_on_equity", "operator": "greater", "value": 15 }
+  ],
+  "markets": ["america"],
+  "sort_by": "market_cap_basic",
+  "sort_order": "desc",
+  "limit": 20,
+  "columns": ["name", "close", "return_on_equity"]
+}
+```
+
 ---
 
 ## Investor Commands
@@ -417,10 +473,10 @@ All screening tools support the following operators in filter conditions:
 | `crosses_above` | Field crosses above the reference | `SMA50 crosses_above SMA200` (golden cross) |
 | `crosses_below` | Field crosses below the reference | `SMA50 crosses_below SMA200` (death cross) |
 | `match` | Text contains substring | `name match "tech"` |
-| `above_percent` | Field is N% above reference | `close above_percent SMA200` |
-| `below_percent` | Field is N% below reference | `close below_percent SMA200` |
-| `has` | Field contains value (list fields) | `indexes has "S&P 500"` |
-| `has_none_of` | Field contains none of the values | filters out specific index members |
+| `above_percent` | Field is N% above a reference field | `close above_percent ["SMA200", 5]` |
+| `below_percent` | Field is N% below a reference field | `close below_percent ["SMA200", 10]` |
+| `has` | Field contains any listed value | `indexes has ["S&P 500"]` |
+| `has_none_of` | Field contains none of the listed values | `indexes has_none_of ["S&P 500"]` |
 | `empty` | Field has no value | `dividend_yield_recent empty` |
 | `not_empty` | Field has a value | `all_time_high not_empty` |
 

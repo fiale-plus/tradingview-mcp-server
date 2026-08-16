@@ -206,7 +206,7 @@ List available fields for filtering and display. Use this to discover what field
 {
   "asset_type": "stock",
   "category": "all",
-  "field_count": 75,
+  "field_count": 104,
   "fields": [
     {
       "name": "return_on_equity",
@@ -257,6 +257,72 @@ List all available preset screening strategies. Returns key, name, and descripti
 
 ---
 
+### search_symbols
+
+Searches TradingView's public symbol-search endpoint and returns normalized symbol identifiers.
+
+**Parameters**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `query` | `string` | Yes | — | Non-empty search text |
+| `exchange` | `string` | No | — | Exchange filter |
+| `asset_type` | `string` | No | — | `stock`, `forex`, `crypto`, `cfd`, `futures`, `index`, or `economic` |
+| `limit` | `number` | No | `20` | Results per page (1–50) |
+| `start` | `number` | No | `0` | Non-negative result offset |
+
+The response contains `query`, total pre-pagination `count`, and a normalized `symbols` array with `symbol`, `ticker`, `description`, `exchange`, `type`, and optional `currency`. `metadata.returned_count` is the number returned on the current page.
+
+---
+
+### get_market_metainfo
+
+Discovers the fields exposed by a market's screener endpoint.
+
+**Parameters**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `market` | `string` | Yes | — | TradingView market identifier, for example `america`, `uk`, or `germany` |
+| `fields` | `string[]` | No | All available fields | Optional field names to return |
+| `mode` | `"summary" \| "raw"` | No | `"summary"` | Normalized field metadata or the unmodified upstream response |
+
+Summary mode returns `market`, `requested_fields`, and `metainfo` with `available`, `field_count`, and normalized `fields`. Raw mode returns `market` and the unmodified upstream payload under `raw`; use it for debugging, not as a stable application schema.
+
+---
+
+### get_ta_summary
+
+Returns TradingView-style recommendation labels and scores for each requested symbol.
+
+**Parameters**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `symbols` | `string[]` | Yes | — | 1–50 TradingView symbols |
+| `timeframes` | `string[]` | No | `["60","240","1D","1W"]` | One or more supported timeframes |
+| `include_components` | `boolean` | No | `true` | Include oscillator and moving-average scores |
+
+Each timeframe has `summary`, `available`, and scores in the range `[-1, 1]`. Missing symbols appear in `metadata.missing_symbols`; symbols with no usable TA score appear in `metadata.unavailable_symbols`. Unavailable values are reported as `summary: "unavailable"`, not as neutral.
+
+---
+
+### rank_by_ta
+
+Ranks a watchlist by weighted TA alignment across selected timeframes.
+
+**Parameters**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `symbols` | `string[]` | Yes | — | 1–50 TradingView symbols |
+| `timeframes` | `string[]` | No | `["60","240","1D","1W"]` | Timeframes to rank |
+| `weights` | `object` | No | Equal weights | Non-negative numeric weights keyed by selected timeframe |
+
+The response contains `requested_symbols`, `timeframes`, effective `weights`, descending `ranked` results, and `excluded_symbols`. A symbol is excluded with `missing_symbol` when absent upstream or `unavailable_ta` when any selected timeframe lacks a usable score. It is never silently assigned a neutral score.
+
+---
+
 ## Operators
 
 All 18 operators supported by the filter system:
@@ -292,7 +358,7 @@ All 18 operators supported by the filter system:
 
 ## Fields
 
-### Stock Fields (~75 fields)
+### Stock Fields (104 fields)
 
 #### Fundamental
 
@@ -495,6 +561,32 @@ All 18 operators supported by the filter system:
 | `macro_assets` | Macro Asset Monitor | symbols | — | — | Key macro assets: VIX, DXY, TNX (10Y yield), Gold, Oil, Bitcoin, SPX. |
 | `market_indexes` | Global Market Indexes | symbols | — | — | Major global indexes: US (SPX, DJI, IXIC, RUT), European (UKX, DAX, CAC, IBEX35), Asian (NI225, HSI, SHCOMP, SENSEX), Nordic (OMXS30). Includes ATH, 52-week data, and performance. |
 
+### Versioned preset files
+
+The CLI also accepts a strict, portable JSON preset:
+
+```bash
+tradingview-cli screen stocks --preset-file ./presets/quality.json --limit 20
+```
+
+The file must use `schemaVersion: 1`, include non-empty `name` and `description`, and define exactly one of `filters` or `symbols`. Optional keys are `markets`, `sort_by`, `sort_order`, `limit` (1–200), and `columns`; unknown keys, invalid operators, and invalid value shapes are rejected. `--preset` and `--preset-file` cannot be combined. Files are limited to 1 MiB. The CLI prints the file basename and SHA-256 to stderr after a successful load.
+
+```json
+{
+  "schemaVersion": 1,
+  "name": "Quality with a tighter range",
+  "description": "A reproducible quality screen",
+  "filters": [
+    { "field": "return_on_equity", "operator": "greater", "value": 15 }
+  ],
+  "markets": ["america"],
+  "sort_by": "market_cap_basic",
+  "sort_order": "desc",
+  "limit": 20,
+  "columns": ["name", "close", "return_on_equity"]
+}
+```
+
 ### Preset filter details
 
 **quality_stocks** filters:
@@ -682,16 +774,48 @@ Use `not_empty` to find stocks with upcoming earnings dates, or `empty` to find 
 
 ## Configuration
 
-Environment variables (set in `.mcp.json`):
+Environment variables read by the server and CLI. Set them in the process environment (for example, the `env` object in `.mcp.json`):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CACHE_TTL_SECONDS` | `300` | Cache duration in seconds for API responses |
-| `RATE_LIMIT_RPM` | `10` | Maximum API requests per minute |
+| `CACHE_TTL_SECONDS` | `300` | Cache duration in seconds. Valid range: `0` (disabled) to `3600` seconds |
+| `RATE_LIMIT_RPM` | `10` | Maximum API requests per minute. Valid range: `1` to `60` |
+
+Invalid values fail before the MCP server starts. These limits protect TradingView's public endpoints; they do not provide a TradingView quota or guarantee availability.
+
+### Upstream limitations
+
+This package is an unofficial client of TradingView's public scanner and symbol-search endpoints. The endpoints are unauthenticated, can change or reject traffic without notice, and may return delayed or incomplete market data. The server does not provide historical data, brokerage execution, alerts, or a TradingView data entitlement.
 
 ---
 
 ## Response Formats
+
+### Response metadata and partial results
+
+Screening, lookup, search, market metainfo, and TA/ranking responses include a `metadata` object:
+
+```json
+{
+  "retrieved_at": "2026-08-16T00:00:00.000Z",
+  "source": "https://scanner.tradingview.com/global/scan",
+  "cache_hit": false,
+  "requested_count": 20,
+  "returned_count": 18,
+  "missing_symbols": []
+}
+```
+
+- `retrieved_at` is the source-data retrieval time; cache hits preserve it so callers can assess data age.
+- `source` identifies the public endpoint used.
+- `cache_hit` distinguishes an in-memory response from a new upstream request.
+- `requested_count` and `returned_count` describe the requested and usable result collections.
+- `missing_symbols` lists requested symbols absent from an upstream response. TA responses may also include `unavailable_symbols` when symbols exist but have no usable score.
+- `rank_by_ta` additionally returns `excluded_symbols` with `missing_symbol` or `unavailable_ta` reasons. Missing data is never converted into a neutral score.
+
+`list_fields`, `get_preset`, and `list_presets` return their documented collections without this metadata wrapper. Raw metainfo mode preserves the upstream payload under `raw` rather than normalizing it.
+
+---
 
 ### screen_stocks / screen_etf response
 ```json
