@@ -328,7 +328,7 @@ Screening, lookup, search, market metainfo, and TA/ranking responses include a `
 - `retrieved_at` is the source-data retrieval time; cache hits preserve it so callers can assess data age.
 - `source` identifies the public endpoint used.
 - `cache_hit` distinguishes an in-memory response from a new upstream request.
-- `requested_count` and `returned_count` describe the requested and usable result collections.
+- `requested_count` and `returned_count` describe the requested items or limit and rows returned; consult `unavailable_symbols` and `excluded_symbols` for usable TA coverage.
 - `missing_symbols` lists requested symbols absent from an upstream response. TA responses may also include `unavailable_symbols` when symbols exist but have no usable score.
 - `rank_by_ta` additionally returns `excluded_symbols` with `missing_symbol` or `unavailable_ta` reasons. Missing data is never converted into a neutral score.
 

@@ -303,7 +303,7 @@ Returns TradingView-style recommendation labels and scores for each requested sy
 | `timeframes` | `string[]` | No | `["60","240","1D","1W"]` | One or more supported timeframes |
 | `include_components` | `boolean` | No | `true` | Include oscillator and moving-average scores |
 
-Each timeframe has `summary`, `available`, and scores in the range `[-1, 1]`. Missing symbols appear in `metadata.missing_symbols`; symbols with no usable TA score appear in `metadata.unavailable_symbols`. Unavailable values are reported as `summary: "unavailable"`, not as neutral.
+Each timeframe has `summary`, `available`, and `scores`. Numeric scores are in the range `[-1, 1]`; unavailable score fields are `null`. Missing symbols appear in `metadata.missing_symbols`; symbols with no usable TA score appear in `metadata.unavailable_symbols`. Unavailable values are reported as `summary: "unavailable"`, not as neutral.
 
 ---
 
@@ -317,7 +317,7 @@ Ranks a watchlist by weighted TA alignment across selected timeframes.
 |-----------|------|----------|---------|-------------|
 | `symbols` | `string[]` | Yes | — | 1–50 TradingView symbols |
 | `timeframes` | `string[]` | No | `["60","240","1D","1W"]` | Timeframes to rank |
-| `weights` | `object` | No | Equal weights | Non-negative numeric weights keyed by selected timeframe |
+| `weights` | `object` | No | Equal weights | Non-negative numeric weights keyed by selected timeframe; omitted selected timeframes default to 1, and effective weights must have a positive total |
 
 The response contains `requested_symbols`, `timeframes`, effective `weights`, descending `ranked` results, and `excluded_symbols`. A symbol is excluded with `missing_symbol` when absent upstream or `unavailable_ta` when any selected timeframe lacks a usable score. It is never silently assigned a neutral score.
 
@@ -809,7 +809,7 @@ Screening, lookup, search, market metainfo, and TA/ranking responses include a `
 - `retrieved_at` is the source-data retrieval time; cache hits preserve it so callers can assess data age.
 - `source` identifies the public endpoint used.
 - `cache_hit` distinguishes an in-memory response from a new upstream request.
-- `requested_count` and `returned_count` describe the requested and usable result collections.
+- `requested_count` and `returned_count` describe the requested items or limit and rows returned; consult `unavailable_symbols` and `excluded_symbols` for usable TA coverage.
 - `missing_symbols` lists requested symbols absent from an upstream response. TA responses may also include `unavailable_symbols` when symbols exist but have no usable score.
 - `rank_by_ta` additionally returns `excluded_symbols` with `missing_symbol` or `unavailable_ta` reasons. Missing data is never converted into a neutral score.
 
