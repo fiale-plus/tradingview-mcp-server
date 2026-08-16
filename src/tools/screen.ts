@@ -11,7 +11,24 @@ import { validateScreenFilters } from "../api/validation.js";
 import type { TradingViewClient } from "../api/client.js";
 import type { Cache } from "../utils/cache.js";
 import type { RateLimiter } from "../utils/rateLimit.js";
+import {
+  createResultMetadata,
+  withCacheHitMetadata,
+  withResultMetadata,
+} from "../utils/resultMetadata.js";
+
 export { validateScreenFilters } from "../api/validation.js";
+const STOCK_SOURCE = "https://scanner.tradingview.com/global/scan";
+const FOREX_SOURCE = "https://scanner.tradingview.com/forex/scan";
+const CRYPTO_SOURCE = "https://scanner.tradingview.com/crypto/scan";
+
+function cachedCollectionLength(cached: unknown, key: string): number {
+  if (typeof cached !== "object" || cached === null || Array.isArray(cached)) {
+    return 0;
+  }
+  const collection = (cached as Record<string, unknown>)[key];
+  return Array.isArray(collection) ? collection.length : 0;
+}
 
 // Minimal default columns for lean responses
 const DEFAULT_COLUMNS = [
@@ -103,7 +120,11 @@ export class ScreenTool {
     // Check cache
     const cached = this.cache.get(cacheKey);
     if (cached) {
-      return cached;
+      return withCacheHitMetadata(cached, {
+        source: STOCK_SOURCE,
+        requested_count: limit,
+        returned_count: cachedCollectionLength(cached, "stocks"),
+      });
     }
 
     // Convert filters to TradingView format
@@ -150,11 +171,19 @@ export class ScreenTool {
         return stock;
       }),
     };
+    const resultWithMetadata = withResultMetadata(
+      result,
+      createResultMetadata({
+        source: STOCK_SOURCE,
+        requested_count: limit,
+        returned_count: result.stocks.length,
+      }),
+    );
 
     // Cache result
-    this.cache.set(cacheKey, result);
+    this.cache.set(cacheKey, resultWithMetadata);
 
-    return result;
+    return resultWithMetadata;
   }
 
   async screenForex(input: Omit<ScreenStocksInput, "markets">): Promise<any> {
@@ -173,7 +202,13 @@ export class ScreenTool {
 
     const cacheKey = JSON.stringify({ type: "forex", filters, sort_by, sort_order, limit, columns: inputColumns });
     const cached = this.cache.get(cacheKey);
-    if (cached) return cached;
+    if (cached) {
+      return withCacheHitMetadata(cached, {
+        source: FOREX_SOURCE,
+        requested_count: limit,
+        returned_count: cachedCollectionLength(cached, "pairs"),
+      });
+    }
 
     const tvFilters = this.validateAndConvertFilters(filters);
 
@@ -201,9 +236,17 @@ export class ScreenTool {
         return pair;
       }),
     };
+    const resultWithMetadata = withResultMetadata(
+      result,
+      createResultMetadata({
+        source: FOREX_SOURCE,
+        requested_count: limit,
+        returned_count: result.pairs.length,
+      }),
+    );
 
-    this.cache.set(cacheKey, result);
-    return result;
+    this.cache.set(cacheKey, resultWithMetadata);
+    return resultWithMetadata;
   }
 
   async screenCrypto(input: Omit<ScreenStocksInput, "markets">): Promise<any> {
@@ -222,7 +265,13 @@ export class ScreenTool {
 
     const cacheKey = JSON.stringify({ type: "crypto", filters, sort_by, sort_order, limit, columns: inputColumns });
     const cached = this.cache.get(cacheKey);
-    if (cached) return cached;
+    if (cached) {
+      return withCacheHitMetadata(cached, {
+        source: CRYPTO_SOURCE,
+        requested_count: limit,
+        returned_count: cachedCollectionLength(cached, "cryptocurrencies"),
+      });
+    }
 
     const tvFilters = this.validateAndConvertFilters(filters);
 
@@ -250,9 +299,17 @@ export class ScreenTool {
         return crypto;
       }),
     };
+    const resultWithMetadata = withResultMetadata(
+      result,
+      createResultMetadata({
+        source: CRYPTO_SOURCE,
+        requested_count: limit,
+        returned_count: result.cryptocurrencies.length,
+      }),
+    );
 
-    this.cache.set(cacheKey, result);
-    return result;
+    this.cache.set(cacheKey, resultWithMetadata);
+    return resultWithMetadata;
   }
 
   async screenETF(input: ScreenStocksInput): Promise<any> {
@@ -277,7 +334,11 @@ export class ScreenTool {
     // Check cache
     const cached = this.cache.get(cacheKey);
     if (cached) {
-      return cached;
+      return withCacheHitMetadata(cached, {
+        source: STOCK_SOURCE,
+        requested_count: limit,
+        returned_count: cachedCollectionLength(cached, "etfs"),
+      });
     }
 
     // Convert filters to TradingView format
@@ -327,11 +388,19 @@ export class ScreenTool {
         return etf;
       }),
     };
+    const resultWithMetadata = withResultMetadata(
+      result,
+      createResultMetadata({
+        source: STOCK_SOURCE,
+        requested_count: limit,
+        returned_count: result.etfs.length,
+      }),
+    );
 
     // Cache result
-    this.cache.set(cacheKey, result);
+    this.cache.set(cacheKey, resultWithMetadata);
 
-    return result;
+    return resultWithMetadata;
   }
 
   async lookupSymbols(input: { symbols: string[]; columns?: string[] }): Promise<any> {
@@ -355,7 +424,17 @@ export class ScreenTool {
     // Check cache
     const cached = this.cache.get(cacheKey);
     if (cached) {
-      return cached;
+      const cachedSymbols = Array.isArray(cached.symbols)
+        ? cached.symbols
+          .map((item: { symbol?: unknown }) => item.symbol)
+          .filter((symbol: unknown): symbol is string => typeof symbol === "string")
+        : [];
+      return withCacheHitMetadata(cached, {
+        source: STOCK_SOURCE,
+        requested_count: symbols.length,
+        returned_count: cachedSymbols.length,
+        missing_symbols: symbols.filter((symbol) => !cachedSymbols.includes(symbol)),
+      });
     }
 
     // Default columns for symbol lookup
@@ -408,10 +487,20 @@ export class ScreenTool {
         return symbol;
       }),
     };
+    const returnedSymbols = result.symbols.map((item) => item.symbol);
+    const resultWithMetadata = withResultMetadata(
+      result,
+      createResultMetadata({
+        source: STOCK_SOURCE,
+        requested_count: symbols.length,
+        returned_count: result.symbols.length,
+        missing_symbols: symbols.filter((symbol) => !returnedSymbols.includes(symbol)),
+      }),
+    );
 
     // Cache result
-    this.cache.set(cacheKey, result);
+    this.cache.set(cacheKey, resultWithMetadata);
 
-    return result;
+    return resultWithMetadata;
   }
 }

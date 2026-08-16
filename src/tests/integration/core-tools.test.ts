@@ -193,7 +193,9 @@ describe("Integration — Core-4: get_ta_summary", () => {
 
     const tf60 = aapl.timeframes["60"];
     assert.ok(VALID_LABELS.includes(tf60.summary), `Invalid label: ${tf60.summary}`);
-    assert.equal(typeof tf60.scores.all, "number");
+    if (typeof tf60.scores.all !== "number") {
+      throw new Error("Expected a numeric TA score");
+    }
     assert.ok(tf60.scores.all >= -1 && tf60.scores.all <= 1, `Score out of range: ${tf60.scores.all}`);
   });
 

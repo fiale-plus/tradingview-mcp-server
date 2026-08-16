@@ -203,10 +203,11 @@ describe("TAClient - getTASummary", () => {
       symbols: ["NASDAQ:NULL"],
       timeframes: ["60"],
     });
-
     const symbol = result.symbols[0];
-    assert.strictEqual(symbol.timeframes["60"].summary, "neutral");
-    assert.strictEqual(symbol.timeframes["60"].scores.all, 0);
+
+    assert.strictEqual(symbol.timeframes["60"].summary, "unavailable");
+    assert.strictEqual(symbol.timeframes["60"].available, false);
+    assert.strictEqual(symbol.timeframes["60"].scores.all, null);
   });
 });
 
