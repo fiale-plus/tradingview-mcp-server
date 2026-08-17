@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "flow": {
+    "runsDir": ".repo-arch/runs"
+  },
+  "cards": {
+    "minConfidence": 0.3,
+    "maxCards": 20
+  },
+  "index": {
+    "model": "Xenova/all-MiniLM-L6-v2"
+  },
+  "training": {
+    "model": "Qwen/Qwen2.5-Coder-1.5B-Instruct",
+    "iters": 100,
+    "learningRate": 0.00001,
+    "run": false,
+    "includeRejected": false
+  }
+}

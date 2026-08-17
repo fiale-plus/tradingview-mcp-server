@@ -39,5 +39,10 @@ docs/local/
 # Worktrees
 .worktrees/
 
+# Repo-Arch
+.repo-arch/adapters/
+.repo-arch/cache/
+.repo-arch/index/
+
 # Autoresearch
 .autoresearch/
