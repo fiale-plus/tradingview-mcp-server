@@ -536,6 +536,46 @@ describe("ScreenTool - Filter Validation", () => {
       });
     });
   });
+  describe("ETF taxonomy", () => {
+    it("filters fund rows to verified ETF subtypes and preserves missing expense ratio as null", async () => {
+      (mockClient.scanStocks as any).mock.mockImplementation(async (request: any) => {
+        const rows = [
+          ["AMEX:SPY", "SPDR S&P 500 ETF", "etf", null],
+          ["NYSE:ABC-P", "Preferred Share", "preferred", 0.4],
+          ["NASDAQ:CORP", "Corporate Instrument", "corporate", null],
+          ["NYSE:CEF", "Closed End Fund", "closed_end", 1.2],
+          ["NASDAQ:MUTF", "Mutual Fund", "mutual_fund", 0.8],
+          ["NYSE:TRUST", "Trust", "trust", null],
+        ];
+        return {
+          totalCount: rows.length,
+          data: rows.map(([symbol, name, subtype, expense]) => ({
+            s: symbol,
+            d: request.columns.map((column: string) => ({ name, close: 10, subtype, type: "fund", expense_ratio: expense }[column] ?? null)),
+          })),
+        };
+      });
+
+      const result = await screenTool.screenETF({ filters: [], limit: 20 });
+      assert.deepEqual(result.etfs.map((item: any) => item.symbol), ["AMEX:SPY"]);
+      assert.equal(result.etfs[0].type, "fund");
+      assert.equal(result.etfs[0].subtype, "etf");
+      assert.equal(result.etfs[0].expense_ratio, null);
+      assert.equal(result.etfs[0].etfClassification, "verified");
+    });
+
+    it("adds an ETF subtype discriminator to the upstream request", async () => {
+      (mockClient.scanStocks as any).mock.mockImplementation(async (request: any) => {
+        assert.deepEqual(request.filter.slice(-2), [
+          { left: "type", operation: "equal", right: "fund" },
+          { left: "subtype", operation: "equal", right: "etf" },
+        ]);
+        return { totalCount: 0, data: [] };
+      });
+
+      await screenTool.screenETF({ filters: [] });
+    });
+  });
 
   describe("Valid filter conversion", () => {
     it("should convert valid filters to TradingView format", async () => {

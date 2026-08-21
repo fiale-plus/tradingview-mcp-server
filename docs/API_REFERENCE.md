@@ -141,10 +141,13 @@ Screen ETFs (Exchange-Traded Funds) based on performance and technical criteria.
 | `sort_by` | `string` | No | `"market_cap_basic"` | Field to sort results by (market_cap_basic approximates AUM for ETFs) |
 | `sort_order` | `"asc" \| "desc"` | No | `"desc"` | Sort direction |
 | `limit` | `number` | No | `20` | Number of results (1–200) |
-| `columns` | `string[]` | No | `["name","close","volume","change","change_from_open"]` | Columns to include |
+| `columns` | `string[]` | No | `["name","close","volume","change","change_from_open","type","subtype","expense_ratio"]` | Columns to include; `expense_ratio: null` explicitly means TradingView did not publish a value |
 
-Note: Internally applies a `type = fund` filter in addition to user-supplied filters.
+The server applies both `type = fund` and `subtype = etf` filters. Returned rows include `type`, `subtype`, and `etfClassification: "verified"`; preferred shares, corporate instruments, closed-end funds, mutual funds, and trusts are not presented as ETFs. Retrieval provenance remains in `metadata` (`retrieved_at`, `source`, and `cache_hit`).
 
+When an upstream response lacks a usable subtype, do not infer ETF status from naming or `expense_ratio`. Use `lookup_symbols` for the ticker and corroborate the issuer's instrument classification before treating it as an ETF.
+
+Note: Internally applies `type = fund` and `subtype = etf` filters in addition to user-supplied filters.
 **Example**
 
 ```json
