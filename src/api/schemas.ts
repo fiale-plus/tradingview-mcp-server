@@ -90,7 +90,7 @@ export const OUTPUT_SCHEMAS = {
         items: {
           type: "object",
           properties: {
-            time: { type: "integer", minimum: 0 },
+            time: { type: "integer" },
             open: { type: "number" },
             high: { type: "number" },
             low: { type: "number" },

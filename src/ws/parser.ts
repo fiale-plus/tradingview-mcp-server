@@ -18,7 +18,7 @@ export function parseBarData(series: unknown, previous: Bar[] = []): Bar[] {
     if (!Array.isArray(v) || v.length < 5 ||
         !v.slice(0, 5).every((n) => typeof n === "number" && Number.isFinite(n)) ||
         (v.length > 5 && v[5] !== null && (typeof v[5] !== "number" || !Number.isFinite(v[5]))) ||
-        !Number.isInteger(v[0]) || v[0] < 0) {
+        !Number.isInteger(v[0])) {
       throw new Error("Invalid TradingView OHLCV row");
     }
     const [time, open, high, low, close] = v as number[];
