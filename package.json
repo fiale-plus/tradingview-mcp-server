@@ -47,10 +47,12 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.19",
+    "@types/ws": "^8.18.2",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3"
   },
