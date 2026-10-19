@@ -6,6 +6,33 @@ This document is the complete reference for all MCP tools, operators, fields, pr
 
 ## Tools
 
+### experimental_get_bars (experimental)
+
+**[EXPERIMENTAL]** Unofficial historical OHLCV via TradingView's anonymous public chart WebSocket. Data may be delayed or limited; this interface may break without notice. Draft-only; not a release commitment.
+
+Enable with `TV_EXPERIMENTAL_ENABLED=1` (also accepts `true` or `yes`, case-insensitive) in the server environment. Restart the server after changing it. Disabled by default: not listed in `tools/list`, and direct calls return an explicit disabled error.
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `symbol` | `string` | Yes | — | `EXCHANGE:TICKER`, max 128 characters, e.g. `NASDAQ:AAPL` |
+| `timeframe` | `string` | No | `1D` | `1`, `3`, `5`, `15`, `30`, `45`, `60`, `120`, `180`, `240` (minutes), `1D`, `1W`, `1M` |
+| `limit` | `integer` | No | `300` | Requested bars, 1–5000 |
+
+Strict input validation rejects unknown properties. Example: `{"symbol":"BINANCE:BTCUSDT","timeframe":"60","limit":20}`.
+
+**Output:** both JSON text and MCP `structuredContent` contain `symbol`, `timeframe`, `count`, `bars`, and `metadata`, described by an object `outputSchema`. Each bar has numeric `open`, `high`, `low`, `close`, integer `time` (Unix seconds), and `volume` of type `number` or `null` (missing for some indexes/forex). Bars are ascending and deduplicated by timestamp (latest update wins). `count` equals `bars.length` and never exceeds `limit`.
+
+`metadata` contains `retrieved_at` (ISO timestamp), `source: "experimental_tradingview_ws"`, `cache_hit: false`, `requested_count`, `returned_count`, `missing_symbols: []`, and `experimental: true`.
+
+Only `wss://data.tradingview.com/socket.io/websocket` and the literal anonymous token are used. The client sends an `Origin: https://www.tradingview.com` header. No account, cookie, session-token, alternate-endpoint, streaming, or quote-session support. The server makes one chart request with a hard 15-second overall deadline covering connection and data retrieval; sockets are terminated on success, error, and timeout. No caching or retries. This experimental path does not queue through the scanner's non-cancellable rate limiter. A process-wide guard allows only one request in flight and enforces at least 2 seconds between connection starts: overlapping calls fail immediately with an in-flight error; calls inside the minimum gap fail immediately with a retry-after duration. There is no rate-limit wait extending the deadline. Avoid bulk downloads.
+
+Anonymous access does not grant market-data entitlements. History can be shorter than requested, the latest bar may be incomplete, and unavailable symbols or upstream protocol errors produce tool errors rather than partial success. Completion with zero bars returns `no bars returned for SYMBOL`. Timeouts are errors, not partial data.
+
+Live smoke checks (opt-in): `TV_INTEGRATION=1 TV_EXPERIMENTAL_ENABLED=1 npx tsx --test src/tests/integration/experimental-bars.test.ts`; without `TV_INTEGRATION=1`, these tests skip.
+
+---
+
+
 ### screen_stocks
 
 Screen stocks based on fundamental and technical criteria. Returns stocks matching the specified filters.
