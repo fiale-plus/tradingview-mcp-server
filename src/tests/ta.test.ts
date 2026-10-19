@@ -66,9 +66,9 @@ describe("TAClient - getTASummary", () => {
           0.88,                                  // Recommend.All|240
           0.55,                                  // Recommend.Other|240
           0.96,                                  // Recommend.MA|240
-          0.45,                                  // Recommend.All|1D
-          -0.2,                                  // Recommend.Other|1D
-          0.9,                                   // Recommend.MA|1D
+          0.45,                                  // Recommend.All (daily)
+          -0.2,                                  // Recommend.Other (daily)
+          0.9,                                   // Recommend.MA (daily)
           0.12,                                  // Recommend.All|1W
           0.05,                                  // Recommend.Other|1W
           0.15,                                  // Recommend.MA|1W
@@ -108,6 +108,52 @@ describe("TAClient - getTASummary", () => {
     acquire: mock.fn(async () => {}),
   } as unknown as RateLimiter;
 
+
+  it("should request exact columns for default timeframes", async () => {
+    const scanStocks = mock.fn(async (_request: { columns: string[] }) => mockResponse);
+    const client = { scanStocks } as unknown as TradingViewClient;
+    const taClient = new TAClient(client, mockCache, mockRateLimiter);
+
+    const result = await taClient.getTASummary({ symbols: ["NASDAQ:AAPL"] });
+
+    assert.deepStrictEqual(scanStocks.mock.calls[0].arguments[0].columns, [
+      "name",
+      "Recommend.All|60", "Recommend.Other|60", "Recommend.MA|60",
+      "Recommend.All|240", "Recommend.Other|240", "Recommend.MA|240",
+      "Recommend.All", "Recommend.Other", "Recommend.MA",
+      "Recommend.All|1W", "Recommend.Other|1W", "Recommend.MA|1W",
+    ]);
+    const daily = result.symbols[0].timeframes["1D"];
+    assert.strictEqual(daily.available, true);
+    assert.strictEqual(daily.summary, "buy");
+    assert.deepStrictEqual(daily.scores, {
+      all: 0.45, oscillators: -0.2, moving_averages: 0.9,
+    });
+  });
+
+  it("should request exact columns for explicit timeframes including daily", async () => {
+    const scanStocks = mock.fn(async (_request: { columns: string[] }) => ({
+      totalCount: 1,
+      data: [{ s: "NASDAQ:AAPL", d: ["Apple", 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, -0.2, -0.3, -0.4] }],
+    }));
+    const client = { scanStocks } as unknown as TradingViewClient;
+    const taClient = new TAClient(client, mockCache, mockRateLimiter);
+
+    const result = await taClient.getTASummary({
+      symbols: ["NASDAQ:AAPL"],
+      timeframes: ["1D", "1", "1M"],
+    });
+
+    assert.deepStrictEqual(scanStocks.mock.calls[0].arguments[0].columns, [
+      "name",
+      "Recommend.All", "Recommend.Other", "Recommend.MA",
+      "Recommend.All|1", "Recommend.Other|1", "Recommend.MA|1",
+      "Recommend.All|1M", "Recommend.Other|1M", "Recommend.MA|1M",
+    ]);
+    assert.strictEqual(result.symbols[0].timeframes["1D"].scores.all, 0.2);
+    assert.strictEqual(result.symbols[0].timeframes["1"].scores.all, 0.5);
+    assert.strictEqual(result.symbols[0].timeframes["1M"].scores.all, -0.2);
+  });
 
   it("should get TA summary for symbols", async () => {
     const taClient = new TAClient(mockClient, mockCache as any, mockRateLimiter as any);

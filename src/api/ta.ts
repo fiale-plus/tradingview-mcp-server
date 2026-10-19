@@ -133,6 +133,14 @@ export function validateTAWeights(
 }
 
 /**
+ * TradingView's scanner exposes daily recommendation scores as the unsuffixed
+ * column (e.g. "Recommend.All"); "Recommend.All|1D" is always null upstream.
+ */
+function taColumn(field: string, timeframe: Timeframe): string {
+  return timeframe === "1D" ? field : `${field}|${timeframe}`;
+}
+
+/**
  * Build the columns needed for a TA summary across given timeframes.
  *
  * TradingView recommendation fields:
@@ -140,15 +148,15 @@ export function validateTAWeights(
  *   Recommend.Other — oscillator-based score
  *   Recommend.MA — moving average-based score
  *
- * Timeframe variants: field|timeframe e.g. "Recommend.All|60"
+ * Daily fields are unsuffixed; other timeframes use field|timeframe, e.g. "Recommend.All|60".
  */
 function buildTAColumns(timeframes: Timeframe[]): string[] {
   const columns: string[] = ["name"];
 
   for (const tf of timeframes) {
-    columns.push(`Recommend.All|${tf}`);
-    columns.push(`Recommend.Other|${tf}`);
-    columns.push(`Recommend.MA|${tf}`);
+    columns.push(taColumn("Recommend.All", tf));
+    columns.push(taColumn("Recommend.Other", tf));
+    columns.push(taColumn("Recommend.MA", tf));
   }
 
   return columns;
@@ -249,9 +257,9 @@ export class TAClient {
       const timeframeData: TASymbolSummary["timeframes"] = {};
 
       for (const tf of timeframes) {
-        const allIdx = columns.indexOf(`Recommend.All|${tf}`);
-        const otherIdx = columns.indexOf(`Recommend.Other|${tf}`);
-        const maIdx = columns.indexOf(`Recommend.MA|${tf}`);
+        const allIdx = columns.indexOf(taColumn("Recommend.All", tf));
+        const otherIdx = columns.indexOf(taColumn("Recommend.Other", tf));
+        const maIdx = columns.indexOf(taColumn("Recommend.MA", tf));
 
         const allScore = allIdx >= 0 ? parseScore(item.d?.[allIdx]) : null;
         const otherScore = otherIdx >= 0 ? parseScore(item.d?.[otherIdx]) : null;

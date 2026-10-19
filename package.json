@@ -1,6 +1,6 @@
 {
   "name": "tradingview-mcp-server",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Unofficial MCP server and CLI for TradingView stock screener API",
   "type": "module",
   "main": "dist/index.js",
@@ -46,7 +46,7 @@
   "author": "Community",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.28.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

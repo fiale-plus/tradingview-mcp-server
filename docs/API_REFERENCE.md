@@ -306,6 +306,8 @@ Returns TradingView-style recommendation labels and scores for each requested sy
 | `timeframes` | `string[]` | No | `["60","240","1D","1W"]` | One or more supported timeframes |
 | `include_components` | `boolean` | No | `true` | Include oscillator and moving-average scores |
 
+The `1D` timeframe maps to TradingView's unsuffixed `Recommend.All`, `Recommend.Other` and `Recommend.MA` scanner columns (the `|1D` suffixed columns are always `null` upstream); every other timeframe uses the `Recommend.*|<timeframe>` columns.
+
 Each timeframe has `summary`, `available`, and `scores`. Numeric scores are in the range `[-1, 1]`; unavailable score fields are `null`. Missing symbols appear in `metadata.missing_symbols`; symbols with no usable TA score appear in `metadata.unavailable_symbols`. Unavailable values are reported as `summary: "unavailable"`, not as neutral.
 
 ---

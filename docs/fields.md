@@ -8,7 +8,7 @@ This reference helps you **learn what financial metrics mean** and how to use th
 
 ### Why These Fields Matter
 
-Successful long-term investing requires understanding what separates great businesses from mediocre ones. These 75+ fields give you the same fundamental and technical data that professional analysts use - organized for learning and practical application.
+Successful long-term investing requires understanding what separates great businesses from mediocre ones. These 100+ fields give you the same fundamental and technical data that professional analysts use - organized for learning and practical application.
 
 **You'll learn:**
 - **Valuation** - Is the stock price reasonable? (P/E, EV/EBITDA, PEG)

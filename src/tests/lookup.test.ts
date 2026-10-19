@@ -224,6 +224,39 @@ describe("ScreenTool - lookupSymbols Integration", () => {
       assert.deepStrictEqual(lastCacheCall.arguments[1], result); // Cached value should be the result
     });
 
+    it("should reuse cache across symbol order while reporting current request metadata", async () => {
+      const cache = new Map<string, any>();
+      const upstream = mock.fn(async () => ({
+        totalCount: 1,
+        data: [{
+          s: "NASDAQ:AAPL",
+          d: ["Apple Inc.", 178.72, 2.5, 50000000, 2800000000000, 180, 120, 179, 125],
+        }],
+      }));
+      const cachedTool = new ScreenTool(
+        { scanStocks: upstream } as unknown as TradingViewClient,
+        {
+          get: (key: string) => cache.get(key) ?? null,
+          set: (key: string, value: any) => cache.set(key, value),
+        } as unknown as Cache,
+        mockRateLimiter,
+      );
+      const firstSymbols = ["NASDAQ:AAPL", "NYSE:MSFT"];
+      const first = await cachedTool.lookupSymbols({ symbols: firstSymbols });
+      const secondSymbols = ["NYSE:MSFT", "NASDAQ:AAPL"];
+      const originalSecondSymbols = [...secondSymbols];
+
+      const result = await cachedTool.lookupSymbols({ symbols: secondSymbols });
+
+      assert.equal(upstream.mock.calls.length, 1);
+      assert.equal(result.metadata.cache_hit, true);
+      assert.equal(result.metadata.requested_count, 2);
+      assert.deepStrictEqual(result.metadata.missing_symbols, ["NYSE:MSFT"]);
+      assert.equal(result.metadata.returned_count, 1);
+      assert.deepStrictEqual(result.symbols, first.symbols);
+      assert.deepStrictEqual(secondSymbols, originalSecondSymbols);
+    });
+
     it("should use different cache keys for different symbol sets", async () => {
       (mockCache.get as any).mock.mockImplementation(() => null);
       (mockClient.scanStocks as any).mock.mockImplementation(async () => ({
