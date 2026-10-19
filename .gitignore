@@ -41,3 +41,6 @@ docs/local/
 
 # Autoresearch
 .autoresearch/
+
+# Local agent task files
+.omp-task/

@@ -4,7 +4,7 @@
 
 ## Learn Time-Tested Investment Approaches
 
-These 7 pre-configured strategies represent proven investment philosophies used by successful investors for decades. Each preset is designed to help you **explore different investment styles systematically** - from conservative quality investing to growth-oriented strategies, plus market regime analysis.
+These 14 pre-configured strategies represent proven investment philosophies used by successful investors for decades. Each preset is designed to help you **explore different investment styles systematically** - from conservative quality investing to growth-oriented strategies, plus market regime analysis.
 
 ### Why Presets Matter for Learning Investors
 
@@ -564,7 +564,7 @@ Screen for value stocks with P/E under 15
 
 ## See Also
 
-- [Field Reference](fields.md) - Complete list of all 75+ available fields
+- [Field Reference](fields.md) - Complete list of all 100+ available fields
 - [Development Guide](development.md) - How to create custom presets
 - [Quick Start Guide](../README.md#quick-start) - Custom screening examples
 

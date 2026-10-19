@@ -411,8 +411,11 @@ export class ScreenTool {
       throw new Error("Maximum 100 symbols allowed");
     }
 
-    // Build cache key
-    const cacheKey = JSON.stringify({ type: "lookup", symbols, columns: inputColumns });
+    const cacheKey = JSON.stringify({
+      type: "lookup",
+      symbols: [...symbols].sort(),
+      columns: inputColumns,
+    });
 
     // Check cache
     const cached = this.cache.get(cacheKey);
