@@ -23,6 +23,7 @@ import { MetainfoTool } from "./tools/metainfo.js";
 import { TATool } from "./tools/ta.js";
 import { FieldsTool } from "./tools/fields.js";
 import { PresetsTool, PRESETS } from "./resources/presets.js";
+import { EXPERIMENTAL_BARS_TOOL, getBars, isExperimentalEnabled } from "./tools/bars.js";
 import { Cache } from "./utils/cache.js";
 import { RateLimiter } from "./utils/rateLimit.js";
 import { FILTER_VALUE_SCHEMA, OUTPUT_SCHEMAS } from "./api/schemas.js";
@@ -607,6 +608,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           idempotentHint: true,
         },
       },
+      ...(isExperimentalEnabled() ? [EXPERIMENTAL_BARS_TOOL] : []),
 
     ],
   };
@@ -618,6 +620,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
 
     switch (name) {
+      case "experimental_get_bars":
+        return createToolResult(await getBars(args ?? {}));
+
       case "screen_stocks":
         return createToolResult(
           await screenTool.screenStocks(validateScreenInput(args ?? {}))
