@@ -41,7 +41,9 @@ export function decodePacket(raw: string): Array<Message | string> {
       messages.push(payload);
       continue;
     }
-    const value: unknown = JSON.parse(payload);
+    let value: unknown;
+    try { value = JSON.parse(payload); }
+    catch { throw new Error("Invalid TradingView message JSON"); }
     // The initial connection greeting has no method and needs no response.
     if (typeof value !== "object" || value === null) throw new Error("Invalid TradingView message");
     if (!("m" in value)) continue;

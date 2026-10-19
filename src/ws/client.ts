@@ -18,6 +18,7 @@ export interface BarsTransport {
 export interface BarsClientOptions {
   timeoutMs?: number;
   transportFactory?: () => BarsTransport;
+  signal?: AbortSignal;
 }
 
 export function fetchBars(
@@ -28,6 +29,9 @@ export function fetchBars(
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 60_000) {
     throw new Error("timeoutMs must be an integer between 1 and 60000");
   }
+  if (options.signal?.aborted) {
+    return Promise.reject(new Error("experimental_get_bars request cancelled"));
+  }
   return new Promise((resolve, reject) => {
     let socket: BarsTransport | undefined;
     let settled = false;
@@ -37,12 +41,14 @@ export function fetchBars(
       if (settled) return;
       settled = true;
       clearTimeout(timer);
+      options.signal?.removeEventListener("abort", onAbort);
       // terminate also aborts a pending handshake; close() can wait indefinitely.
       try { socket?.terminate(); } catch { /* Preserve the original outcome. */ }
       if (error) reject(error);
       else resolve(bars.slice(-input.limit));
     };
     const timer = setTimeout(() => finish(new Error(`TradingView bars timed out after ${timeoutMs}ms`)), timeoutMs);
+    const onAbort = () => finish(new Error("experimental_get_bars request cancelled"));
     const send = (m: string, p: unknown[]) => socket!.send(encodePacket({ m, p }));
     try {
       socket = options.transportFactory?.() ?? new WebSocket(BARS_ENDPOINT, {
@@ -52,6 +58,8 @@ export function fetchBars(
       });
       socket.on("error", (error) => finish(new Error(`TradingView WebSocket error: ${error.message}`)));
       socket.on("close", (code, reason) => finish(new Error(`TradingView WebSocket closed before series completion (code ${code}, reason: ${reason?.toString() || "none"})`)));
+      options.signal?.addEventListener("abort", onAbort, { once: true });
+      if (options.signal?.aborted) onAbort();
       socket.on("open", () => {
         if (settled) return;
         try {
@@ -73,7 +81,9 @@ export function fetchBars(
             }
             const { m, p } = message;
             if (["symbol_error", "series_error", "critical_error", "protocol_error"].includes(m)) {
-              throw new Error(`TradingView ${m} for ${input.symbol}: ${JSON.stringify(p).slice(0, 300)}`);
+              const reason = p.at(-1);
+              const detail = typeof reason === "string" && reason.length > 0 && reason !== session ? reason : JSON.stringify(p);
+              throw new Error(`TradingView ${m} for ${input.symbol}: ${detail.slice(0, 300)}`);
             }
             if (p[0] !== session) continue;
             if (m === "timescale_update" || m === "du") {

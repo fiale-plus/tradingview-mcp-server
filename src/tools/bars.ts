@@ -30,14 +30,15 @@ export const EXPERIMENTAL_BARS_TOOL = {
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
 };
 
-export async function getBars(value: unknown, options: BarsClientOptions = {}) {
+export async function getBars(value: unknown, options: BarsClientOptions & { now?: () => number } = {}) {
   if (!isExperimentalEnabled()) {
     throw new Error("experimental_get_bars is disabled; set TV_EXPERIMENTAL_ENABLED=1 (or true/yes) to enable");
   }
   const input = validateBarsInput(value);
+  if (options.signal?.aborted) throw new Error("experimental_get_bars request cancelled");
   if (inFlight) throw new Error("another experimental_get_bars request is in flight");
-  const now = Date.now();
-  const retryAfter = MIN_CONNECTION_GAP_MS - (now - lastConnectionStart);
+  const now = (options.now ?? (() => performance.now()))();
+  const retryAfter = Math.ceil(MIN_CONNECTION_GAP_MS - (now - lastConnectionStart));
   if (retryAfter > 0) throw new Error(`experimental_get_bars rate limited; retry after ${retryAfter}ms`);
   inFlight = true;
   lastConnectionStart = now;

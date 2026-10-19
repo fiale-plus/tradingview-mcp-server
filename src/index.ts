@@ -615,13 +615,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 });
 
 // Handle tool calls
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
+server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
   try {
     const { name, arguments: args } = request.params;
 
     switch (name) {
       case "experimental_get_bars":
-        return createToolResult(await getBars(args ?? {}));
+        return createToolResult(await getBars(args ?? {}, { signal: extra.signal }));
 
       case "screen_stocks":
         return createToolResult(
