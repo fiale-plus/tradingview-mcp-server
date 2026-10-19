@@ -9,6 +9,7 @@ import {
   type Timeframe,
 } from "./ta.js";
 import type { Filter, FilterOperation, ListFieldsInput, ScreenStocksInput } from "./types.js";
+import { BAR_TIMEFRAMES, type GetBarsInput } from "./types.js";
 
 const VALID_ASSET_TYPES = ["stock", "forex", "crypto", "etf"] as const;
 const VALID_FIELD_CATEGORIES = ["fundamental", "technical", "performance"] as const;
@@ -433,6 +434,22 @@ export function validateEmptyToolInput(value: unknown): Record<string, never> {
   const input = asObject(value, "tool input");
   assertAllowedKeys(input, [], "tool input");
   return {};
+}
+
+export function validateBarsInput(value: unknown): GetBarsInput {
+  const input = asObject(value, "experimental_get_bars input");
+  assertAllowedKeys(input, ["symbol", "timeframe", "limit"], "experimental_get_bars input");
+  const symbol = nonEmptyString(input.symbol, "symbol");
+  if (symbol.length > 128) throw new Error("symbol must be at most 128 characters");
+  if (!/^[A-Za-z0-9_][A-Za-z0-9_.-]*:[A-Za-z0-9_][A-Za-z0-9_.!/-]*$/.test(symbol)) {
+    throw new Error("symbol must use EXCHANGE:TICKER format");
+  }
+  const timeframe = input.timeframe === undefined ? "1D" : input.timeframe;
+  if (typeof timeframe !== "string" || !BAR_TIMEFRAMES.includes(timeframe as GetBarsInput["timeframe"])) {
+    throw new Error(`timeframe must be one of: ${BAR_TIMEFRAMES.join(", ")}`);
+  }
+  const limit = optionalBoundedInteger(input.limit, 1, 5000, "limit must be an integer between 1 and 5000") ?? 300;
+  return { symbol, timeframe: timeframe as GetBarsInput["timeframe"], limit };
 }
 
 export { VALID_TIMEFRAMES, VALID_OPERATORS };

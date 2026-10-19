@@ -79,6 +79,41 @@ function collectionSchema(name: string) {
 }
 
 export const OUTPUT_SCHEMAS = {
+  experimental_get_bars: {
+    type: "object",
+    properties: {
+      symbol: { type: "string" },
+      timeframe: { type: "string", enum: ["1", "3", "5", "15", "30", "45", "60", "120", "180", "240", "1D", "1W", "1M"] },
+      count: { type: "integer", minimum: 0 },
+      bars: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            time: { type: "integer" },
+            open: { type: "number" },
+            high: { type: "number" },
+            low: { type: "number" },
+            close: { type: "number" },
+            volume: { type: ["number", "null"] },
+          },
+          required: ["time", "open", "high", "low", "close", "volume"],
+          additionalProperties: false,
+        },
+      },
+      metadata: {
+        ...RESULT_METADATA_SCHEMA,
+        properties: {
+          ...RESULT_METADATA_SCHEMA.properties,
+          source: { type: "string", const: "experimental_tradingview_ws" },
+          experimental: { type: "boolean", const: true },
+        },
+        required: [...RESULT_METADATA_SCHEMA.required, "experimental"],
+      },
+    },
+    required: ["symbol", "timeframe", "count", "bars", "metadata"],
+    additionalProperties: false,
+  },
   screen_stocks: collectionSchema("stocks"),
   screen_forex: collectionSchema("pairs"),
   screen_crypto: collectionSchema("cryptocurrencies"),

@@ -106,3 +106,9 @@ export interface FieldMetadata {
   type: "number" | "percent" | "currency" | "string" | "boolean";
   description?: string;
 }
+export const BAR_TIMEFRAMES = ["1", "3", "5", "15", "30", "45", "60", "120", "180", "240", "1D", "1W", "1M"] as const;
+export interface GetBarsInput {
+  symbol: string;
+  timeframe: (typeof BAR_TIMEFRAMES)[number];
+  limit: number;
+}

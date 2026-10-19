@@ -217,7 +217,7 @@ Invalid values fail before the MCP server starts. These limits protect TradingVi
 
 ### Upstream limitations
 
-This package is an unofficial client of TradingView's public scanner and symbol-search endpoints. The endpoints are unauthenticated, can change or reject traffic without notice, and may return delayed or incomplete market data. The server does not provide historical data, brokerage execution, alerts, or a TradingView data entitlement.
+This package is an unofficial client of TradingView's public scanner and symbol-search endpoints. The endpoints are unauthenticated, can change or reject traffic without notice, and may return delayed or incomplete market data. Stable tools do not provide historical data; the opt-in experiment below is not a data entitlement. The server does not provide brokerage execution or alerts.
 
 ---
 
@@ -239,6 +239,23 @@ The MCP server exposes twelve tools to any compatible MCP client. The Claude Cod
 | `rank_by_ta` | Rank symbols by weighted TA scores across timeframes | `symbols`, `timeframes`, `weights` |
 | `get_preset` | Retrieve a pre-configured screening strategy by key | `preset_name` |
 | `list_presets` | List all available preset strategies with descriptions | — |
+
+### Experimental: anonymous historical bars
+
+Draft-only, opt-in MCP tool `experimental_get_bars` (not a CLI command or release commitment).
+Set `TV_EXPERIMENTAL_ENABLED` to `1`, `true`, or `yes` in the MCP server's environment and restart it.
+Otherwise the tool is absent from discovery and direct calls are rejected.
+
+```json
+{ "symbol": "NASDAQ:AAPL", "timeframe": "1D", "limit": 10 }
+```
+
+`symbol` must be `EXCHANGE:TICKER`. `timeframe` is one of `1`, `3`, `5`, `15`, `30`, `45`, `60`, `120`, `180`, `240`, `1D`, `1W`, `1M` (default `1D`); `limit` is an integer from 1 to 5000 (default 300). Unknown arguments are rejected.
+
+Returns `symbol`, `timeframe`, `count`, ascending, timestamp-deduplicated `bars` (`time` in Unix seconds, `open`, `high`, `low`, `close`, `volume`), and provenance `metadata` with `source: "experimental_tradingview_ws"` and `experimental: true`.
+
+**Unofficial and anonymous only:** uses TradingView's public chart WebSocket with no cookies or credentials. Data may be delayed or limited, fewer bars may be returned, and the current bar may be incomplete. The endpoint may break without notice. Requests have a 15-second overall deadline and no retries. See [API reference](docs/API_REFERENCE.md#experimental_get_bars-experimental).
+
 
 ### Filter Structure
 
