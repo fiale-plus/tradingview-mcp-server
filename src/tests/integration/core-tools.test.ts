@@ -192,16 +192,12 @@ describe("Integration — Core-4: get_ta_summary", () => {
     assert.ok(aapl.timeframes["240"], "240m timeframe");
 
     const tf60 = aapl.timeframes["60"];
-    assert.ok([...VALID_LABELS, "unavailable"].includes(tf60.summary), `Invalid label: ${tf60.summary}`);
-    if (tf60.scores.all === null) {
-      assert.equal(tf60.available, false);
-      assert.equal(tf60.summary, "unavailable");
-    } else {
-      assert.equal(tf60.available, true);
-      assert.ok(VALID_LABELS.includes(tf60.summary));
-      assert.equal(typeof tf60.scores.all, "number");
-      assert.ok(tf60.scores.all >= -1 && tf60.scores.all <= 1, `Score out of range: ${tf60.scores.all}`);
+    assert.equal(tf60.available, true, "60m TA should be available");
+    assert.ok(VALID_LABELS.includes(tf60.summary), `Invalid label: ${tf60.summary}`);
+    if (typeof tf60.scores.all !== "number") {
+      throw new Error("Expected a numeric TA score");
     }
+    assert.ok(tf60.scores.all >= -1 && tf60.scores.all <= 1, `Score out of range: ${tf60.scores.all}`);
   });
 
   it("should include oscillator and MA breakdown when include_components=true", async () => {
@@ -214,8 +210,8 @@ describe("Integration — Core-4: get_ta_summary", () => {
     const tf = result.symbols[0].timeframes["60"];
     assert.ok(tf.scores.oscillators !== undefined, "oscillators score");
     assert.ok(tf.scores.moving_averages !== undefined, "moving_averages score");
-    assert.ok(tf.scores.oscillators === null || typeof tf.scores.oscillators === "number");
-    assert.ok(tf.scores.moving_averages === null || typeof tf.scores.moving_averages === "number");
+    assert.equal(typeof tf.scores.oscillators, "number");
+    assert.equal(typeof tf.scores.moving_averages, "number");
   });
 
   it("should exclude component breakdown when include_components=false", async () => {
@@ -228,7 +224,7 @@ describe("Integration — Core-4: get_ta_summary", () => {
     const tf = result.symbols[0].timeframes["60"];
     assert.equal(tf.scores.oscillators, undefined, "oscillators should be absent");
     assert.equal(tf.scores.moving_averages, undefined, "MA should be absent");
-    assert.ok(tf.scores.all === null || typeof tf.scores.all === "number", "all score should still be present");
+    assert.equal(typeof tf.scores.all, "number", "all score should still be present");
   });
 
   it("should handle multiple symbols", async () => {
@@ -253,6 +249,8 @@ describe("Integration — Core-4: get_ta_summary", () => {
     assert.equal(tf.available, true);
     assert.ok(VALID_LABELS.includes(tf.summary), `Invalid label: ${tf.summary}`);
     assert.equal(typeof tf.scores.all, "number", "Should have numeric score");
+    assert.equal(typeof tf.scores.oscillators, "number", "Should have numeric daily oscillator score");
+    assert.equal(typeof tf.scores.moving_averages, "number", "Should have numeric daily MA score");
   });
 });
 

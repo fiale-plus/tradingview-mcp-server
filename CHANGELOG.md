@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. Earlier releases are listed on the [GitHub releases page](https://github.com/fiale-plus/tradingview-mcp-server/releases).
 
-## 0.7.2
+## 0.7.2 - 2026-10-19
 
 ### Fixed
 - **Daily technical analysis was always unavailable.** TradingView's scanner exposes daily recommendation scores as the unsuffixed `Recommend.All`, `Recommend.Other` and `Recommend.MA` columns; the server requested `Recommend.All|1D`, which is always `null`. Since 0.7.0 marks missing scores as `unavailable`, `get_ta_summary` reported every daily timeframe as unavailable and `rank_by_ta` with its default timeframes (`60`, `240`, `1D`, `1W`) excluded every symbol. Daily now maps to the unsuffixed columns; the public timeframe key stays `1D`.
@@ -10,7 +10,7 @@ All notable changes to this project are documented here. Earlier releases are li
 - Docs: stale "75+ fields" and "7 strategies" claims updated to 100+ fields and 14 presets.
 
 ### Changed
-- `@modelcontextprotocol/sdk` updated to 1.32.1; `npm audit fix` applied to transitive dependencies (clears the production audit findings).
+- `@modelcontextprotocol/sdk` updated to 1.32.1; `npm audit fix` applied to transitive dependencies (`npm audit --omit=dev` reports 0 vulnerabilities).
 
 ### Tests
 - Offline test asserting the exact scanner columns requested per timeframe.

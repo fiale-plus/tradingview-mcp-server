@@ -132,6 +132,10 @@ export function validateTAWeights(
   return validated;
 }
 
+/**
+ * TradingView's scanner exposes daily recommendation scores as the unsuffixed
+ * column (e.g. "Recommend.All"); "Recommend.All|1D" is always null upstream.
+ */
 function taColumn(field: string, timeframe: Timeframe): string {
   return timeframe === "1D" ? field : `${field}|${timeframe}`;
 }
